@@ -1,0 +1,12 @@
+/**
+ * Admin CSS for AB WP Bits
+ *
+ * DO NOT use @layer in admin interface per CLAUDE.md requirements
+ * Most styling is handled by WPEA framework
+ */
+
+#ab-wp-bits-app {
+    margin-top: 20px;
+}
+
+/* Additional plugin-specific styles can be added here if needed */

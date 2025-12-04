@@ -1,0 +1,146 @@
+/* =========================
+   WORDPRESS ADMIN RESETS
+   Override WP Admin default margins/typography
+   Wrapped in .wpea for scoped application
+   ========================= */
+
+body:has(.wpea){
+  background: var(--wpea-surface--bg);
+}
+
+.wpea h1, .wpea h2, .wpea h3, .wpea h4, .wpea h5, .wpea h6 {
+  margin: 0;
+  font-family: var(--wpea-font-sans);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--wpea-surface--text);
+}
+
+.wpea p {
+  margin: 0 0 var(--wpea-space--sm) 0;
+  line-height: 1.6;
+}
+
+.wpea p:last-child {
+  margin-bottom: 0;
+}
+
+.wpea ul, .wpea ol {
+  margin: 0 0 var(--wpea-space--sm) 0;
+  padding-inline-start: var(--wpea-space--lg);
+}
+
+.wpea ul:last-child, .wpea ol:last-child {
+  margin-bottom: 0;
+}
+
+.wpea li {
+  margin-bottom: calc(var(--wpea-space--xs) * 0.5);
+  line-height: 1.6;
+}
+
+.wpea dl {
+  margin: 0 0 var(--wpea-space--sm) 0;
+}
+
+.wpea dt {
+  font-weight: 600;
+  margin-bottom: calc(var(--wpea-space--xs) * 0.5);
+}
+
+.wpea dd {
+  margin: 0 0 var(--wpea-space--sm) var(--wpea-space--lg);
+}
+
+.wpea dd:last-child {
+  margin-bottom: 0;
+}
+
+.wpea blockquote {
+  margin: 0 0 var(--wpea-space--sm) 0;
+  padding-inline-start: var(--wpea-space--md);
+  border-inline-start: 3px solid var(--wpea-surface--border);
+  color: var(--wpea-surface--text-muted);
+}
+
+.wpea pre, .wpea code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.9em;
+}
+
+.wpea pre {
+  margin: 0 0 var(--wpea-space--sm) 0;
+  padding: var(--wpea-space--sm);
+  background: var(--wpea-surface--muted);
+  border-radius: var(--wpea-radius--sm);
+  overflow-x: auto;
+}
+
+.wpea code {
+  padding: 0.2em 0.4em;
+  background: var(--wpea-surface--muted);
+  border-radius: var(--wpea-radius--sm);
+}
+
+.wpea pre code {
+  padding: 0;
+  background: none;
+}
+
+.wpea hr {
+  margin: var(--wpea-space--md) 0;
+  border: 0;
+  border-block-start: 1px solid var(--wpea-surface--divider);
+}
+
+.wpea table {
+  margin: 0 0 var(--wpea-space--sm) 0;
+  border-collapse: collapse;
+}
+
+.wpea strong, .wpea b {
+  font-weight: 700;
+}
+
+.wpea em, .wpea i {
+  font-style: italic;
+}
+
+.wpea a {
+  color: var(--wpea-color--primary);
+  text-decoration: none;
+  transition: color var(--wpea-anim-duration--fast);
+}
+
+.wpea a:hover {
+  color: var(--wpea-color--primary-d-2);
+  text-decoration: underline;
+}
+
+/* Reset WordPress admin form elements */
+.wpea input[type="text"],
+.wpea input[type="email"],
+.wpea input[type="url"],
+.wpea input[type="password"],
+.wpea input[type="search"],
+.wpea input[type="number"],
+.wpea input[type="tel"],
+.wpea input[type="date"],
+.wpea input[type="datetime-local"],
+.wpea input[type="month"],
+.wpea input[type="time"],
+.wpea input[type="week"],
+.wpea select,
+.wpea textarea {
+  margin: 0;
+  font-family: var(--wpea-font-sans);
+}
+
+.wpea button {
+  font-family: var(--wpea-font-sans);
+}
+
+/* Reset WordPress admin notice/message margins */
+.wpea .notice, .wpea .message {
+  margin: 0 0 var(--wpea-space--sm) 0;
+}
