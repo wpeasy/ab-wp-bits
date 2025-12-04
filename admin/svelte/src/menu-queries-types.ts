@@ -13,6 +13,7 @@ export interface MetaQuery {
   compare: string;
   type: string;
   clauseName: string;
+  title?: string;
 }
 
 export interface QueryConfig {
@@ -35,6 +36,7 @@ export interface QueryConfig {
   includeTaxonomies: number[];
   excludeTaxonomies: number[];
   metaQueries: MetaQuery[];
+  metaQueryRelation: 'AND' | 'OR';
   rawWPQuery?: string;
 }
 

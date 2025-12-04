@@ -9,10 +9,20 @@
 
   interface Props {
     metaQueries: MetaQuery[];
+    relation: 'AND' | 'OR';
     onUpdate: (queries: MetaQuery[]) => void;
   }
 
-  let { metaQueries = $bindable([]), onUpdate }: Props = $props();
+  let { metaQueries = $bindable([]), relation = $bindable('AND'), onUpdate }: Props = $props();
+
+  let editingTitleIndex = $state<number | null>(null);
+  let titleInputRef = $state<HTMLInputElement | null>(null);
+
+  $effect(() => {
+    if (editingTitleIndex !== null && titleInputRef) {
+      titleInputRef.focus();
+    }
+  });
 
   const compareOptions = [
     { value: '=', label: '=' },
@@ -48,7 +58,8 @@
       value: '',
       compare: '=',
       type: 'CHAR',
-      clauseName: ''
+      clauseName: '',
+      title: ''
     }];
     onUpdate(metaQueries);
   }
@@ -62,11 +73,40 @@
     metaQueries[index][field] = value;
     onUpdate(metaQueries);
   }
+
+  function startEditingTitle(index: number) {
+    editingTitleIndex = index;
+  }
+
+  function finishEditingTitle(index: number) {
+    editingTitleIndex = null;
+    onUpdate(metaQueries);
+  }
+
+  function handleTitleKeydown(event: KeyboardEvent, index: number) {
+    if (event.key === 'Enter') {
+      finishEditingTitle(index);
+    } else if (event.key === 'Escape') {
+      editingTitleIndex = null;
+    }
+  }
 </script>
 
 <Stack>
-  <div class="wpea-flex wpea-justify-between wpea-align-center">
+  <div style="display: flex; justify-content: space-between; align-items: center; position: relative;">
     <h3 class="wpea-heading wpea-heading--sm">Meta Queries</h3>
+    {#if metaQueries.length > 1}
+      <div style="position: absolute; left: 50%; transform: translateX(-50%);">
+        <button
+          type="button"
+          class="wpea-button wpea-button--secondary"
+          style="padding: 4px 12px; font-size: 13px; min-width: 50px;"
+          onclick={() => relation = relation === 'AND' ? 'OR' : 'AND'}
+        >
+          {relation}
+        </button>
+      </div>
+    {/if}
     <Button variant="secondary" size="s" onclick={addMetaQuery}>
       Add Meta Query
     </Button>
@@ -76,17 +116,35 @@
     <p class="wpea-text-muted wpea-text-sm">No meta queries added. Click "Add Meta Query" to add one.</p>
   {:else}
     {#each metaQueries as query, index (index)}
-      <Card>
-        {#snippet header()}
-          <div class="wpea-flex wpea-justify-between wpea-align-center">
-            <div class="wpea-card__title">Meta Query #{index + 1}</div>
-            <Button variant="ghost" size="s" onclick={() => removeMetaQuery(index)}>
-              Remove
-            </Button>
-          </div>
-        {/snippet}
+      <div class="wpea-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 0 16px;">
+          {#if editingTitleIndex === index}
+            <input
+              type="text"
+              bind:this={titleInputRef}
+              bind:value={query.title}
+              onblur={() => finishEditingTitle(index)}
+              onkeydown={(e) => handleTitleKeydown(e, index)}
+              style="font-weight: 600; font-size: 14px; border: 1px solid var(--wpea-input--border); padding: 4px 8px; border-radius: 4px; background: var(--wpea-input--bg); color: var(--wpea-surface--text);"
+              placeholder="Meta Query #{index + 1}"
+            />
+          {:else}
+            <button
+              type="button"
+              style="font-weight: 600; font-size: 14px; cursor: pointer; padding: 4px 0; background: transparent; border: none; color: var(--wpea-surface--text); text-align: left;"
+              onclick={() => startEditingTitle(index)}
+              title="Click to edit"
+            >
+              {query.title || `Meta Query #${index + 1}`}
+            </button>
+          {/if}
+          <Button variant="ghost" size="s" onclick={() => removeMetaQuery(index)}>
+            Remove
+          </Button>
+        </div>
 
-        <div class="wpea-grid-2">
+        <div style="padding: 16px;">
+          <div class="wpea-grid-2">
           <Input
             id="meta-key-{index}"
             label="Meta Key"
@@ -130,24 +188,13 @@
             />
           </div>
         </div>
-      </Card>
+        </div>
+      </div>
     {/each}
   {/if}
 </Stack>
 
 <style>
-  .wpea-flex {
-    display: flex;
-  }
-
-  .wpea-justify-between {
-    justify-content: space-between;
-  }
-
-  .wpea-align-center {
-    align-items: center;
-  }
-
   .wpea-grid-2 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

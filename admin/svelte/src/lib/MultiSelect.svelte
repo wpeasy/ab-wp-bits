@@ -154,25 +154,26 @@
   .multiselect__tag {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.5rem;
+    gap: 0.125rem;
+    padding: 0.0625rem 0.25rem;
     background: var(--wpea-color--primary);
     color: white;
-    border-radius: var(--wpea-radius);
-    font-size: 0.875rem;
+    border-radius: 3px;
+    font-size: 0.6875rem;
+    line-height: 1.2;
   }
 
   .multiselect__tag-remove {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1rem;
-    height: 1rem;
+    width: 0.75rem;
+    height: 0.75rem;
     padding: 0;
     background: transparent;
     border: none;
     color: white;
-    font-size: 1.25rem;
+    font-size: 0.875rem;
     line-height: 1;
     cursor: pointer;
     opacity: 0.8;

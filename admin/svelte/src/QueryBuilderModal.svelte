@@ -42,6 +42,7 @@
   let includeTaxonomies = $state<(string | number)[]>([]);
   let excludeTaxonomies = $state<(string | number)[]>([]);
   let metaQueries = $state<MetaQuery[]>([]);
+  let metaQueryRelation = $state<'AND' | 'OR'>('AND');
 
   // Tab and WP_Query state
   let activeTab = $state('builder');
@@ -76,6 +77,7 @@
         includeTaxonomies = initialConfig.includeTaxonomies || [];
         excludeTaxonomies = initialConfig.excludeTaxonomies || [];
         metaQueries = initialConfig.metaQueries || [];
+        metaQueryRelation = initialConfig.metaQueryRelation || 'AND';
         rawWPQuery = initialConfig.rawWPQuery || '';
       } else {
         // Reset to defaults for new query
@@ -98,6 +100,7 @@
         includeTaxonomies = [];
         excludeTaxonomies = [];
         metaQueries = [];
+        metaQueryRelation = 'AND';
         rawWPQuery = '';
       }
       // Reset tab to builder when opening
@@ -163,14 +166,40 @@
         }
 
         // Parse meta_query
-        if (args.meta_query && Array.isArray(args.meta_query)) {
-          metaQueries = args.meta_query.map((mq: any, idx: number) => ({
-            key: mq.key || '',
-            value: mq.value || '',
-            compare: mq.compare || '=',
-            type: mq.type || 'CHAR',
-            clauseName: `clause_${idx + 1}`
-          }));
+        if (args.meta_query) {
+          if (Array.isArray(args.meta_query)) {
+            metaQueries = args.meta_query
+              .filter((mq: any) => mq.key) // Only include items with a key (exclude relation objects)
+              .map((mq: any, idx: number) => ({
+                key: mq.key || '',
+                value: mq.value || '',
+                compare: mq.compare || '=',
+                type: mq.type || 'CHAR',
+                clauseName: mq.clauseName || `clause_${idx + 1}`,
+                title: mq.title || ''
+              }));
+            // Check for relation in array
+            const relationItem = args.meta_query.find((item: any) => item.relation);
+            if (relationItem) {
+              metaQueryRelation = relationItem.relation === 'OR' ? 'OR' : 'AND';
+            }
+          } else if (typeof args.meta_query === 'object') {
+            // Handle object format with numeric keys
+            metaQueryRelation = args.meta_query.relation || 'AND';
+            metaQueries = Object.keys(args.meta_query)
+              .filter(key => !isNaN(Number(key))) // Only numeric keys
+              .map((key, idx) => {
+                const mq = args.meta_query[key];
+                return {
+                  key: mq.key || '',
+                  value: mq.value || '',
+                  compare: mq.compare || '=',
+                  type: mq.type || 'CHAR',
+                  clauseName: mq.clauseName || `clause_${idx + 1}`,
+                  title: mq.title || ''
+                };
+              });
+          }
         }
       }
 
@@ -365,12 +394,32 @@
       }
 
       if (metaQueries.length > 0) {
-        args.meta_query = metaQueries.map(mq => ({
-          key: mq.key,
-          value: mq.value,
-          compare: mq.compare,
-          type: mq.type
-        }));
+        // Filter out meta queries with empty key or value
+        const validMetaQueries = metaQueries.filter(mq => mq.key.trim() !== '' && mq.value.trim() !== '');
+
+        if (validMetaQueries.length > 0) {
+          args.meta_query = {
+            ...validMetaQueries.reduce((acc, mq, index) => {
+              acc[index] = {
+                key: mq.key,
+                value: mq.value,
+                compare: mq.compare,
+                type: mq.type
+              };
+              if (mq.clauseName) {
+                acc[index].clauseName = mq.clauseName;
+              }
+              if (mq.title) {
+                acc[index].title = mq.title;
+              }
+              return acc;
+            }, {} as any)
+          };
+          // Add relation if there are multiple meta queries
+          if (validMetaQueries.length > 1) {
+            args.meta_query.relation = metaQueryRelation;
+          }
+        }
       }
     } else {
       // Taxonomy query
@@ -482,6 +531,7 @@
       includeTaxonomies: includeTaxonomies.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
       excludeTaxonomies: excludeTaxonomies.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
       metaQueries,
+      metaQueryRelation,
       rawWPQuery: rawWPQuery || undefined
     };
     onSubmit(config);
@@ -532,6 +582,7 @@
       includeTaxonomies = [];
       excludeTaxonomies = [];
       metaQueries = [];
+      metaQueryRelation = 'AND';
 
       // Clear WP_Query immediately
       rawWPQuery = '';
@@ -761,6 +812,7 @@
         <Card>
           <MetaQueryRepeater
             bind:metaQueries
+            bind:relation={metaQueryRelation}
             onUpdate={handleMetaQueriesUpdate}
           />
         </Card>
