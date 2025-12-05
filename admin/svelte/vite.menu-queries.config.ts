@@ -7,6 +7,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: false,
+    minify: false, // Disable minification for debugging
     rollupOptions: {
       input: 'src/menu-queries-main.ts',
       output: {

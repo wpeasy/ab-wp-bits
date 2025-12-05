@@ -18,7 +18,7 @@ if (document.readyState === 'loading') {
 function init() {
   // Check if we're in the Customizer
   const isCustomizer = window.location.pathname.includes('customize.php') ||
-                       typeof (window as any).wp?.customize !== 'undefined';
+                       window.location.search.includes('customize_theme');
 
   if (isCustomizer) {
     initializeCustomizer();
@@ -60,13 +60,11 @@ function init() {
 }
 
 function initializeCustomizer() {
-  // Mount the app component for Customizer
-  const container = document.createElement('div');
-  container.id = 'menu-queries-app';
-  document.body.appendChild(container);
+  console.log('MenuQueries: initializeCustomizer() called');
 
+  // Mount the app component directly to body to avoid 0x0 container issues
   mount(MenuQueriesApp, {
-    target: container,
+    target: document.body,
     props: {
       onSubmit: (config: QueryConfig) => {
         saveQueryConfigCustomizer(config);
@@ -74,9 +72,10 @@ function initializeCustomizer() {
     }
   });
 
+  console.log('MenuQueries: MenuQueriesApp mounted to body');
+
   // Wait for wp.customize to be available
   if (typeof (window as any).wp === 'undefined' || typeof (window as any).wp.customize === 'undefined') {
-    // Try again after a delay
     setTimeout(initializeCustomizer, 500);
     return;
   }
@@ -85,20 +84,6 @@ function initializeCustomizer() {
 
   // Add configure button to query items in Customizer
   customize.bind('ready', () => {
-    // Listen for new menu item controls being added
-    customize.section.each((section: any) => {
-      if (section.id && section.id.indexOf('nav_menu[') === 0) {
-        // This is a menu section
-        section.container.on('click', '.configure-query-button-customizer', (e: any) => {
-          e.preventDefault();
-          const itemId = parseInt(e.target.getAttribute('data-item-id') || '0', 10);
-          if (itemId) {
-            openQueryBuilderForItemCustomizer(itemId);
-          }
-        });
-      }
-    });
-
     // Add button to existing query item controls
     customize.control.each((control: any) => {
       if (control.params && control.params.type === 'nav_menu_item') {
@@ -116,40 +101,59 @@ function initializeCustomizer() {
 }
 
 function addConfigureButtonToControl(control: any) {
-  // Wait a bit for the control to be fully rendered
-  setTimeout(() => {
-    const container = control.container[0];
-    if (!container) {
-      return;
-    }
+  // Check if this is a query item by looking at the setting value
+  if (typeof control.setting !== 'function') {
+    return;
+  }
 
+  const value = control.setting();
+  if (!value) {
+    return;
+  }
+
+  // Extract item ID from control.id (format: "nav_menu_item[123]")
+  const itemId = control.id.replace('nav_menu_item[', '').replace(']', '');
+
+  // Check if this is a query item
+  const isQueryItem = value.query_config || (value.type === 'custom' && value.object === 'custom' && value.url === '#query-item');
+
+  if (!isQueryItem) {
+    return;
+  }
+
+  console.log('MenuQueries: Found query item', itemId, '- setting up observer');
+
+  const container = control.container[0];
+  if (!container) {
+    return;
+  }
+
+  // Use MutationObserver to watch for when the container gets populated (when user expands the item)
+  const observer = new MutationObserver((mutations) => {
     // Check if button already exists
     if (container.querySelector('.configure-query-button-customizer')) {
       return;
     }
 
-    // Check if this is a query item by looking at the setting value
-    if (typeof control.setting !== 'function') {
-      return;
+    // Check if the item is expanded (edit-active class)
+    if (!container.classList.contains('menu-item-edit-active')) {
+      return; // Item is still collapsed
     }
 
-    const setting = control.setting();
-    if (!setting) {
-      return;
-    }
+    console.log('MenuQueries: Item', itemId, 'is now expanded!');
 
-    // Get the setting value using the .get() method
-    const value = setting.get();
-
-    if (!value || value.type !== 'query_item') {
-      return;
-    }
-
-    // Find the item controls section
+    // Find the menu item settings container
     const itemControls = container.querySelector('.menu-item-settings');
+
+    console.log('MenuQueries: itemControls found:', !!itemControls);
+
     if (!itemControls) {
+      console.log('MenuQueries: .menu-item-settings not found yet');
       return;
     }
+
+    console.log('MenuQueries: Control expanded, adding button for item', itemId);
+    console.log('MenuQueries: itemControls.innerHTML =', itemControls.innerHTML.substring(0, 500));
 
     // Create configure button
     const buttonContainer = document.createElement('p');
@@ -159,59 +163,127 @@ function addConfigureButtonToControl(control: any) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'button button-secondary configure-query-button-customizer';
-    const itemId = setting.id.replace('nav_menu_item[', '').replace(']', '');
     button.setAttribute('data-item-id', itemId);
     button.textContent = value.query_config ? 'Edit Query' : 'Configure Query';
 
+    // Add click handler
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('MenuQueries: Configure button clicked for item', itemId);
+      openQueryBuilderForItemCustomizer(parseInt(itemId, 10));
+    });
+
     buttonContainer.appendChild(button);
 
-    // Insert after the Navigation Label field
-    const navLabelField = itemControls.querySelector('.field-nav-menu-attr');
-    if (navLabelField && navLabelField.parentNode) {
-      navLabelField.parentNode.insertBefore(buttonContainer, navLabelField.nextSibling);
+    // Find a good place to insert - look for URL field
+    const urlField = itemControls.querySelector('.field-url');
+    if (urlField && urlField.parentNode) {
+      urlField.parentNode.insertBefore(buttonContainer, urlField.nextSibling);
+      console.log('MenuQueries: Inserted button after URL field');
     } else {
       itemControls.appendChild(buttonContainer);
+      console.log('MenuQueries: Appended button to controls');
     }
-  }, 500);
+  });
+
+  // Start observing the container for changes
+  observer.observe(container, {
+    childList: true,
+    subtree: true,
+    attributes: true,  // Watch for class changes (menu-item-edit-active)
+    attributeFilter: ['class']  // Only watch class attribute
+  });
 }
 
 function openQueryBuilderForItemCustomizer(itemId: number) {
+  console.log('MenuQueries: openQueryBuilderForItemCustomizer called with itemId:', itemId);
   currentMenuItemId = itemId;
 
   const customize = (window as any).wp.customize;
+  console.log('MenuQueries: wp.customize exists:', !!customize);
+
   const setting = customize('nav_menu_item[' + itemId + ']');
+  console.log('MenuQueries: setting exists:', !!setting);
 
-  if (!setting) return;
+  if (!setting) {
+    console.log('MenuQueries: No setting found, returning');
+    return;
+  }
 
-  const value = setting.get();
+  // In the Customizer API, setting() returns the value and setting.set() updates it
+  const value = setting();
+  console.log('MenuQueries: setting value:', value);
+  console.log('MenuQueries: query_config from setting:', value?.query_config?.substring(0, 100));
+
   let existingConfig: QueryConfig | null = null;
 
   if (value && value.query_config) {
+    console.log('MenuQueries: Found query_config, parsing...');
+    console.log('MenuQueries: Raw query_config:', value.query_config.substring(0, 200));
+
+    // The JSON is escaped with backslashes - remove them
+    let cleaned = value.query_config
+      .replace(/\\"/g, '"')   // Replace \" with "
+      .replace(/\\\\/g, '\\'); // Replace \\ with \
+
+    console.log('MenuQueries: Cleaned query_config:', cleaned.substring(0, 200));
+
     try {
-      existingConfig = JSON.parse(value.query_config);
+      existingConfig = JSON.parse(cleaned);
+      console.log('MenuQueries: Successfully parsed config');
     } catch (e) {
-      // Failed to parse
+      console.log('MenuQueries: Parse failed even after cleaning:', e);
     }
   }
 
   // Dispatch event to open modal
+  console.log('MenuQueries: Dispatching menu-queries:open event');
   document.dispatchEvent(new CustomEvent('menu-queries:open', {
     detail: { itemId, config: existingConfig }
   }));
+  console.log('MenuQueries: Event dispatched');
 }
 
 function saveQueryConfigCustomizer(config: QueryConfig) {
+  console.log('MenuQueries: saveQueryConfigCustomizer called with:', config);
+  console.log('MenuQueries: currentMenuItemId:', currentMenuItemId);
+
   if (!currentMenuItemId) {
+    console.log('MenuQueries: No currentMenuItemId, returning');
     return;
   }
 
   const customize = (window as any).wp.customize;
   const setting = customize('nav_menu_item[' + currentMenuItemId + ']');
 
+  console.log('MenuQueries: Setting exists:', !!setting);
+
   if (setting) {
-    const value = setting.get();
-    value.query_config = JSON.stringify(config);
-    setting.set(value);
+    const currentValue = setting();
+    console.log('MenuQueries: Current value before update:', currentValue);
+
+    // Exclude rawWPQuery from the saved config to avoid nested JSON issues
+    const { rawWPQuery, ...configWithoutRawQuery } = config;
+    const newQueryConfig = JSON.stringify(configWithoutRawQuery);
+
+    console.log('MenuQueries: New query_config (without rawWPQuery):', newQueryConfig.substring(0, 100));
+
+    // Create a new object to trigger change detection
+    const newValue = {
+      ...currentValue,
+      query_config: newQueryConfig
+    };
+
+    setting.set(newValue);
+    console.log('MenuQueries: Setting updated with new object');
+
+    // Verify the setting was updated
+    setTimeout(() => {
+      const verifyValue = setting();
+      console.log('MenuQueries: Verified query_config after save:', verifyValue?.query_config?.substring(0, 100));
+    }, 100);
+
+    // Note: We don't need to manually refresh - Customizer auto-refreshes when settings change
   }
 
   currentMenuItemId = null;
