@@ -15,7 +15,9 @@
       "Bash(npm run build:menu-queries:*)",
       "Bash(cat:*)",
       "Bash(php -l:*)",
-      "Bash(timeout /t 5)"
+      "Bash(timeout /t 5)",
+      "WebSearch",
+      "WebFetch(domain:developer.wordpress.org)"
     ],
     "deny": [],
     "ask": []

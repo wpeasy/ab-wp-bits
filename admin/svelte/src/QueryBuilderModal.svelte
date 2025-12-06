@@ -58,7 +58,6 @@
       if (initialConfig) {
         // If we have rawWPQuery, parse it to populate UI fields (single source of truth)
         if (initialConfig.rawWPQuery) {
-          console.log('MenuQueries: Loading from rawWPQuery');
           isInitialLoad = true;
           // Format the JSON for display and set it
           // The $effect watching rawWPQuery will handle parsing to UI
@@ -68,9 +67,12 @@
           } catch (e) {
             rawWPQuery = initialConfig.rawWPQuery;
           }
+          // Reset isInitialLoad after parsing completes (via $effect at line 244)
+          setTimeout(() => {
+            isInitialLoad = false;
+          }, 150);
         } else {
           // Legacy: Load from individual config fields
-          console.log('MenuQueries: Loading from individual config fields');
           queryType = initialConfig.queryType || 'post';
           postType = initialConfig.postType || 'post';
           taxonomy = initialConfig.taxonomy || 'category';
@@ -303,7 +305,7 @@
       });
       postTypeOptions = await response.json();
     } catch (error) {
-      // Silently fail
+      console.error('Failed to fetch post types:', error);
     }
   }
 
@@ -314,7 +316,7 @@
       });
       taxonomyOptions = await response.json();
     } catch (error) {
-      // Silently fail
+      console.error('Failed to fetch taxonomies:', error);
     }
   }
 
@@ -325,7 +327,7 @@
       });
       postOptions = await response.json();
     } catch (error) {
-      // Silently fail
+      console.error('Failed to fetch posts:', error);
     }
   }
 
@@ -336,7 +338,7 @@
       });
       termOptions = await response.json();
     } catch (error) {
-      // Silently fail
+      console.error('Failed to fetch terms:', error);
     }
   }
 
@@ -508,6 +510,19 @@
         autoGenTimeout = null;
       }
       autoGenEnabled = false;
+    }
+  });
+
+  // Clear include/exclude arrays when post type changes
+  let previousPostType = $state('');
+  $effect(() => {
+    if (previousPostType === '') {
+      // Initialize on first run
+      previousPostType = postType;
+    } else if (postType !== previousPostType) {
+      includePosts = [];
+      excludePosts = [];
+      previousPostType = postType;
     }
   });
 

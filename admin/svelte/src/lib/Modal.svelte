@@ -53,21 +53,8 @@
 
   $effect(() => {
     if (open) {
-      console.log('MenuQueries: Modal $effect - modal is opening');
       document.body.style.overflow = 'hidden';
       document.addEventListener('keydown', handleKeydown);
-
-      // Check if modal element exists in DOM
-      setTimeout(() => {
-        const modalEl = document.querySelector('.wpea-modal--open');
-        console.log('MenuQueries: Modal element in DOM:', !!modalEl, modalEl);
-        if (modalEl) {
-          const computedStyle = window.getComputedStyle(modalEl);
-          console.log('MenuQueries: Modal display:', computedStyle.display);
-          console.log('MenuQueries: Modal z-index:', computedStyle.zIndex);
-          console.log('MenuQueries: Modal position:', computedStyle.position);
-        }
-      }, 100);
     } else {
       document.body.style.overflow = '';
     }

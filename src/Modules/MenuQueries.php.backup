@@ -611,7 +611,6 @@ final class MenuQueries {
                 }
             }
         } catch (\Exception $e) {
-            error_log("MenuQueries ERROR in get_posts_for_selection: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -626,10 +625,15 @@ final class MenuQueries {
      * @return array
      */
     public static function save_query_config_via_api($request): array {
+        error_log('MenuQueries: ========== REST API SAVE START ==========');
 
         $menu_item_id = $request->get_param('menu_item_id');
         $query_config = $request->get_param('query_config');
 
+        error_log("MenuQueries: menu_item_id: $menu_item_id");
+        error_log("MenuQueries: query_config type: " . gettype($query_config));
+        error_log("MenuQueries: query_config length: " . strlen($query_config));
+        error_log("MenuQueries: query_config (first 200 chars): " . substr($query_config, 0, 200));
 
         // Validate it's valid JSON
         $parsed = json_decode($query_config, true);
@@ -641,12 +645,15 @@ final class MenuQueries {
             ];
         }
 
+        error_log("MenuQueries: Parsed query keys: " . implode(', ', array_keys($parsed)));
 
         // Save the raw WP_Query JSON to post meta
         $result = update_post_meta($menu_item_id, '_menu_item_query_config', $query_config);
+        error_log("MenuQueries: update_post_meta result for query_config: " . ($result ? 'SUCCESS' : 'NO_CHANGE'));
 
         // Also set the query_type meta
         $type_result = update_post_meta($menu_item_id, '_menu_item_query_type', 'query_item');
+        error_log("MenuQueries: update_post_meta result for query_type: " . ($type_result ? 'SUCCESS' : 'NO_CHANGE'));
 
         // Update the menu item title if it's still the default "Query Item"
         $current_title = get_post_field('post_title', $menu_item_id);
@@ -661,11 +668,15 @@ final class MenuQueries {
                 'post_title' => $new_title,
             ]);
 
+            error_log("MenuQueries: Updated title from '$current_title' to '$new_title'");
         }
 
         // Verify what was saved
         $saved_value = get_post_meta($menu_item_id, '_menu_item_query_config', true);
+        error_log("MenuQueries: Verification - saved value (first 200 chars): " . substr($saved_value, 0, 200));
+        error_log("MenuQueries: Verification - values match: " . ($saved_value === $query_config ? 'YES' : 'NO'));
 
+        error_log('MenuQueries: ========== REST API SAVE END ==========');
 
         return [
             'success' => true,
@@ -682,10 +693,12 @@ final class MenuQueries {
     public static function get_query_config_via_api($request): array {
         $menu_item_id = $request->get_param('menu_item_id');
 
+        error_log("MenuQueries: GET config for item $menu_item_id");
 
         // Get from post meta
         $query_config = get_post_meta($menu_item_id, '_menu_item_query_config', true);
 
+        error_log("MenuQueries: Retrieved config: " . ($query_config ? substr($query_config, 0, 100) : 'EMPTY'));
 
         return [
             'success' => true,
@@ -1037,14 +1050,17 @@ final class MenuQueries {
      * @return array
      */
     public static function convert_query_items_to_arrays($items, $menu, $args) {
+        error_log("MenuQueries: convert_query_items_to_arrays called with " . count($items) . " items, menu=" . (is_object($menu) ? $menu->term_id : 'null'));
 
         if (!is_array($items)) {
+            error_log("MenuQueries: Items is not an array, returning as-is");
             return $items;
         }
 
         $has_query_items = false;
         foreach ($items as $key => $item) {
             if (!is_object($item)) {
+                error_log("MenuQueries: Item $key is not an object: " . gettype($item));
                 continue;
             }
 
@@ -1053,11 +1069,13 @@ final class MenuQueries {
             $has_query_config = isset($item->query_config);
             $meta_check = isset($item->ID) ? get_post_meta($item->ID, '_menu_item_query_type', true) : 'no-ID';
 
+            error_log("MenuQueries: Item #$item_id - has query_config=$has_query_config, meta_check=$meta_check, type=" . (isset($item->type) ? $item->type : 'unknown'));
 
             $is_query_item = isset($item->query_config) || (isset($item->ID) && get_post_meta($item->ID, '_menu_item_query_type', true) === 'query_item');
 
             if ($is_query_item) {
                 $has_query_items = true;
+                error_log("MenuQueries: Converting query item #{$item->ID} to array for Customizer");
 
                 // Cast to array first
                 $item_array = (array) $item;
@@ -1075,10 +1093,12 @@ final class MenuQueries {
                 // Convert back to object (stdClass, not WP_Post)
                 $items[$key] = (object) $item_array;
 
+                error_log("MenuQueries: Converted - status={$items[$key]->status}, has query_config=" . (isset($items[$key]->query_config) ? 'YES' : 'NO'));
             }
         }
 
         if (!$has_query_items) {
+            error_log("MenuQueries: No query items found in this batch");
         }
 
         return $items;
@@ -1118,6 +1138,7 @@ final class MenuQueries {
                                 $has_query_config_in_setting = true;
                                 $query_config_from_setting = $decoded;
                                 $is_query_item = true;
+                                error_log("MenuQueries: Loaded query_config from description field for item #{$item_post_id}");
                             }
                         }
                         // Fallback: Try query_config (only works on first save before sanitization)
@@ -1125,6 +1146,7 @@ final class MenuQueries {
                             $has_query_config_in_setting = true;
                             $query_config_from_setting = $value['query_config'];
                             $is_query_item = true;
+                            error_log("MenuQueries: Loaded query_config from query_config field for item #{$item_post_id}");
                         }
                     }
                 }
@@ -1132,17 +1154,22 @@ final class MenuQueries {
         }
 
         if ($is_query_item) {
+            error_log("MenuQueries: Processing query item #{$item_post_id}");
 
             // Load query_config - prefer Customizer setting over database
             if ($has_query_config_in_setting) {
                 $menu_item->query_config = $query_config_from_setting;
+                error_log("MenuQueries: Loaded query_config from Customizer setting for item #{$item_post_id}");
+                error_log("MenuQueries: Full query_config: " . $menu_item->query_config);
 
                 // Parse and log the post_type/taxonomy
                 $parsed = json_decode($menu_item->query_config, true);
                 if ($parsed) {
+                    error_log("MenuQueries: Parsed - post_type: " . ($parsed['post_type'] ?? 'not set') . ", taxonomy: " . ($parsed['taxonomy'] ?? 'not set'));
                 }
             } else {
                 $menu_item->query_config = get_post_meta($item_post_id, '_menu_item_query_config', true);
+                error_log("MenuQueries: Loaded query_config from DB for item #{$item_post_id}: " . substr($menu_item->query_config, 0, 100));
             }
 
             $menu_item->type_label = __('Query Item', 'ab-wp-bits');
@@ -1159,6 +1186,7 @@ final class MenuQueries {
                 $menu_item->classes = [];
             }
 
+            error_log("MenuQueries: Added status={$menu_item->status}, position={$menu_item->position}");
         }
         return $menu_item;
     }
@@ -1209,6 +1237,7 @@ final class MenuQueries {
                                 $is_query_item = true;
 
                                 // Save the query_config from description
+                                error_log("MenuQueries: ensure_query_item_url - Saving query_config from description for item $menu_item_db_id (setting ID: $setting_id_num)");
                                 update_post_meta($menu_item_db_id, '_menu_item_query_config', $decoded);
                                 update_post_meta($menu_item_db_id, '_menu_item_query_type', 'query_item');
 
@@ -1265,24 +1294,28 @@ final class MenuQueries {
             return;
         }
 
+        error_log('MenuQueries: Fixing ' . count($query_items) . ' existing query items');
 
         foreach ($query_items as $item_id) {
             // Fix type if it's set to invalid 'query_item'
             $current_type = get_post_meta($item_id, '_menu_item_type', true);
             if ($current_type === 'query_item') {
                 update_post_meta($item_id, '_menu_item_type', 'custom');
+                error_log("MenuQueries: Fixed type for item $item_id");
             }
 
             // Fix object if it's set to invalid 'query_item'
             $current_object = get_post_meta($item_id, '_menu_item_object', true);
             if ($current_object === 'query_item') {
                 update_post_meta($item_id, '_menu_item_object', 'custom');
+                error_log("MenuQueries: Fixed object for item $item_id");
             }
 
             // Ensure URL is set
             $current_url = get_post_meta($item_id, '_menu_item_url', true);
             if (empty($current_url)) {
                 update_post_meta($item_id, '_menu_item_url', '#query-item');
+                error_log("MenuQueries: Fixed URL for item $item_id");
             }
         }
     }
@@ -1295,6 +1328,7 @@ final class MenuQueries {
      * @return array
      */
     public static function customize_nav_menu_item_setting_args($args, $item_id): array {
+        error_log('MenuQueries: customize_nav_menu_item_setting_args called for item ' . $item_id);
 
         // CRITICAL: Wrap sanitize_callback to preserve query_config
         // This registers it as a valid property that WordPress will save
@@ -1308,6 +1342,7 @@ final class MenuQueries {
 
             // Ensure query_config is preserved if present
             if (isset($value['query_config'])) {
+                error_log("MenuQueries: Sanitizing item $item_id - query_config present: " . substr($value['query_config'], 0, 100));
                 // Don't sanitize the JSON itself, just ensure it's a string
                 $value['query_config'] = (string) $value['query_config'];
             }
@@ -1318,6 +1353,7 @@ final class MenuQueries {
         // Check if this is a query item
         $is_query_item = get_post_meta($item_id, '_menu_item_query_type', true) === 'query_item';
 
+        error_log('MenuQueries: Is query item: ' . ($is_query_item ? 'YES' : 'NO'));
 
         if ($is_query_item) {
             // Get the post to check its status
@@ -1353,6 +1389,7 @@ final class MenuQueries {
      * @return void
      */
     public static function clear_menu_cache_for_customizer(): void {
+        error_log('MenuQueries: Clearing menu cache for Customizer');
 
         // Get all menus
         $menus = wp_get_nav_menus();
@@ -1360,6 +1397,7 @@ final class MenuQueries {
         foreach ($menus as $menu) {
             // Clear the cache for each menu
             wp_cache_delete($menu->term_id, 'nav_menu_items');
+            error_log("MenuQueries: Cleared cache for menu {$menu->term_id}");
         }
     }
 
@@ -1423,10 +1461,12 @@ final class MenuQueries {
             $has_query_config = isset($args['query_config']) && !empty($args['query_config']);
 
             if ($has_query_url || $has_query_config) {
+                error_log("MenuQueries: wp_update_nav_menu_item - saving query item $menu_item_db_id");
                 update_post_meta($menu_item_db_id, '_menu_item_query_type', 'query_item');
 
                 // Save query config if provided in args (from Customizer changeset)
                 if ($has_query_config) {
+                    error_log("MenuQueries: Saving query_config from changeset: " . substr($args['query_config'], 0, 100));
                     update_post_meta($menu_item_db_id, '_menu_item_query_config', wp_slash($args['query_config']));
                 }
             }
@@ -1451,6 +1491,7 @@ final class MenuQueries {
             return $items;
         }
 
+        error_log("MenuQueries: EXPANDING in preview/frontend - " . count($items) . " items");
 
         if (!is_array($items)) {
             return $items;
@@ -1471,6 +1512,21 @@ final class MenuQueries {
                             (isset($item->query_config) && !empty($item->query_config));
 
             if (!$is_query_item) {
+                // Log first real menu item for comparison
+                if (!$logged_real_item) {
+                    error_log("MenuQueries: Real menu item - " . json_encode([
+                        'ID' => $item->ID,
+                        'db_id' => $item->db_id ?? 'not set',
+                        'title' => $item->title,
+                        'type' => $item->type,
+                        'object' => $item->object,
+                        'object_id' => $item->object_id,
+                        'url' => $item->url,
+                        'post_type' => $item->post_type ?? 'not set',
+                        'post_status' => $item->post_status ?? 'not set',
+                    ]));
+                    $logged_real_item = true;
+                }
                 $expanded_items[] = $item;
                 continue;
             }
@@ -1481,10 +1537,12 @@ final class MenuQueries {
             // In Customizer preview, ALWAYS prefer the item's query_config property over database
             // This ensures the preview shows the latest unsaved changes from the changeset
             if (is_customize_preview() && isset($item->query_config) && !empty($item->query_config)) {
+                error_log("MenuQueries: Using query_config from Customizer changeset for item $item_post_id");
                 $query_config_json = $item->query_config;
             } else {
                 // Outside Customizer or no changeset data, read from database
                 $query_config_json = get_post_meta($item_post_id, '_menu_item_query_config', true);
+                error_log("MenuQueries: Using query_config from database for item $item_post_id");
             }
 
             if (empty($query_config_json)) {
@@ -1542,11 +1600,14 @@ final class MenuQueries {
             // Replace the query item with actual results (use item's parent, not the item itself)
             $menu_order_counter = null;
             $child_items = self::results_to_menu_items($results, $item, $item_counter, $query_type, 0, $item->menu_item_parent, $menu_order_counter, $post_type);
+            error_log("MenuQueries: Created " . count($child_items) . " child items from query");
             $expanded_items = array_merge($expanded_items, $child_items);
         }
 
+        error_log("MenuQueries: Returning " . count($expanded_items) . " total items (from " . count($items) . " original)");
 
         // Log the args to see what walker is being used
+        error_log("MenuQueries: Menu args - " . print_r($args, true));
 
         return $expanded_items;
     }
@@ -1626,7 +1687,6 @@ final class MenuQueries {
 
                 return $results;
             }
-            error_log("MenuQueries ERROR in execute_query: " . $e->getMessage());
         } catch (\Exception $e) {
             return [];
         }
@@ -1688,6 +1748,21 @@ final class MenuQueries {
             $item->post_title = $item->title;
             $item->filter = 'raw';
 
+            // Log what we're creating
+            if ($counter == 10000) {
+                error_log("MenuQueries: Created first query item - " . json_encode([
+                    'ID' => $item->ID,
+                    'db_id' => $item->db_id,
+                    'title' => $item->title,
+                    'type' => $item->type,
+                    'object' => $item->object,
+                    'object_id' => $item->object_id,
+                    'url' => $item->url,
+                    'post_type' => $item->post_type,
+                    'post_status' => $item->post_status,
+                ]));
+            }
+
             $menu_items[] = $item;
 
             // Handle children if hierarchical
@@ -1713,6 +1788,7 @@ final class MenuQueries {
      * Debug filter to see what items the walker receives
      */
     public static function debug_walker_items($items, $args) {
+        error_log("MenuQueries: wp_nav_menu_objects filter - Walker receiving " . count($items) . " items");
 
         $query_item_count = 0;
         foreach ($items as $item) {
@@ -1720,6 +1796,7 @@ final class MenuQueries {
                 $query_item_count++;
             }
         }
+        error_log("MenuQueries: Walker has $query_item_count query items (IDs >= 10000)");
 
         return $items;
     }
@@ -1728,17 +1805,21 @@ final class MenuQueries {
      * Debug filter to see what HTML was generated
      */
     public static function debug_rendered_items($items, $args) {
+        error_log("MenuQueries: wp_nav_menu_items filter - Received HTML with " . strlen($items) . " characters");
 
         // Count how many <li> elements (menu items) are in the HTML
         $item_count = substr_count($items, '<li');
+        error_log("MenuQueries: HTML contains $item_count menu items");
 
         // Check if any query items are in the HTML
         $has_query_items = strpos($items, 'menu-item-10000') !== false ||
                           strpos($items, 'menu-item-type-post_type menu-item-object-page') !== false;
+        error_log("MenuQueries: Query items in HTML: " . ($has_query_items ? 'YES' : 'NO'));
 
         // Log a snippet of HTML around the first query item if found
         $pos = strpos($items, 'menu-item-10000');
         if ($pos !== false) {
+            error_log("MenuQueries: HTML snippet around query item - " . substr($items, max(0, $pos - 50), 200));
         }
 
         return $items;

@@ -60,8 +60,6 @@ function init() {
 }
 
 function initializeCustomizer() {
-  console.log('MenuQueries: initializeCustomizer() called');
-
   // Mount the app component directly to body to avoid 0x0 container issues
   mount(MenuQueriesApp, {
     target: document.body,
@@ -71,8 +69,6 @@ function initializeCustomizer() {
       }
     }
   });
-
-  console.log('MenuQueries: MenuQueriesApp mounted to body');
 
   // Wait for wp.customize to be available
   if (typeof (window as any).wp === 'undefined' || typeof (window as any).wp.customize === 'undefined') {
@@ -84,8 +80,6 @@ function initializeCustomizer() {
 
   // Add configure button to query items in Customizer
   customize.bind('ready', () => {
-    console.log('MenuQueries: Customizer ready');
-
     // Add button to existing query item controls
     customize.control.each((control: any) => {
       if (control.params && control.params.type === 'nav_menu_item') {
@@ -96,21 +90,17 @@ function initializeCustomizer() {
     // Listen for new controls being added
     customize.control.bind('add', (control: any) => {
       if (control.params && control.params.type === 'nav_menu_item') {
-        console.log('MenuQueries: New nav_menu_item control added', control.id);
         addConfigureButtonToControl(control);
 
         // Check if this is a newly added query item
         const value = control.setting ? control.setting() : null;
         if (value && value.type === 'query_item') {
-          console.log('MenuQueries: New query item detected, will auto-open modal when expanded');
-
           // Wait for the control container to be available and expanded
           setTimeout(() => {
             const container = control.container[0];
             if (container && container.classList.contains('menu-item-edit-active')) {
               // Already expanded - open modal immediately
               const itemId = control.id.replace('nav_menu_item[', '').replace(']', '');
-              console.log('MenuQueries: Auto-opening modal for new query item', itemId);
               openQueryBuilderForItemCustomizer(parseInt(itemId, 10));
             }
           }, 500);
@@ -146,8 +136,6 @@ function addConfigureButtonToControl(control: any) {
     return;
   }
 
-  console.log('MenuQueries: Found query item', itemId, '- setting up observer');
-
   const container = control.container[0];
   if (!container) {
     return;
@@ -165,20 +153,12 @@ function addConfigureButtonToControl(control: any) {
       return; // Item is still collapsed
     }
 
-    console.log('MenuQueries: Item', itemId, 'is now expanded!');
-
     // Find the menu item settings container
     const itemControls = container.querySelector('.menu-item-settings');
 
-    console.log('MenuQueries: itemControls found:', !!itemControls);
-
     if (!itemControls) {
-      console.log('MenuQueries: .menu-item-settings not found yet');
       return;
     }
-
-    console.log('MenuQueries: Control expanded, adding button for item', itemId);
-    console.log('MenuQueries: itemControls.innerHTML =', itemControls.innerHTML.substring(0, 500));
 
     // Create configure button
     const buttonContainer = document.createElement('p');
@@ -194,7 +174,6 @@ function addConfigureButtonToControl(control: any) {
     // Add click handler
     button.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log('MenuQueries: Configure button clicked for item', itemId);
       openQueryBuilderForItemCustomizer(parseInt(itemId, 10));
     });
 
@@ -204,10 +183,8 @@ function addConfigureButtonToControl(control: any) {
     const urlField = itemControls.querySelector('.field-url');
     if (urlField && urlField.parentNode) {
       urlField.parentNode.insertBefore(buttonContainer, urlField.nextSibling);
-      console.log('MenuQueries: Inserted button after URL field');
     } else {
       itemControls.appendChild(buttonContainer);
-      console.log('MenuQueries: Appended button to controls');
     }
   });
 
@@ -221,37 +198,29 @@ function addConfigureButtonToControl(control: any) {
 }
 
 async function openQueryBuilderForItemCustomizer(itemId: number) {
-  console.log('MenuQueries: openQueryBuilderForItemCustomizer called with itemId:', itemId);
   currentMenuItemId = itemId;
 
   const customize = (window as any).wp.customize;
-  console.log('MenuQueries: wp.customize exists:', !!customize);
 
   const setting = customize('nav_menu_item[' + itemId + ']');
-  console.log('MenuQueries: setting exists:', !!setting);
 
   if (!setting) {
-    console.log('MenuQueries: No setting found, returning');
     return;
   }
 
   // In the Customizer API, setting() returns the value and setting.set() updates it
   const value = setting();
-  console.log('MenuQueries: setting value:', value);
-  console.log('MenuQueries: query_config from setting:', value?.query_config?.substring(0, 100));
 
   let rawWPQuery = '';
 
   // First try to get from Customizer setting
   if (value && value.query_config) {
-    console.log('MenuQueries: Found query_config in setting');
     rawWPQuery = value.query_config
       .replace(/\\"/g, '"')   // Replace \" with "
       .replace(/\\\\/g, '\\'); // Replace \\ with \
   } else {
     // Fallback: Load from database via REST API
     // This is needed for newly added items where the setting doesn't have query_config yet
-    console.log('MenuQueries: No query_config in setting, loading from database...');
     try {
       const response = await fetch(`${window.abMenuQueriesData.apiUrl}/menu-queries/get-config?menu_item_id=${itemId}`, {
         headers: {
@@ -260,31 +229,22 @@ async function openQueryBuilderForItemCustomizer(itemId: number) {
       });
       const data = await response.json();
       if (data.success && data.query_config) {
-        console.log('MenuQueries: Loaded from database:', data.query_config.substring(0, 100));
         rawWPQuery = data.query_config;
       }
     } catch (error) {
-      console.error('MenuQueries: Failed to load from database:', error);
+      console.error('Failed to load query config from database:', error);
     }
   }
 
-  console.log('MenuQueries: Final rawWPQuery:', rawWPQuery.substring(0, 200));
-
   // Dispatch event to open modal with rawWPQuery
   // The modal will parse this to populate the UI fields
-  console.log('MenuQueries: Dispatching menu-queries:open event');
   document.dispatchEvent(new CustomEvent('menu-queries:open', {
     detail: { itemId, rawWPQuery }
   }));
-  console.log('MenuQueries: Event dispatched');
 }
 
 async function saveQueryConfigCustomizer(config: QueryConfig) {
-  console.log('MenuQueries: saveQueryConfigCustomizer called with:', config);
-  console.log('MenuQueries: currentMenuItemId:', currentMenuItemId);
-
   if (!currentMenuItemId) {
-    console.log('MenuQueries: No currentMenuItemId, returning');
     return;
   }
 
@@ -294,47 +254,72 @@ async function saveQueryConfigCustomizer(config: QueryConfig) {
   // Save ONLY the rawWPQuery as the source of truth
   const queryToSave = config.rawWPQuery || '';
 
-  console.log('MenuQueries: Saving via REST API, rawWPQuery:', queryToSave.substring(0, 100));
+  // Check if this is a temporary ID (negative number = unsaved item)
+  const isTempId = currentMenuItemId < 0;
 
-  try {
-    // Save directly to database via REST API
-    // This is necessary because Customizer settings don't persist on Publish
-    const response = await fetch(`${window.abMenuQueriesData.apiUrl}/menu-queries/save-config`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-WP-Nonce': window.abMenuQueriesData.nonce,
-      },
-      body: JSON.stringify({
-        menu_item_id: currentMenuItemId,
-        query_config: queryToSave,
-      }),
-    });
+  // ALWAYS update the Customizer setting first
+  if (setting) {
+    const currentValue = setting();
 
-    const data = await response.json();
-    console.log('MenuQueries: REST API save response:', data);
+    // Always generate title from the query config
+    let title = currentValue.title || 'Query Item';
+    try {
+      const parsed = JSON.parse(queryToSave);
+      const postType = parsed.post_type || '';
+      const taxonomy = parsed.taxonomy || '';
+      const newTitle = taxonomy ? `Query: ${taxonomy}` : `Query: ${postType}`;
 
-    if (data.success) {
-      // ALSO update the Customizer setting so it's available when reopening
-      if (setting) {
-        const currentValue = setting();
-        const newValue = {
-          ...currentValue,
-          query_config: queryToSave
-        };
-        setting.set(newValue);
-        console.log('MenuQueries: Customizer setting updated with query_config');
+      if (newTitle && newTitle !== 'Query: ') {
+        title = newTitle;
       }
-
-      // Refresh the Customizer preview to show the updated menu
-      customize.previewer.refresh();
-      console.log('MenuQueries: Preview refreshed');
-    } else {
-      console.error('MenuQueries: REST API save failed:', data);
+    } catch (e) {
+      // Keep existing title
     }
-  } catch (error) {
-    console.error('MenuQueries: REST API save error:', error);
+
+    // CRITICAL: Store query_config in the description field (which IS whitelisted)
+    // WordPress's sanitization strips query_config, but preserves description
+    // We Base64 encode it to ensure it passes sanitization safely
+    const encodedConfig = btoa(queryToSave);
+
+    const newValue = {
+      ...currentValue,
+      query_config: queryToSave,  // Will be stripped by sanitization, but needed for preview
+      description: encodedConfig,  // Survives sanitization!
+      title: title
+    };
+    setting.set(newValue);
   }
+
+  // Only save to database if this is a real post ID (positive number)
+  if (!isTempId) {
+    try {
+      const response = await fetch(`${window.abMenuQueriesData.apiUrl}/menu-queries/save-config`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-WP-Nonce': window.abMenuQueriesData.nonce,
+        },
+        body: JSON.stringify({
+          menu_item_id: currentMenuItemId,
+          query_config: queryToSave,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        console.error('Failed to save query config to database:', data);
+      }
+    } catch (error) {
+      console.error('Error saving query config to database:', error);
+    }
+  }
+
+  // Refresh the Customizer preview to show the updated menu
+  // Add a small delay to ensure setting is updated first
+  setTimeout(() => {
+    customize.previewer.refresh();
+  }, 100);
 
   currentMenuItemId = null;
 }
@@ -382,6 +367,7 @@ function handleAddQueryItem(e: Event) {
       }
     })
     .catch(error => {
+      console.error('Error adding query item:', error);
       alert('Error adding query item. Please try again.');
     })
     .finally(() => {
