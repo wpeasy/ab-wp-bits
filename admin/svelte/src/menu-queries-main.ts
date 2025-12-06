@@ -84,6 +84,8 @@ function initializeCustomizer() {
 
   // Add configure button to query items in Customizer
   customize.bind('ready', () => {
+    console.log('MenuQueries: Customizer ready');
+
     // Add button to existing query item controls
     customize.control.each((control: any) => {
       if (control.params && control.params.type === 'nav_menu_item') {
@@ -94,7 +96,25 @@ function initializeCustomizer() {
     // Listen for new controls being added
     customize.control.bind('add', (control: any) => {
       if (control.params && control.params.type === 'nav_menu_item') {
+        console.log('MenuQueries: New nav_menu_item control added', control.id);
         addConfigureButtonToControl(control);
+
+        // Check if this is a newly added query item
+        const value = control.setting ? control.setting() : null;
+        if (value && value.type === 'query_item') {
+          console.log('MenuQueries: New query item detected, will auto-open modal when expanded');
+
+          // Wait for the control container to be available and expanded
+          setTimeout(() => {
+            const container = control.container[0];
+            if (container && container.classList.contains('menu-item-edit-active')) {
+              // Already expanded - open modal immediately
+              const itemId = control.id.replace('nav_menu_item[', '').replace(']', '');
+              console.log('MenuQueries: Auto-opening modal for new query item', itemId);
+              openQueryBuilderForItemCustomizer(parseInt(itemId, 10));
+            }
+          }, 500);
+        }
       }
     });
   });
@@ -115,7 +135,12 @@ function addConfigureButtonToControl(control: any) {
   const itemId = control.id.replace('nav_menu_item[', '').replace(']', '');
 
   // Check if this is a query item
-  const isQueryItem = value.query_config || (value.type === 'custom' && value.object === 'custom' && value.url === '#query-item');
+  // Can be: type='query_item' (from Customizer Add Items)
+  // OR: type='custom' with url='#query-item' (from Appearance->Menus)
+  // OR: has query_config already set
+  const isQueryItem = value.query_config ||
+                      value.type === 'query_item' ||
+                      (value.type === 'custom' && value.object === 'custom' && value.url === '#query-item');
 
   if (!isQueryItem) {
     return;
@@ -195,7 +220,7 @@ function addConfigureButtonToControl(control: any) {
   });
 }
 
-function openQueryBuilderForItemCustomizer(itemId: number) {
+async function openQueryBuilderForItemCustomizer(itemId: number) {
   console.log('MenuQueries: openQueryBuilderForItemCustomizer called with itemId:', itemId);
   currentMenuItemId = itemId;
 
@@ -215,36 +240,46 @@ function openQueryBuilderForItemCustomizer(itemId: number) {
   console.log('MenuQueries: setting value:', value);
   console.log('MenuQueries: query_config from setting:', value?.query_config?.substring(0, 100));
 
-  let existingConfig: QueryConfig | null = null;
+  let rawWPQuery = '';
 
+  // First try to get from Customizer setting
   if (value && value.query_config) {
-    console.log('MenuQueries: Found query_config, parsing...');
-    console.log('MenuQueries: Raw query_config:', value.query_config.substring(0, 200));
-
-    // The JSON is escaped with backslashes - remove them
-    let cleaned = value.query_config
+    console.log('MenuQueries: Found query_config in setting');
+    rawWPQuery = value.query_config
       .replace(/\\"/g, '"')   // Replace \" with "
       .replace(/\\\\/g, '\\'); // Replace \\ with \
-
-    console.log('MenuQueries: Cleaned query_config:', cleaned.substring(0, 200));
-
+  } else {
+    // Fallback: Load from database via REST API
+    // This is needed for newly added items where the setting doesn't have query_config yet
+    console.log('MenuQueries: No query_config in setting, loading from database...');
     try {
-      existingConfig = JSON.parse(cleaned);
-      console.log('MenuQueries: Successfully parsed config');
-    } catch (e) {
-      console.log('MenuQueries: Parse failed even after cleaning:', e);
+      const response = await fetch(`${window.abMenuQueriesData.apiUrl}/menu-queries/get-config?menu_item_id=${itemId}`, {
+        headers: {
+          'X-WP-Nonce': window.abMenuQueriesData.nonce,
+        },
+      });
+      const data = await response.json();
+      if (data.success && data.query_config) {
+        console.log('MenuQueries: Loaded from database:', data.query_config.substring(0, 100));
+        rawWPQuery = data.query_config;
+      }
+    } catch (error) {
+      console.error('MenuQueries: Failed to load from database:', error);
     }
   }
 
-  // Dispatch event to open modal
+  console.log('MenuQueries: Final rawWPQuery:', rawWPQuery.substring(0, 200));
+
+  // Dispatch event to open modal with rawWPQuery
+  // The modal will parse this to populate the UI fields
   console.log('MenuQueries: Dispatching menu-queries:open event');
   document.dispatchEvent(new CustomEvent('menu-queries:open', {
-    detail: { itemId, config: existingConfig }
+    detail: { itemId, rawWPQuery }
   }));
   console.log('MenuQueries: Event dispatched');
 }
 
-function saveQueryConfigCustomizer(config: QueryConfig) {
+async function saveQueryConfigCustomizer(config: QueryConfig) {
   console.log('MenuQueries: saveQueryConfigCustomizer called with:', config);
   console.log('MenuQueries: currentMenuItemId:', currentMenuItemId);
 
@@ -256,34 +291,49 @@ function saveQueryConfigCustomizer(config: QueryConfig) {
   const customize = (window as any).wp.customize;
   const setting = customize('nav_menu_item[' + currentMenuItemId + ']');
 
-  console.log('MenuQueries: Setting exists:', !!setting);
+  // Save ONLY the rawWPQuery as the source of truth
+  const queryToSave = config.rawWPQuery || '';
 
-  if (setting) {
-    const currentValue = setting();
-    console.log('MenuQueries: Current value before update:', currentValue);
+  console.log('MenuQueries: Saving via REST API, rawWPQuery:', queryToSave.substring(0, 100));
 
-    // Exclude rawWPQuery from the saved config to avoid nested JSON issues
-    const { rawWPQuery, ...configWithoutRawQuery } = config;
-    const newQueryConfig = JSON.stringify(configWithoutRawQuery);
+  try {
+    // Save directly to database via REST API
+    // This is necessary because Customizer settings don't persist on Publish
+    const response = await fetch(`${window.abMenuQueriesData.apiUrl}/menu-queries/save-config`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-WP-Nonce': window.abMenuQueriesData.nonce,
+      },
+      body: JSON.stringify({
+        menu_item_id: currentMenuItemId,
+        query_config: queryToSave,
+      }),
+    });
 
-    console.log('MenuQueries: New query_config (without rawWPQuery):', newQueryConfig.substring(0, 100));
+    const data = await response.json();
+    console.log('MenuQueries: REST API save response:', data);
 
-    // Create a new object to trigger change detection
-    const newValue = {
-      ...currentValue,
-      query_config: newQueryConfig
-    };
+    if (data.success) {
+      // ALSO update the Customizer setting so it's available when reopening
+      if (setting) {
+        const currentValue = setting();
+        const newValue = {
+          ...currentValue,
+          query_config: queryToSave
+        };
+        setting.set(newValue);
+        console.log('MenuQueries: Customizer setting updated with query_config');
+      }
 
-    setting.set(newValue);
-    console.log('MenuQueries: Setting updated with new object');
-
-    // Verify the setting was updated
-    setTimeout(() => {
-      const verifyValue = setting();
-      console.log('MenuQueries: Verified query_config after save:', verifyValue?.query_config?.substring(0, 100));
-    }, 100);
-
-    // Note: We don't need to manually refresh - Customizer auto-refreshes when settings change
+      // Refresh the Customizer preview to show the updated menu
+      customize.previewer.refresh();
+      console.log('MenuQueries: Preview refreshed');
+    } else {
+      console.error('MenuQueries: REST API save failed:', data);
+    }
+  } catch (error) {
+    console.error('MenuQueries: REST API save error:', error);
   }
 
   currentMenuItemId = null;
@@ -377,51 +427,65 @@ function openQueryBuilderForItem(itemId: number) {
 
   // Load existing config if available
   const configInput = document.getElementById(`query-config-${itemId}`) as HTMLInputElement;
-  let existingConfig: QueryConfig | null = null;
+  let rawWPQuery = '';
 
   if (configInput && configInput.value) {
     try {
       let configValue = configInput.value;
 
       // Try different unescape methods
+      let parsed: any = null;
       try {
         // First try: parse directly
-        existingConfig = JSON.parse(configValue);
+        parsed = JSON.parse(configValue);
       } catch (firstError) {
         try {
           // Second try: unescape HTML entities
           const textarea = document.createElement('textarea');
           textarea.innerHTML = configValue;
           configValue = textarea.value;
-          existingConfig = JSON.parse(configValue);
+          parsed = JSON.parse(configValue);
         } catch (secondError) {
           // Third try: manually unescape backslashes (WordPress adds these)
           configValue = configInput.value.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-          existingConfig = JSON.parse(configValue);
+          parsed = JSON.parse(configValue);
         }
+      }
+
+      // Detect format: if it has WP_Query properties (snake_case), it's the rawWPQuery
+      // Otherwise it's the legacy full config object
+      if (parsed && (parsed.post_type || parsed.taxonomy)) {
+        // New format: this IS the rawWPQuery
+        rawWPQuery = JSON.stringify(parsed);
+      } else if (parsed && parsed.rawWPQuery) {
+        // Legacy format: extract rawWPQuery
+        rawWPQuery = parsed.rawWPQuery;
       }
     } catch (e) {
       // Silently fail parsing
     }
   }
 
-  // Dispatch event to open modal
+  // Dispatch event to open modal with rawWPQuery
   document.dispatchEvent(new CustomEvent('menu-queries:open', {
-    detail: { itemId, config: existingConfig }
+    detail: { itemId, rawWPQuery }
   }));
 }
 
 /**
- * Save query config to menu item
+ * Save query config to menu item (regular admin)
  */
 function saveQueryConfig(config: QueryConfig) {
   if (!currentMenuItemId) {
     return;
   }
 
+  // Save ONLY the rawWPQuery as the source of truth
+  const queryToSave = config.rawWPQuery || '';
+
   const configInput = document.getElementById(`query-config-${currentMenuItemId}`) as HTMLInputElement;
   if (configInput) {
-    configInput.value = JSON.stringify(config);
+    configInput.value = queryToSave;
 
     // Trigger change event so WordPress knows to save
     const event = new Event('change', { bubbles: true });

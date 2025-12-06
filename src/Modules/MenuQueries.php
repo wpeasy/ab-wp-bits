@@ -75,9 +75,8 @@ final class MenuQueries {
         add_action('wp_update_nav_menu_item', [__CLASS__, 'save_menu_item_custom_fields'], 10, 2);
 
         // Save query_config when Customizer saves menu items
-        // Use the standard wp_update_nav_menu_item hook which fires for both admin and Customizer
-        // Priority 20 ensures this runs AFTER WordPress saves standard properties
-        add_action('wp_update_nav_menu_item', [__CLASS__, 'save_query_config_customizer'], 20, 3);
+        // Use customize_save which fires when Customizer publishes/saves
+        add_action('customize_save', [__CLASS__, 'save_customizer_query_configs'], 100);
 
         // Setup nav menu item
         add_filter('wp_setup_nav_menu_item', [__CLASS__, 'setup_nav_menu_item']);
@@ -88,12 +87,17 @@ final class MenuQueries {
         // Add AJAX handler for adding query items
         add_action('wp_ajax_add_query_menu_item', [__CLASS__, 'ajax_add_query_menu_item']);
 
-        // Filter menu items to expand query items
-        add_filter('wp_get_nav_menu_items', [__CLASS__, 'expand_query_menu_items'], 10, 3);
+        // Filter menu items to expand query items (run at priority 5, before convert_query_items_to_arrays at 999)
+        add_filter('wp_get_nav_menu_items', [__CLASS__, 'expand_query_menu_items'], 5, 3);
 
-        // Disable Customizer support - Query Items only work in Appearance->Menus
-        // The Customizer has complex initialization that conflicts with our custom menu items
-        add_action('customize_register', [__CLASS__, 'disable_customizer_for_query_menus']);
+        // Debug filter to see what items the walker receives
+        add_filter('wp_nav_menu_objects', [__CLASS__, 'debug_walker_items'], 10, 2);
+
+        // Debug filter at the very end to see what HTML is generated
+        add_filter('wp_nav_menu_items', [__CLASS__, 'debug_rendered_items'], 10, 2);
+
+        // Add Query Items support to Customizer
+        add_action('customize_register', [__CLASS__, 'register_customizer_support']);
 
         // Register Customizer filter early - MUST be before customize_register runs
         $result = add_filter('customize_nav_menu_item_setting_args', [__CLASS__, 'customize_nav_menu_item_setting_args'], 5, 2);
@@ -322,6 +326,36 @@ final class MenuQueries {
             'methods' => 'POST',
             'callback' => [__CLASS__, 'execute_query'],
             'permission_callback' => [__CLASS__, 'check_permissions'],
+        ]);
+
+        // Save query config for a menu item (used by Customizer)
+        register_rest_route('ab-wp-bits/v1', '/menu-queries/save-config', [
+            'methods' => 'POST',
+            'callback' => [__CLASS__, 'save_query_config_via_api'],
+            'permission_callback' => [__CLASS__, 'check_permissions'],
+            'args' => [
+                'menu_item_id' => [
+                    'required' => true,
+                    'type' => 'integer',
+                ],
+                'query_config' => [
+                    'required' => true,
+                    'type' => 'string',
+                ],
+            ],
+        ]);
+
+        // Get query config for a menu item (used by Customizer)
+        register_rest_route('ab-wp-bits/v1', '/menu-queries/get-config', [
+            'methods' => 'GET',
+            'callback' => [__CLASS__, 'get_query_config_via_api'],
+            'permission_callback' => [__CLASS__, 'check_permissions'],
+            'args' => [
+                'menu_item_id' => [
+                    'required' => true,
+                    'type' => 'integer',
+                ],
+            ],
         ]);
     }
 
@@ -584,6 +618,78 @@ final class MenuQueries {
                 'message' => $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Save query config via REST API (used by Customizer)
+     *
+     * @param WP_REST_Request $request
+     * @return array
+     */
+    public static function save_query_config_via_api($request): array {
+        error_log('MenuQueries: ========== REST API SAVE START ==========');
+
+        $menu_item_id = $request->get_param('menu_item_id');
+        $query_config = $request->get_param('query_config');
+
+        error_log("MenuQueries: menu_item_id: $menu_item_id");
+        error_log("MenuQueries: query_config type: " . gettype($query_config));
+        error_log("MenuQueries: query_config length: " . strlen($query_config));
+        error_log("MenuQueries: query_config (first 200 chars): " . substr($query_config, 0, 200));
+
+        // Validate it's valid JSON
+        $parsed = json_decode($query_config, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("MenuQueries: ERROR - Invalid JSON: " . json_last_error_msg());
+            return [
+                'success' => false,
+                'message' => 'Invalid JSON: ' . json_last_error_msg(),
+            ];
+        }
+
+        error_log("MenuQueries: Parsed query keys: " . implode(', ', array_keys($parsed)));
+
+        // Save the raw WP_Query JSON to post meta
+        $result = update_post_meta($menu_item_id, '_menu_item_query_config', $query_config);
+        error_log("MenuQueries: update_post_meta result for query_config: " . ($result ? 'SUCCESS' : 'NO_CHANGE'));
+
+        // Also set the query_type meta
+        $type_result = update_post_meta($menu_item_id, '_menu_item_query_type', 'query_item');
+        error_log("MenuQueries: update_post_meta result for query_type: " . ($type_result ? 'SUCCESS' : 'NO_CHANGE'));
+
+        // Verify what was saved
+        $saved_value = get_post_meta($menu_item_id, '_menu_item_query_config', true);
+        error_log("MenuQueries: Verification - saved value (first 200 chars): " . substr($saved_value, 0, 200));
+        error_log("MenuQueries: Verification - values match: " . ($saved_value === $query_config ? 'YES' : 'NO'));
+
+        error_log('MenuQueries: ========== REST API SAVE END ==========');
+
+        return [
+            'success' => true,
+            'message' => __('Query configuration saved', 'ab-wp-bits'),
+        ];
+    }
+
+    /**
+     * Get query config via REST API (used by Customizer)
+     *
+     * @param WP_REST_Request $request
+     * @return array
+     */
+    public static function get_query_config_via_api($request): array {
+        $menu_item_id = $request->get_param('menu_item_id');
+
+        error_log("MenuQueries: GET config for item $menu_item_id");
+
+        // Get from post meta
+        $query_config = get_post_meta($menu_item_id, '_menu_item_query_config', true);
+
+        error_log("MenuQueries: Retrieved config: " . ($query_config ? substr($query_config, 0, 100) : 'EMPTY'));
+
+        return [
+            'success' => true,
+            'query_config' => $query_config ?: '',
+        ];
     }
 
     /**
@@ -876,46 +982,69 @@ final class MenuQueries {
      * @param array $item_data       Menu item data from Customizer
      * @return void
      */
-    public static function save_query_config_customizer($menu_id, $menu_item_db_id, $args) {
-        // Only run in Customizer context
-        global $wp_customize;
-        if (!isset($wp_customize)) {
-            return;
+    public static function save_customizer_query_configs($wp_customize) {
+        error_log("MenuQueries: ==================== customize_save FIRED ====================");
+
+        // Get all settings
+        $settings = $wp_customize->settings();
+        error_log("MenuQueries: Total settings count: " . count($settings));
+
+        $nav_menu_item_count = 0;
+        $saved_count = 0;
+        $all_nav_item_ids = [];
+
+        foreach ($settings as $setting_id => $setting) {
+            // Only process nav_menu_item settings
+            if (strpos($setting_id, 'nav_menu_item[') !== 0) {
+                continue;
+            }
+
+            $nav_menu_item_count++;
+
+            // Get the menu item ID
+            $menu_item_db_id = $setting->post_id;
+            $all_nav_item_ids[] = $menu_item_db_id;
+
+            // Try post_value first (for changed items), then fall back to value (current state)
+            $value = $setting->post_value();
+            $source = 'post_value';
+            if (!$value) {
+                $value = $setting->value();
+                $source = 'value';
+            }
+
+            if (!$value) {
+                error_log("MenuQueries: Item $menu_item_db_id has no value at all");
+                continue;
+            }
+
+            // Special logging for item 927
+            if ($menu_item_db_id == 927) {
+                error_log("MenuQueries: Item 927 found! Source: $source");
+                error_log("MenuQueries: Item 927 keys: " . implode(', ', array_keys($value)));
+                error_log("MenuQueries: Item 927 query_config exists: " . (isset($value['query_config']) ? 'YES' : 'NO'));
+                if (isset($value['query_config'])) {
+                    error_log("MenuQueries: Item 927 query_config value: " . substr($value['query_config'], 0, 100));
+                }
+            }
+
+            // Check if this item has query_config
+            if (isset($value['query_config']) && !empty($value['query_config'])) {
+                error_log("MenuQueries: *** FOUND query_config for item $menu_item_db_id ***");
+                error_log("MenuQueries: query_config value: " . substr($value['query_config'], 0, 150));
+
+                // Save to post meta
+                update_post_meta($menu_item_db_id, '_menu_item_query_config', $value['query_config']);
+                update_post_meta($menu_item_db_id, '_menu_item_query_type', 'query_item');
+
+                $saved_count++;
+                error_log("MenuQueries: Successfully saved query_config for item $menu_item_db_id");
+            }
         }
 
-        error_log("MenuQueries: save_query_config_customizer called for item $menu_item_db_id");
-
-        // Get the setting from the Customizer
-        $setting = $wp_customize->get_setting("nav_menu_item[$menu_item_db_id]");
-
-        if (!$setting) {
-            error_log("MenuQueries: No setting found for item $menu_item_db_id");
-            return;
-        }
-
-        // Get the post_value which contains our query_config
-        $value = $setting->post_value();
-
-        if (!$value) {
-            error_log("MenuQueries: No post_value for item $menu_item_db_id");
-            return;
-        }
-
-        error_log("MenuQueries: Post value: " . print_r($value, true));
-
-        // Check if this item has query_config
-        if (isset($value['query_config']) && !empty($value['query_config'])) {
-            error_log("MenuQueries: Found query_config, saving to DB");
-            error_log("MenuQueries: query_config: " . substr($value['query_config'], 0, 100));
-
-            // Save to post meta
-            update_post_meta($menu_item_db_id, '_menu_item_query_config', $value['query_config']);
-            update_post_meta($menu_item_db_id, '_menu_item_query_type', 'query_item');
-
-            error_log("MenuQueries: Successfully saved query_config for item $menu_item_db_id");
-        } else {
-            error_log("MenuQueries: No query_config found in post_value");
-        }
+        error_log("MenuQueries: Processed $nav_menu_item_count nav_menu_items, saved $saved_count query_configs");
+        error_log("MenuQueries: Nav item IDs found: " . implode(', ', $all_nav_item_ids));
+        error_log("MenuQueries: ==================== customize_save COMPLETE ====================");
     }
 
     /**
@@ -1166,54 +1295,13 @@ final class MenuQueries {
     }
 
     /**
-     * Disable Customizer for menus containing Query Items
-     * Query Items have complex requirements that conflict with Customizer's initialization
+     * Register Customizer support for Query Items
+     * Adds Query Items to the "Add Items" panel in Customizer
      *
      * @param WP_Customize_Manager $wp_customize
      * @return void
      */
-    public static function disable_customizer_for_query_menus($wp_customize): void {
-        // Check if any menus have query items
-        $menus = wp_get_nav_menus();
-        $has_query_items = false;
-
-        foreach ($menus as $menu) {
-            $items = wp_get_nav_menu_items($menu->term_id);
-            if ($items) {
-                foreach ($items as $item) {
-                    if (get_post_meta($item->ID, '_menu_item_query_type', true) === 'query_item') {
-                        $has_query_items = true;
-                        break 2;
-                    }
-                }
-            }
-        }
-
-        if ($has_query_items) {
-            // Add a notice in the Customizer
-            $wp_customize->add_section('query_items_notice', [
-                'title' => __('Menu Query Items', 'ab-wp-bits'),
-                'priority' => 1,
-                'description' => '<div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0;">' .
-                    '<strong>' . __('Notice:', 'ab-wp-bits') . '</strong> ' .
-                    __('Your menus contain Query Items. These advanced menu items must be managed through Appearance → Menus, not the Customizer.', 'ab-wp-bits') .
-                    '</div>',
-            ]);
-        }
-    }
-
-    /**
-     * OLD: Register Customizer support for Query Items (DISABLED)
-     * This method is no longer used - Query Items don't work reliably in Customizer
-     *
-     * @param WP_Customize_Manager $wp_customize
-     * @return void
-     */
-    private static function customize_register_OLD($wp_customize): void {
-        // Add Query Items to the available menu items in Customizer
-        // This requires using the nav_menus component which handles this automatically
-        // We just need to make sure our query items are recognized as a valid item type
-
+    public static function register_customizer_support($wp_customize): void {
         // Register custom item type for Customizer
         add_filter('customize_nav_menu_available_item_types', function($item_types) {
             $item_types[] = [
@@ -1241,16 +1329,29 @@ final class MenuQueries {
         }, 10, 4);
 
         // Handle saving query items in Customizer
+        // Convert query_item type to custom type for proper rendering
         add_filter('customize_nav_menu_item_value', function($value, $item_type) {
             if (isset($value['type']) && $value['type'] === 'query_item') {
+                // Convert to custom type so WordPress saves it correctly
+                $value['type'] = 'custom';
+                $value['object'] = 'custom';
                 $value['type_label'] = __('Query Item', 'ab-wp-bits');
+
+                // Ensure URL is set
+                if (empty($value['url'])) {
+                    $value['url'] = '#query-item';
+                }
             }
             return $value;
         }, 10, 2);
 
         // Set meta when query items are saved via Customizer
         add_action('wp_update_nav_menu_item', function($menu_id, $menu_item_db_id, $args) {
-            if (isset($args['menu-item-type']) && $args['menu-item-type'] === 'query_item') {
+            // Check if this is a query item (type is now 'custom' with url '#query-item')
+            $is_query_item = (isset($args['menu-item-type']) && $args['menu-item-type'] === 'custom' &&
+                             isset($args['menu-item-url']) && $args['menu-item-url'] === '#query-item');
+
+            if ($is_query_item) {
                 update_post_meta($menu_item_db_id, '_menu_item_query_type', 'query_item');
 
                 // Save query config if provided
@@ -1259,7 +1360,6 @@ final class MenuQueries {
                 }
             }
         }, 10, 3);
-
     }
 
     /**
@@ -1271,18 +1371,16 @@ final class MenuQueries {
      * @return array Modified menu items
      */
     public static function expand_query_menu_items($items, $menu, $args): array {
-        // Don't expand in admin at all (including Customizer controls panel)
-        // Only expand on actual frontend or preview iframe
+        // Only expand on frontend or Customizer preview iframe
+        // Don't expand in admin (Appearance->Menus) or Customizer controls panel
+
+        // Simple check: is_admin() returns false in the Customizer preview iframe
+        // but true in both Appearance->Menus and Customizer controls panel
         if (is_admin()) {
             return $items;
         }
 
-        // Also check if we're in Customizer preview (this is the iframe)
-        // vs Customizer controls (the left panel)
-        global $wp_customize;
-        if (isset($wp_customize) && !is_customize_preview()) {
-            return $items;
-        }
+        error_log("MenuQueries: EXPANDING in preview/frontend - " . count($items) . " items");
 
         if (!is_array($items)) {
             return $items;
@@ -1291,6 +1389,7 @@ final class MenuQueries {
         $expanded_items = [];
         $item_counter = 9999; // Start counter high to avoid conflicts
 
+        $logged_real_item = false;
         foreach ($items as $item) {
             // Use db_id which is the actual nav_menu_item post ID
             $item_post_id = $item->db_id ?? $item->ID;
@@ -1299,11 +1398,26 @@ final class MenuQueries {
             $is_query_item = get_post_meta($item_post_id, '_menu_item_query_type', true) === 'query_item';
 
             if (!$is_query_item) {
+                // Log first real menu item for comparison
+                if (!$logged_real_item) {
+                    error_log("MenuQueries: Real menu item - " . json_encode([
+                        'ID' => $item->ID,
+                        'db_id' => $item->db_id ?? 'not set',
+                        'title' => $item->title,
+                        'type' => $item->type,
+                        'object' => $item->object,
+                        'object_id' => $item->object_id,
+                        'url' => $item->url,
+                        'post_type' => $item->post_type ?? 'not set',
+                        'post_status' => $item->post_status ?? 'not set',
+                    ]));
+                    $logged_real_item = true;
+                }
                 $expanded_items[] = $item;
                 continue;
             }
 
-            // Load query config
+            // Load query config (this IS the rawWPQuery now - single source of truth)
             $query_config_json = get_post_meta($item_post_id, '_menu_item_query_config', true);
 
             if (empty($query_config_json)) {
@@ -1313,35 +1427,27 @@ final class MenuQueries {
             }
 
             // WordPress may have added slashes, try to unescape
-            $config = json_decode($query_config_json, true);
+            $query_args = json_decode($query_config_json, true);
 
             // If that fails, try stripping slashes
-            if (!$config) {
+            if (!$query_args) {
                 $query_config_json = stripslashes($query_config_json);
-                $config = json_decode($query_config_json, true);
+                $query_args = json_decode($query_config_json, true);
             }
 
-            if (!$config) {
-                $expanded_items[] = $item;
-                continue;
-            }
-
-            if (!isset($config['rawWPQuery']) || empty($config['rawWPQuery'])) {
-                $expanded_items[] = $item;
-                continue;
-            }
-
-            // Execute the query
-            $query_args = json_decode($config['rawWPQuery'], true);
             if (!$query_args) {
                 $expanded_items[] = $item;
                 continue;
             }
 
-            $query_type = $config['queryType'] ?? 'post';
-            $hierarchical = $config['hierarchical'] ?? false;
-            $show_label_on_empty = $config['showLabelOnEmpty'] ?? false;
-            $empty_label = $config['emptyLabel'] ?? '';
+            // Determine query type from the args
+            $query_type = isset($query_args['taxonomy']) ? 'taxonomy' : 'post';
+            $hierarchical = $query_args['hierarchical'] ?? false;
+
+            // Note: showLabelOnEmpty and emptyLabel are not in WP_Query args
+            // For now, default to not showing empty labels
+            $show_label_on_empty = false;
+            $empty_label = '';
 
             // Execute query and get results
             $results = self::execute_menu_query($query_args, $query_type, $hierarchical);
@@ -1362,11 +1468,21 @@ final class MenuQueries {
                 continue;
             }
 
+            // Get post_type for post queries (needed for menu item object property)
+            $post_type = $query_type === 'post' ? ($query_args['post_type'] ?? 'post') : '';
+
             // Convert results to menu items
             // Replace the query item with actual results (use item's parent, not the item itself)
-            $child_items = self::results_to_menu_items($results, $item, $item_counter, $query_type, 0, $item->menu_item_parent);
+            $menu_order_counter = null;
+            $child_items = self::results_to_menu_items($results, $item, $item_counter, $query_type, 0, $item->menu_item_parent, $menu_order_counter, $post_type);
+            error_log("MenuQueries: Created " . count($child_items) . " child items from query");
             $expanded_items = array_merge($expanded_items, $child_items);
         }
+
+        error_log("MenuQueries: Returning " . count($expanded_items) . " total items (from " . count($items) . " original)");
+
+        // Log the args to see what walker is being used
+        error_log("MenuQueries: Menu args - " . print_r($args, true));
 
         return $expanded_items;
     }
@@ -1461,9 +1577,10 @@ final class MenuQueries {
      * @param int    $parent_id Parent menu item ID (0 for top level)
      * @param int    $query_item_id The query item's db_id (used for first level)
      * @param int    &$menu_order_counter Menu order counter
+     * @param string $post_type Post type for post queries
      * @return array Menu items
      */
-    private static function results_to_menu_items(array $results, $parent_item, &$counter, string $query_type, int $parent_id = 0, int $query_item_id = 0, &$menu_order_counter = null): array {
+    private static function results_to_menu_items(array $results, $parent_item, &$counter, string $query_type, int $parent_id = 0, int $query_item_id = 0, &$menu_order_counter = null, string $post_type = 'post'): array {
         $menu_items = [];
 
         // Initialize menu order counter if not set
@@ -1480,7 +1597,7 @@ final class MenuQueries {
             $item->menu_order = ++$menu_order_counter;
             $item->post_parent = 0;
             $item->object_id = $query_type === 'taxonomy' ? $result['term_id'] : $result['ID'];
-            $item->object = $query_type === 'taxonomy' ? $result['taxonomy'] ?? 'category' : 'page';
+            $item->object = $query_type === 'taxonomy' ? $result['taxonomy'] ?? 'category' : $post_type;
             $item->type = $query_type === 'taxonomy' ? 'taxonomy' : 'post_type';
             $item->type_label = $query_type === 'taxonomy' ? __('Taxonomy', 'ab-wp-bits') : __('Post', 'ab-wp-bits');
             $item->title = $query_type === 'taxonomy' ? $result['name'] : $result['post_title'];
@@ -1500,6 +1617,27 @@ final class MenuQueries {
             $item->position = $item->menu_order;
             $item->post_status = 'publish';
 
+            // Add WordPress post properties that might be needed for rendering
+            $item->post_type = 'nav_menu_item';
+            $item->post_name = sanitize_title($item->title);
+            $item->post_title = $item->title;
+            $item->filter = 'raw';
+
+            // Log what we're creating
+            if ($counter == 10000) {
+                error_log("MenuQueries: Created first query item - " . json_encode([
+                    'ID' => $item->ID,
+                    'db_id' => $item->db_id,
+                    'title' => $item->title,
+                    'type' => $item->type,
+                    'object' => $item->object,
+                    'object_id' => $item->object_id,
+                    'url' => $item->url,
+                    'post_type' => $item->post_type,
+                    'post_status' => $item->post_status,
+                ]));
+            }
+
             $menu_items[] = $item;
 
             // Handle children if hierarchical
@@ -1511,13 +1649,55 @@ final class MenuQueries {
                     $query_type,
                     $item->ID,
                     $query_item_id,
-                    $menu_order_counter
+                    $menu_order_counter,
+                    $post_type
                 );
                 $menu_items = array_merge($menu_items, $child_items);
             }
         }
 
         return $menu_items;
+    }
+
+    /**
+     * Debug filter to see what items the walker receives
+     */
+    public static function debug_walker_items($items, $args) {
+        error_log("MenuQueries: wp_nav_menu_objects filter - Walker receiving " . count($items) . " items");
+
+        $query_item_count = 0;
+        foreach ($items as $item) {
+            if (isset($item->ID) && $item->ID >= 10000) {
+                $query_item_count++;
+            }
+        }
+        error_log("MenuQueries: Walker has $query_item_count query items (IDs >= 10000)");
+
+        return $items;
+    }
+
+    /**
+     * Debug filter to see what HTML was generated
+     */
+    public static function debug_rendered_items($items, $args) {
+        error_log("MenuQueries: wp_nav_menu_items filter - Received HTML with " . strlen($items) . " characters");
+
+        // Count how many <li> elements (menu items) are in the HTML
+        $item_count = substr_count($items, '<li');
+        error_log("MenuQueries: HTML contains $item_count menu items");
+
+        // Check if any query items are in the HTML
+        $has_query_items = strpos($items, 'menu-item-10000') !== false ||
+                          strpos($items, 'menu-item-type-post_type menu-item-object-page') !== false;
+        error_log("MenuQueries: Query items in HTML: " . ($has_query_items ? 'YES' : 'NO'));
+
+        // Log a snippet of HTML around the first query item if found
+        $pos = strpos($items, 'menu-item-10000');
+        if ($pos !== false) {
+            error_log("MenuQueries: HTML snippet around query item - " . substr($items, max(0, $pos - 50), 200));
+        }
+
+        return $items;
     }
 
     /**

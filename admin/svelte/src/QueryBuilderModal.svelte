@@ -56,29 +56,49 @@
   $effect(() => {
     if (open) {
       if (initialConfig) {
-        // Load existing config
-        queryType = initialConfig.queryType || 'post';
-        postType = initialConfig.postType || 'post';
-        taxonomy = initialConfig.taxonomy || 'category';
-        orderBy = initialConfig.orderBy || 'title';
-        order = initialConfig.order || 'ASC';
-        // Ensure numbers are parsed correctly (may come as strings from JSON)
-        postCount = typeof initialConfig.postCount === 'string' ? parseInt(initialConfig.postCount, 10) : (initialConfig.postCount ?? -1);
-        offset = typeof initialConfig.offset === 'string' ? parseInt(initialConfig.offset, 10) : (initialConfig.offset || 0);
-        childOf = typeof initialConfig.childOf === 'string' ? parseInt(initialConfig.childOf, 10) : (initialConfig.childOf || 0);
-        includeChildren = initialConfig.includeChildren ?? false;
-        hierarchical = initialConfig.hierarchical ?? false;
-        showLabelOnEmpty = initialConfig.showLabelOnEmpty ?? false;
-        emptyLabel = initialConfig.emptyLabel || '';
-        includePosts = initialConfig.includePosts || [];
-        excludePosts = initialConfig.excludePosts || [];
-        includeTerms = initialConfig.includeTerms || [];
-        excludeTerms = initialConfig.excludeTerms || [];
-        includeTaxonomies = initialConfig.includeTaxonomies || [];
-        excludeTaxonomies = initialConfig.excludeTaxonomies || [];
-        metaQueries = initialConfig.metaQueries || [];
-        metaQueryRelation = initialConfig.metaQueryRelation || 'AND';
-        rawWPQuery = initialConfig.rawWPQuery || '';
+        // If we have rawWPQuery, parse it to populate UI fields (single source of truth)
+        if (initialConfig.rawWPQuery) {
+          console.log('MenuQueries: Loading from rawWPQuery');
+          isInitialLoad = true;
+          // Format the JSON for display and set it
+          // The $effect watching rawWPQuery will handle parsing to UI
+          try {
+            const parsed = JSON.parse(initialConfig.rawWPQuery);
+            rawWPQuery = JSON.stringify(parsed, null, 2);
+          } catch (e) {
+            rawWPQuery = initialConfig.rawWPQuery;
+          }
+        } else {
+          // Legacy: Load from individual config fields
+          console.log('MenuQueries: Loading from individual config fields');
+          queryType = initialConfig.queryType || 'post';
+          postType = initialConfig.postType || 'post';
+          taxonomy = initialConfig.taxonomy || 'category';
+          orderBy = initialConfig.orderBy || 'title';
+          order = initialConfig.order || 'ASC';
+          // Ensure numbers are parsed correctly (may come as strings from JSON)
+          postCount = typeof initialConfig.postCount === 'string' ? parseInt(initialConfig.postCount, 10) : (initialConfig.postCount ?? -1);
+          offset = typeof initialConfig.offset === 'string' ? parseInt(initialConfig.offset, 10) : (initialConfig.offset || 0);
+          childOf = typeof initialConfig.childOf === 'string' ? parseInt(initialConfig.childOf, 10) : (initialConfig.childOf || 0);
+          includeChildren = initialConfig.includeChildren ?? false;
+          hierarchical = initialConfig.hierarchical ?? false;
+          showLabelOnEmpty = initialConfig.showLabelOnEmpty ?? false;
+          emptyLabel = initialConfig.emptyLabel || '';
+          includePosts = initialConfig.includePosts || [];
+          excludePosts = initialConfig.excludePosts || [];
+          includeTerms = initialConfig.includeTerms || [];
+          excludeTerms = initialConfig.excludeTerms || [];
+          includeTaxonomies = initialConfig.includeTaxonomies || [];
+          excludeTaxonomies = initialConfig.excludeTaxonomies || [];
+          metaQueries = initialConfig.metaQueries || [];
+          metaQueryRelation = initialConfig.metaQueryRelation || 'AND';
+          rawWPQuery = '';
+
+          // Generate rawWPQuery from UI fields
+          setTimeout(() => {
+            generateWPQuery(true);
+          }, 500);
+        }
       } else {
         // Reset to defaults for new query
         queryType = 'post';
@@ -111,6 +131,7 @@
   // Parse rawWPQuery and sync to UI when it changes
   let isUpdatingFromUI = false;
   let isUpdatingFromQuery = false;
+  let isInitialLoad = false;
 
   function parseWPQueryToUI(queryJson: string) {
     if (!queryJson || isUpdatingFromUI) return;
@@ -214,6 +235,7 @@
     } finally {
       setTimeout(() => {
         isUpdatingFromQuery = false;
+        isInitialLoad = false;
       }, 100);
     }
   }
@@ -331,11 +353,17 @@
     if (preserveCustomProperties && rawWPQuery) {
       try {
         const existing = JSON.parse(rawWPQuery);
-        // Known properties that map to UI - these will be overwritten
+        // Known properties that map to UI - these will be overwritten or filtered out
         const knownProps = new Set([
+          // WP_Query properties (snake_case)
           'post_type', 'posts_per_page', 'offset', 'orderby', 'order', 'include_children', 'hierarchical',
           'post_parent', 'post__in', 'post__not_in', 'tax_query', 'meta_query',
-          'taxonomy', 'number', 'child_of', 'parent', 'include', 'exclude'
+          'taxonomy', 'number', 'child_of', 'parent', 'include', 'exclude',
+          // UI-only properties (camelCase) - should never be in WP_Query
+          'queryType', 'postType', 'orderBy', 'postCount', 'childOf', 'includeChildren',
+          'showLabelOnEmpty', 'emptyLabel', 'includePosts', 'excludePosts',
+          'includeTerms', 'excludeTerms', 'includeTaxonomies', 'excludeTaxonomies',
+          'metaQueries', 'metaQueryRelation'
         ]);
         // Copy over any custom properties not managed by UI
         Object.keys(existing).forEach(key => {
@@ -357,8 +385,10 @@
       if (offset > 0) args.offset = offset;
       args.orderby = orderBy;
       args.order = order;
-      args.include_children = includeChildren;
-      args.hierarchical = hierarchical;
+
+      // Only include boolean properties if they're true
+      if (includeChildren) args.include_children = includeChildren;
+      if (hierarchical) args.hierarchical = hierarchical;
 
       if (childOf > 0) {
         args.post_parent = childOf;
@@ -428,8 +458,10 @@
       if (offset > 0) args.offset = offset;
       args.orderby = orderBy;
       args.order = order;
-      args.include_children = includeChildren;
-      args.hierarchical = hierarchical;
+
+      // Only include boolean properties if they're true
+      if (includeChildren) args.include_children = includeChildren;
+      if (hierarchical) args.hierarchical = hierarchical;
 
       if (childOf > 0) {
         if (includeChildren) {
@@ -504,8 +536,8 @@
       metaQueries
     };
 
-    // Only generate if enabled and not updating from query
-    if (autoGenEnabled && !isUpdatingFromQuery) {
+    // Only generate if enabled and not updating from query or initial load
+    if (autoGenEnabled && !isUpdatingFromQuery && !isInitialLoad) {
       generateWPQuery(true);
     }
   });

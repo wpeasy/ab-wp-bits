@@ -14,7 +14,8 @@
       "Bash(npm run build:*)",
       "Bash(npm run build:menu-queries:*)",
       "Bash(cat:*)",
-      "Bash(php -l:*)"
+      "Bash(php -l:*)",
+      "Bash(timeout /t 5)"
     ],
     "deny": [],
     "ask": []
