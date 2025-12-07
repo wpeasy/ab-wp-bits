@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build --config vite.menu-queries.config.ts",
+    "build": "vite build && vite build --config vite.menu-queries.config.ts && vite build --config vite.menu-conditions.config.ts",
     "build:main": "vite build",
     "build:menu-queries": "vite build --config vite.menu-queries.config.ts",
+    "build:menu-conditions": "vite build --config vite.menu-conditions.config.ts",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },

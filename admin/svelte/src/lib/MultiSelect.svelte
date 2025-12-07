@@ -2,14 +2,16 @@
   import type { SelectOption } from '../menu-queries-types';
 
   type Props = {
-    value?: (string | number)[];
+    value?: (string | number)[] | string | number;
     id?: string;
     label?: string;
     help?: string;
     options?: SelectOption[];
     placeholder?: string;
     disabled?: boolean;
-    onchange?: (value: (string | number)[]) => void;
+    multiple?: boolean;
+    excludeValues?: (string | number)[];
+    onchange?: (value: (string | number)[] | string | number) => void;
   };
 
   let {
@@ -20,6 +22,8 @@
     options = [],
     placeholder = 'Search...',
     disabled = false,
+    multiple = true,
+    excludeValues = [],
     onchange
   }: Props = $props();
 
@@ -27,33 +31,51 @@
   let isOpen = $state(false);
   let dropdownRef: HTMLDivElement | null = null;
 
-  // Filter options based on search and exclude already selected
+  // Normalize value to array for consistent handling
+  let valueArray = $derived(multiple ? (Array.isArray(value) ? value : [value]) : (value ? [value] : []));
+
+  // Filter options based on search and exclude already selected (for multiple mode) and excluded values
   let filteredOptions = $derived(
     (options || []).filter(option => {
-      const isSelected = (value || []).includes(option.value);
+      const isSelected = multiple ? valueArray.includes(option.value) : false;
+      const isExcluded = excludeValues.includes(option.value);
       const matchesSearch = option.label.toLowerCase().includes(searchTerm.toLowerCase());
-      return !isSelected && matchesSearch;
+      return !isSelected && !isExcluded && matchesSearch;
     })
   );
 
   // Get selected option labels
   let selectedOptions = $derived(
-    (value || []).map(val => (options || []).find(opt => opt.value === val)).filter(Boolean) as SelectOption[]
+    valueArray.map(val => (options || []).find(opt => opt.value === val)).filter(Boolean) as SelectOption[]
+  );
+
+  // Get current selected label for single mode
+  let currentLabel = $derived(
+    !multiple && value ? (options || []).find(opt => opt.value === value)?.label || '' : ''
   );
 
   function toggleOption(optionValue: string | number) {
-    if (value.includes(optionValue)) {
-      value = value.filter(v => v !== optionValue);
+    if (multiple) {
+      const arr = Array.isArray(value) ? value : [];
+      if (arr.includes(optionValue)) {
+        value = arr.filter(v => v !== optionValue);
+      } else {
+        value = [...arr, optionValue];
+      }
     } else {
-      value = [...value, optionValue];
+      value = optionValue;
+      isOpen = false;
     }
     searchTerm = '';
     onchange?.(value);
   }
 
   function removeOption(optionValue: string | number) {
-    value = value.filter(v => v !== optionValue);
-    onchange?.(value);
+    if (multiple) {
+      const arr = Array.isArray(value) ? value : [];
+      value = arr.filter(v => v !== optionValue);
+      onchange?.(value);
+    }
   }
 
   function handleClickOutside(event: MouseEvent) {
@@ -78,22 +100,34 @@
   {/if}
 
   <div class="multiselect" bind:this={dropdownRef}>
-    <!-- Selected tags -->
-    <div class="multiselect__tags">
-      {#each selectedOptions as option}
-        <span class="multiselect__tag">
-          {option.label}
-          <button
-            type="button"
-            class="multiselect__tag-remove"
-            onclick={() => removeOption(option.value)}
-            disabled={disabled}
-            aria-label="Remove {option.label}"
-          >
-            ×
-          </button>
+    <!-- Selected tags (multiple mode) OR single value display -->
+    <div
+      class="multiselect__tags"
+      role="button"
+      tabindex="0"
+      onclick={() => !disabled && (isOpen = true)}
+      onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && !disabled && (isOpen = true)}
+    >
+      {#if multiple}
+        {#each selectedOptions as option}
+          <span class="multiselect__tag">
+            {option.label}
+            <button
+              type="button"
+              class="multiselect__tag-remove"
+              onclick={() => removeOption(option.value)}
+              disabled={disabled}
+              aria-label="Remove {option.label}"
+            >
+              ×
+            </button>
+          </span>
+        {/each}
+      {:else if currentLabel}
+        <span class="multiselect__single-value">
+          {currentLabel}
         </span>
-      {/each}
+      {/if}
 
       <!-- Search input -->
       <input
@@ -101,7 +135,7 @@
         class="multiselect__input"
         bind:value={searchTerm}
         onfocus={() => (isOpen = true)}
-        {placeholder}
+        placeholder={!multiple && currentLabel ? '' : placeholder}
         {disabled}
         {id}
       />
@@ -181,6 +215,14 @@
 
   .multiselect__tag-remove:hover {
     opacity: 1;
+  }
+
+  .multiselect__single-value {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.0625rem 0.25rem;
+    font-size: 0.875rem;
+    color: var(--wpea-surface--text);
   }
 
   .multiselect__input {

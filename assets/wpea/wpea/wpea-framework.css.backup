@@ -919,22 +919,16 @@
 .wpea, .wpea * { box-sizing: border-box; }
 
 /* Field layout */
-.wpea .wpea-,
-.wpea-scope .wpea-field { display: grid; gap: .4rem; min-inline-size: 0; }
-.wpea .wpea-,
-.wpea-scope .wpea-label { font-size: var(--wpea-text--sm); color: var(--wpea-surface--text); }
-.wpea .wpea-,
-.wpea-scope .wpea-help  { font-size: var(--wpea-text--xs); color: var(--wpea-surface--text-muted); }
+.wpea .wpea-field { display: grid; gap: .4rem; min-inline-size: 0; }
+.wpea .wpea-label { font-size: var(--wpea-text--sm); color: var(--wpea-surface--text); }
+.wpea .wpea-help  { font-size: var(--wpea-text--xs); color: var(--wpea-surface--text-muted); }
 
 /* High-specificity normalization so WP admin styles don’t leak in */
-.wpea .wpea-,
-.wpea-scope .wpea-input,
+.wpea .wpea-input,
 .wpea input.wpea-input,
-.wpea .wpea-,
-.wpea-scope .wpea-select,
+.wpea .wpea-select,
 .wpea select.wpea-select,
-.wpea .wpea-,
-.wpea-scope .wpea-textarea,
+.wpea .wpea-textarea,
 .wpea textarea.wpea-textarea {
   appearance: none;
   -webkit-appearance: none;
@@ -968,42 +962,31 @@
 }
 
 /* Placeholder color */
-.wpea .wpea-,
-.wpea-scope .wpea-input::placeholder,
-.wpea .wpea-,
-.wpea-scope .wpea-textarea::placeholder { color: var(--wpea-input--placeholder); }
+.wpea .wpea-input::placeholder,
+.wpea .wpea-textarea::placeholder { color: var(--wpea-input--placeholder); }
 
 /* Hover state */
-.wpea .wpea-,
-.wpea-scope .wpea-input:hover:not(:disabled),
+.wpea .wpea-input:hover:not(:disabled),
 .wpea input.wpea-input:hover:not(:disabled),
-.wpea .wpea-,
-.wpea-scope .wpea-select:hover:not(:disabled),
+.wpea .wpea-select:hover:not(:disabled),
 .wpea select.wpea-select:hover:not(:disabled),
-.wpea .wpea-,
-.wpea-scope .wpea-textarea:hover:not(:disabled),
+.wpea .wpea-textarea:hover:not(:disabled),
 .wpea textarea.wpea-textarea:hover:not(:disabled) {
   background: var(--wpea-input--bg-hover);
   border-color: var(--wpea-input--border-hover);
 }
 
 /* Focus — beat WP's focus rules by matching both :focus and :focus-visible */
-.wpea .wpea-,
-.wpea-scope .wpea-input:focus,
-.wpea .wpea-,
-.wpea-scope .wpea-input:focus-visible,
+.wpea .wpea-input:focus,
+.wpea .wpea-input:focus-visible,
 .wpea input.wpea-input:focus,
 .wpea input.wpea-input:focus-visible,
-.wpea .wpea-,
-.wpea-scope .wpea-select:focus,
-.wpea .wpea-,
-.wpea-scope .wpea-select:focus-visible,
+.wpea .wpea-select:focus,
+.wpea .wpea-select:focus-visible,
 .wpea select.wpea-select:focus,
 .wpea select.wpea-select:focus-visible,
-.wpea .wpea-,
-.wpea-scope .wpea-textarea:focus,
-.wpea .wpea-,
-.wpea-scope .wpea-textarea:focus-visible,
+.wpea .wpea-textarea:focus,
+.wpea .wpea-textarea:focus-visible,
 .wpea textarea.wpea-textarea:focus,
 .wpea textarea.wpea-textarea:focus-visible {
   background: var(--wpea-input--bg-focus);
@@ -1013,36 +996,28 @@
 }
 
 /* Disabled */
-.wpea .wpea-,
-.wpea-scope .wpea-input[disabled],
-.wpea .wpea-,
-.wpea-scope .wpea-select[disabled],
-.wpea .wpea-,
-.wpea-scope .wpea-textarea[disabled] {
+.wpea .wpea-input[disabled],
+.wpea .wpea-select[disabled],
+.wpea .wpea-textarea[disabled] {
   opacity: .6;
   cursor: not-allowed;
 }
 
 /* Select option styling - remove browser defaults */
-.wpea .wpea-,
-.wpea-scope .wpea-select option,
+.wpea .wpea-select option,
 .wpea select.wpea-select option {
   background: var(--wpea-select-option--bg) !important;
   background-color: var(--wpea-select-option--bg) !important;
   color: var(--wpea-surface--text) !important;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-select option:checked,
+.wpea .wpea-select option:checked,
 .wpea select.wpea-select option:checked,
-.wpea .wpea-,
-.wpea-scope .wpea-select option:hover,
+.wpea .wpea-select option:hover,
 .wpea select.wpea-select option:hover,
-.wpea .wpea-,
-.wpea-scope .wpea-select option:focus,
+.wpea .wpea-select option:focus,
 .wpea select.wpea-select option:focus,
-.wpea .wpea-,
-.wpea-scope .wpea-select option[selected],
+.wpea .wpea-select option[selected],
 .wpea select.wpea-select option[selected] {
   background: var(--wpea-select-option--bg) !important;
   background-color: var(--wpea-select-option--bg) !important;
@@ -1050,17 +1025,14 @@
 }
 
 /* Sizes */
-.wpea .wpea-,
-.wpea-scope .wpea-input--sm,
+.wpea .wpea-input--sm,
 .wpea input.wpea-input--sm { padding-block: calc(var(--wpea-space--xs) * .7); padding-inline: var(--wpea-space--sm); font-size: var(--wpea-text--sm); }
 
-.wpea .wpea-,
-.wpea-scope .wpea-input--lg,
+.wpea .wpea-input--lg,
 .wpea input.wpea-input--lg { padding-block: var(--wpea-space--sm); padding-inline: var(--wpea-space--md); font-size: var(--wpea-text--lg); }
 
 /* Select dropdown arrow (keeps our appearance across WP) */
-.wpea .wpea-,
-.wpea-scope .wpea-select {
+.wpea .wpea-select {
   background-image:
     linear-gradient(45deg, transparent 49%, currentColor 50%),
     linear-gradient(135deg, currentColor 50%, transparent 51%),
@@ -1079,8 +1051,7 @@
    ========================= */
 
 /* Container for the 3-state toggle button group */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state {
+.wpea .wpea-toggle-3state {
   display: inline-flex;
   border: 1px solid var(--wpea-surface--border);
   border-radius: var(--wpea-radius--md);
@@ -1089,8 +1060,7 @@
 }
 
 /* Individual toggle button */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn {
+.wpea .wpea-toggle-3state__btn {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -1119,20 +1089,17 @@
 }
 
 /* Remove border from last button */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn:last-child {
+.wpea .wpea-toggle-3state__btn:last-child {
   border-inline-end: none;
 }
 
 /* Ensure all buttons have no rounding by default */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn {
+.wpea .wpea-toggle-3state__btn {
   border-radius: 0;
 }
 
 /* Round corners for first button only - left side */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn:first-child {
+.wpea .wpea-toggle-3state__btn:first-child {
   border-top-left-radius: var(--wpea-radius--md);
   border-bottom-left-radius: var(--wpea-radius--md);
   border-top-right-radius: 0;
@@ -1140,8 +1107,7 @@
 }
 
 /* Round corners for last button only - right side */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn:last-child {
+.wpea .wpea-toggle-3state__btn:last-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-top-right-radius: var(--wpea-radius--md);
@@ -1149,45 +1115,39 @@
 }
 
 /* Hover state */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn:hover:not([aria-pressed="true"]):not(:disabled) {
+.wpea .wpea-toggle-3state__btn:hover:not([aria-pressed="true"]):not(:disabled) {
   background: var(--wpea-input--bg-hover);
   color: var(--wpea-surface--text);
 }
 
 /* Active/pressed state */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn[aria-pressed="true"] {
+.wpea .wpea-toggle-3state__btn[aria-pressed="true"] {
   background: var(--wpea-color--primary);
   color: var(--wpea-color--white);
 }
 
 /* Focus state */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn:focus-visible {
+.wpea .wpea-toggle-3state__btn:focus-visible {
   outline: 2px solid var(--wpea-color--primary);
   outline-offset: -2px;
   z-index: 1;
 }
 
 /* Disabled state */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn:disabled {
+.wpea .wpea-toggle-3state__btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* SVG icon sizing */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state__btn svg {
+.wpea .wpea-toggle-3state__btn svg {
   width: 1.125rem;
   height: 1.125rem;
   flex-shrink: 0;
 }
 
 /* Icon-only variant - no padding, icon only */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state--icon-only .wpea-toggle-3state__btn {
+.wpea .wpea-toggle-3state--icon-only .wpea-toggle-3state__btn {
   padding: 0;
   width: 44px;
   height: 44px;
@@ -1197,52 +1157,44 @@
   gap: 0;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state--icon-only .wpea-toggle-3state__btn span {
+.wpea .wpea-toggle-3state--icon-only .wpea-toggle-3state__btn span {
   display: none;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state--icon-only .wpea-toggle-3state__btn svg {
+.wpea .wpea-toggle-3state--icon-only .wpea-toggle-3state__btn svg {
   width: 1.25rem;
   height: 1.25rem;
 }
 
 /* Popover wrapper inside toggle group */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state > .wpea-popover {
+.wpea .wpea-toggle-3state > .wpea-popover {
   position: relative;
   display: flex;
   flex: 0 0 auto;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state > .wpea-popover .wpea-toggle-3state__btn {
+.wpea .wpea-toggle-3state > .wpea-popover .wpea-toggle-3state__btn {
   border-inline-end: 1px solid var(--wpea-surface--border);
   flex: 1;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state > .wpea-popover:last-child .wpea-toggle-3state__btn {
+.wpea .wpea-toggle-3state > .wpea-popover:last-child .wpea-toggle-3state__btn {
   border-inline-end: none;
 }
 
 /* Round corners for first and last buttons when in popover wrapper */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state > .wpea-popover .wpea-toggle-3state__btn {
+.wpea .wpea-toggle-3state > .wpea-popover .wpea-toggle-3state__btn {
   border-radius: 0;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state > .wpea-popover:first-child .wpea-toggle-3state__btn {
+.wpea .wpea-toggle-3state > .wpea-popover:first-child .wpea-toggle-3state__btn {
   border-top-left-radius: var(--wpea-radius--md);
   border-bottom-left-radius: var(--wpea-radius--md);
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state > .wpea-popover:last-child .wpea-toggle-3state__btn {
+.wpea .wpea-toggle-3state > .wpea-popover:last-child .wpea-toggle-3state__btn {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-top-right-radius: var(--wpea-radius--md);
@@ -1250,8 +1202,7 @@
 }
 
 /* Allow popover to overflow when toggle has popover children */
-.wpea .wpea-,
-.wpea-scope .wpea-toggle-3state:has(> .wpea-popover) {
+.wpea .wpea-toggle-3state:has(> .wpea-popover) {
   overflow: visible;
 }
 
@@ -1260,8 +1211,7 @@
    ========================= */
 
 /* Double opt-in button with confirmation state */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in {
+.wpea .wpea-btn-double-opt-in {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -1296,44 +1246,38 @@
 }
 
 /* Hover state (only when not in confirm state) */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in:hover:not([data-confirm="true"]):not(:disabled) {
+.wpea .wpea-btn-double-opt-in:hover:not([data-confirm="true"]):not(:disabled) {
   background: var(--wpea-input--bg-hover);
   border-color: var(--wpea-surface--border-hover);
 }
 
 /* Confirm state (after first click) */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in[data-confirm="true"] {
+.wpea .wpea-btn-double-opt-in[data-confirm="true"] {
   background: var(--wpea-color--danger);
   border-color: var(--wpea-color--danger);
   color: var(--wpea-color--white);
 }
 
 /* Confirm state hover */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in[data-confirm="true"]:hover:not(:disabled) {
+.wpea .wpea-btn-double-opt-in[data-confirm="true"]:hover:not(:disabled) {
   background: color-mix(in oklab, var(--wpea-color--danger), black 15%);
   border-color: color-mix(in oklab, var(--wpea-color--danger), black 15%);
 }
 
 /* Focus state */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in:focus-visible {
+.wpea .wpea-btn-double-opt-in:focus-visible {
   outline: 2px solid var(--wpea-color--primary);
   outline-offset: 2px;
 }
 
 /* Disabled state */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in:disabled {
+.wpea .wpea-btn-double-opt-in:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* SVG icon sizing */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in svg {
+.wpea .wpea-btn-double-opt-in svg {
   width: 1.125rem;
   height: 1.125rem;
   flex-shrink: 0;
@@ -1341,27 +1285,23 @@
 }
 
 /* Icon animation on confirm */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in[data-confirm="true"] svg {
+.wpea .wpea-btn-double-opt-in[data-confirm="true"] svg {
   transform: scale(1.1);
 }
 
 /* Success variant (optional) */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in--success[data-confirm="true"] {
+.wpea .wpea-btn-double-opt-in--success[data-confirm="true"] {
   background: var(--wpea-color--success);
   border-color: var(--wpea-color--success);
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in--success[data-confirm="true"]:hover:not(:disabled) {
+.wpea .wpea-btn-double-opt-in--success[data-confirm="true"]:hover:not(:disabled) {
   background: color-mix(in oklab, var(--wpea-color--success), black 15%);
   border-color: color-mix(in oklab, var(--wpea-color--success), black 15%);
 }
 
 /* Icon-only variant - no padding, icon only */
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in--icon-only {
+.wpea .wpea-btn-double-opt-in--icon-only {
   padding: 0;
   width: 44px;
   height: 44px;
@@ -1371,13 +1311,11 @@
   gap: 0;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in--icon-only .btn-text {
+.wpea .wpea-btn-double-opt-in--icon-only .btn-text {
   display: none;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-btn-double-opt-in--icon-only svg {
+.wpea .wpea-btn-double-opt-in--icon-only svg {
   width: 1.25rem;
   height: 1.25rem;
 }
@@ -1387,15 +1325,13 @@
    ========================= */
 
 /* Popover container (relative positioned parent) */
-.wpea .wpea-,
-.wpea-scope .wpea-popover {
+.wpea .wpea-popover {
   position: relative;
   display: inline-block;
 }
 
 /* Popover content */
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content {
+.wpea .wpea-popover__content {
   position: absolute;
   z-index: 1000;
 
@@ -1417,19 +1353,15 @@
 }
 
 /* Show popover on hover/focus */
-.wpea .wpea-,
-.wpea-scope .wpea-popover:hover .wpea-popover__content,
-.wpea .wpea-,
-.wpea-scope .wpea-popover:focus-within .wpea-popover__content,
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--visible {
+.wpea .wpea-popover:hover .wpea-popover__content,
+.wpea .wpea-popover:focus-within .wpea-popover__content,
+.wpea .wpea-popover__content--visible {
   opacity: 1;
   visibility: visible;
 }
 
 /* Arrow/caret */
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content::before {
+.wpea .wpea-popover__content::before {
   content: '';
   position: absolute;
   width: 0;
@@ -1438,15 +1370,13 @@
 }
 
 /* Positioning - Top */
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--top {
+.wpea .wpea-popover__content--top {
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--top::before {
+.wpea .wpea-popover__content--top::before {
   bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
@@ -1454,28 +1384,24 @@
   border-color: var(--wpea-popover--bg) transparent transparent transparent;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--top-start {
+.wpea .wpea-popover__content--top-start {
   bottom: calc(100% + 8px);
   left: 0;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--top-start::before {
+.wpea .wpea-popover__content--top-start::before {
   bottom: -6px;
   left: 12px;
   border-width: 6px 6px 0 6px;
   border-color: var(--wpea-popover--bg) transparent transparent transparent;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--top-end {
+.wpea .wpea-popover__content--top-end {
   bottom: calc(100% + 8px);
   right: 0;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--top-end::before {
+.wpea .wpea-popover__content--top-end::before {
   bottom: -6px;
   right: 12px;
   border-width: 6px 6px 0 6px;
@@ -1483,15 +1409,13 @@
 }
 
 /* Positioning - Bottom */
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--bottom {
+.wpea .wpea-popover__content--bottom {
   top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--bottom::before {
+.wpea .wpea-popover__content--bottom::before {
   top: -6px;
   left: 50%;
   transform: translateX(-50%);
@@ -1499,28 +1423,24 @@
   border-color: transparent transparent var(--wpea-popover--bg) transparent;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--bottom-start {
+.wpea .wpea-popover__content--bottom-start {
   top: calc(100% + 8px);
   left: 0;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--bottom-start::before {
+.wpea .wpea-popover__content--bottom-start::before {
   top: -6px;
   left: 12px;
   border-width: 0 6px 6px 6px;
   border-color: transparent transparent var(--wpea-popover--bg) transparent;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--bottom-end {
+.wpea .wpea-popover__content--bottom-end {
   top: calc(100% + 8px);
   right: 0;
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--bottom-end::before {
+.wpea .wpea-popover__content--bottom-end::before {
   top: -6px;
   right: 12px;
   border-width: 0 6px 6px 6px;
@@ -1528,15 +1448,13 @@
 }
 
 /* Positioning - Left */
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--left {
+.wpea .wpea-popover__content--left {
   right: calc(100% + 8px);
   top: 50%;
   transform: translateY(-50%);
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--left::before {
+.wpea .wpea-popover__content--left::before {
   right: -6px;
   top: 50%;
   transform: translateY(-50%);
@@ -1545,15 +1463,13 @@
 }
 
 /* Positioning - Right */
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--right {
+.wpea .wpea-popover__content--right {
   left: calc(100% + 8px);
   top: 50%;
   transform: translateY(-50%);
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--right::before {
+.wpea .wpea-popover__content--right::before {
   left: -6px;
   top: 50%;
   transform: translateY(-50%);
@@ -1562,20 +1478,17 @@
 }
 
 /* Size variants */
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--xs {
+.wpea .wpea-popover__content--xs {
   padding: var(--wpea-space--xs);
   font-size: var(--wpea-text--xs);
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--s {
+.wpea .wpea-popover__content--s {
   padding: calc(var(--wpea-space--xs) * 1.25);
   font-size: var(--wpea-text--sm);
 }
 
-.wpea .wpea-,
-.wpea-scope .wpea-popover__content--m {
+.wpea .wpea-popover__content--m {
   padding: var(--wpea-space--sm);
   font-size: var(--wpea-text--sm);
 }

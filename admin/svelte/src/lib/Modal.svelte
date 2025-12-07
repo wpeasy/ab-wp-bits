@@ -91,7 +91,7 @@
         <button class="wpea-modal__close" onclick={handleClose} aria-label="Close">&times;</button>
       </div>
 
-      <div class="wpea-modal__body">
+      <div class="wpea-modal__body wpea-scope">
         {#if children}
           {@render children()}
         {/if}
