@@ -6,9 +6,34 @@
   import Stack from './lib/Stack.svelte';
   import Card from './lib/Card.svelte';
   import Toast from './lib/Toast.svelte';
+  import Tabs from './lib/Tabs.svelte';
 
-  let { modules = $bindable([]) }: { modules: Module[] } = $props();
+  interface Props {
+    modules: Module[];
+    onNavigate: (moduleId: string, tab: 'settings' | 'instructions') => void;
+  }
+
+  let { modules = $bindable([]), onNavigate }: Props = $props();
   let toasts = $state<ToastItem[]>([]);
+  let activeCategory = $state('all');
+
+  // Extract unique categories from modules
+  let categories = $derived(['all', ...new Set(modules.map(m => m.category))]);
+
+  // Build category tabs
+  let categoryTabs = $derived(
+    categories.map(cat => ({
+      id: cat,
+      label: cat === 'all' ? 'All' : cat
+    }))
+  );
+
+  // Filter modules by category
+  let filteredModules = $derived(
+    activeCategory === 'all'
+      ? modules
+      : modules.filter(m => m.category === activeCategory)
+  );
 
   function addToast(message: string, variant: 'success' | 'danger' | 'warning' = 'success') {
     const id = `toast-${Date.now()}`;
@@ -42,15 +67,27 @@
     <div class="wpea-card__title">Module Manager</div>
   {/snippet}
 
-  <Stack>
-    {#if modules.length === 0}
-      <p class="wpea-text-muted">No modules registered yet.</p>
-    {:else}
-      {#each modules as module (module.id)}
-        <ModuleCard {module} onToggle={handleToggle} />
-      {/each}
-    {/if}
-  </Stack>
+  <div class="module-manager">
+    <Tabs tabs={categoryTabs} bind:activeTab={activeCategory} variant="secondary" />
+
+    <Stack>
+      {#if filteredModules.length === 0}
+        <p class="wpea-text-muted">No modules in this category.</p>
+      {:else}
+        {#each filteredModules as module (module.id)}
+          <ModuleCard {module} onToggle={handleToggle} {onNavigate} />
+        {/each}
+      {/if}
+    </Stack>
+  </div>
 </Card>
 
 <Toast bind:toasts position="top-right" />
+
+<style>
+  .module-manager {
+    display: flex;
+    flex-direction: column;
+    gap: var(--wpea-space--lg);
+  }
+</style>

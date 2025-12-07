@@ -39,6 +39,7 @@ final class ModuleManager {
      *     @type string $name Module name
      *     @type string $description Module description
      *     @type string $logo Module logo URL or SVG
+     *     @type string $category Module category (e.g., 'General WordPress', 'WooCommerce', etc.)
      *     @type bool $has_settings Whether module has settings page
      *     @type callable|null $settings_callback Callback for settings page render
      *     @type callable|null $init_callback Callback to run when module is enabled
@@ -56,6 +57,7 @@ final class ModuleManager {
             'name' => '',
             'description' => '',
             'logo' => '',
+            'category' => 'Uncategorized',
             'has_settings' => false,
             'settings_callback' => null,
             'init_callback' => null,
@@ -169,6 +171,7 @@ final class ModuleManager {
                 'name' => $module['name'],
                 'description' => $module['description'],
                 'logo' => $module['logo'],
+                'category' => $module['category'],
                 'has_settings' => $module['has_settings'],
                 'enabled' => isset($enabled[$id]) && $enabled[$id] === true,
             ];

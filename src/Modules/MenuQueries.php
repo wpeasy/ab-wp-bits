@@ -41,6 +41,7 @@ final class MenuQueries {
             'name' => __('WP Menu Queries', 'ab-wp-bits'),
             'description' => __('Adds the ability to query CPTs and Taxonomies to use as menu items in WordPress Menus', 'ab-wp-bits'),
             'logo' => self::get_logo(),
+            'category' => __('General WordPress', 'ab-wp-bits'),
             'has_settings' => true,
             'settings_callback' => [__CLASS__, 'render_settings'],
             'init_callback' => [__CLASS__, 'run'],
@@ -101,6 +102,15 @@ final class MenuQueries {
 
         // Register Customizer filter early - MUST be before customize_register runs
         add_filter('customize_nav_menu_item_setting_args', [__CLASS__, 'customize_nav_menu_item_setting_args'], 5, 2);
+
+        // Clear cache when menus are updated
+        add_action('wp_update_nav_menu', [__CLASS__, 'clear_cache']);
+        add_action('customize_save_after', [__CLASS__, 'clear_cache']);
+
+        // Clear cache when posts/terms are updated (might affect query results)
+        add_action('save_post', [__CLASS__, 'clear_cache']);
+        add_action('edited_term', [__CLASS__, 'clear_cache']);
+        add_action('delete_term', [__CLASS__, 'clear_cache']);
 
         // Ensure query items always have required meta fields set correctly
         add_action('wp_update_nav_menu_item', [__CLASS__, 'ensure_query_item_url'], 10, 2);
@@ -1560,6 +1570,19 @@ final class MenuQueries {
      * @return array Results
      */
     private static function execute_menu_query(array $args, string $query_type, bool $hierarchical): array {
+        // Generate cache key based on query args
+        $cache_key = 'menu_query_' . md5(serialize([
+            'args' => $args,
+            'type' => $query_type,
+            'hierarchical' => $hierarchical
+        ]));
+
+        // Try to get cached results
+        $cached_results = get_transient($cache_key);
+        if ($cached_results !== false) {
+            return $cached_results;
+        }
+
         $orderby = $args['orderby'] ?? 'title';
         $order = $args['order'] ?? 'ASC';
         $include_children = !empty($args['include_children']);
@@ -1588,8 +1611,6 @@ final class MenuQueries {
                 if ($hierarchical) {
                     $results = self::build_term_hierarchy($results, 0, $orderby, $order);
                 }
-
-                return $results;
             } else {
                 // Post query
                 $parent_id = isset($args['post_parent']) ? absint($args['post_parent']) : 0;
@@ -1623,11 +1644,18 @@ final class MenuQueries {
                         $results = self::build_post_hierarchy($results, $root_parent, $orderby, $order);
                     }
                 }
-
-                return $results;
             }
-            error_log("MenuQueries ERROR in execute_query: " . $e->getMessage());
+
+            // Get cache TTL from settings (default to 1 hour)
+            $settings = get_option('ab_wp_bits_menu-queries_settings', []);
+            $cache_ttl = isset($settings['cache_ttl']) ? absint($settings['cache_ttl']) : 3600;
+
+            // Cache the results
+            set_transient($cache_key, $results, $cache_ttl);
+
+            return $results;
         } catch (\Exception $e) {
+            error_log("MenuQueries ERROR in execute_menu_query: " . $e->getMessage());
             return [];
         }
     }
@@ -1817,12 +1845,14 @@ final class MenuQueries {
     }
 
     /**
-     * Clear cache
+     * Clear all menu query caches
      *
      * @return void
      */
-    private static function clear_cache(): void {
-        // Will implement cache clearing later
+    public static function clear_cache(): void {
+        global $wpdb;
+        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_menu_query_%'");
+        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_menu_query_%'");
     }
 
     /**

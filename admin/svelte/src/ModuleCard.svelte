@@ -7,16 +7,32 @@
   interface Props {
     module: Module;
     onToggle: (id: string, enabled: boolean) => void;
+    onNavigate: (moduleId: string, tab: 'settings' | 'instructions') => void;
   }
 
-  let { module, onToggle }: Props = $props();
+  let { module, onToggle, onNavigate }: Props = $props();
 
   function handleToggle(enabled: boolean) {
     onToggle(module.id, enabled);
   }
+
+  function navigateToSettings() {
+    onNavigate(module.id, 'settings');
+  }
+
+  function navigateToInstructions() {
+    onNavigate(module.id, 'instructions');
+  }
 </script>
 
 <div class="wpea-module-card">
+  <div class="wpea-module-switch">
+    <Switch
+      id="module-{module.id}"
+      bind:checked={module.enabled}
+      onchange={handleToggle}
+    />
+  </div>
   <div class="wpea-module-info">
     {#if module.logo}
       <div class="wpea-module-logo">
@@ -28,29 +44,31 @@
       <p class="wpea-text-muted wpea-text-sm">{module.description}</p>
     </div>
   </div>
-  <Cluster>
-    <Switch
-      id="module-{module.id}"
-      bind:checked={module.enabled}
-      onchange={handleToggle}
-    />
-    {#if module.has_settings && module.enabled}
-      <Button variant="secondary" size="s">
+  {#if module.has_settings && module.enabled}
+    <Cluster>
+      <Button variant="secondary" size="s" onclick={navigateToSettings}>
         Settings
       </Button>
-    {/if}
-  </Cluster>
+      <Button variant="secondary" size="s" onclick={navigateToInstructions}>
+        Instructions
+      </Button>
+    </Cluster>
+  {/if}
 </div>
 
 <style>
   .wpea-module-card {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: var(--wpea-space--md);
     padding: var(--wpea-space--md);
     background: var(--wpea-color--surface-raised);
     border: 1px solid var(--wpea-color--border);
     border-radius: var(--wpea-radius--md);
+  }
+
+  .wpea-module-switch {
+    flex-shrink: 0;
   }
 
   .wpea-module-info {

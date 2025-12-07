@@ -397,10 +397,14 @@
       }
 
       const includePostsFiltered = includePosts.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id));
-      if (includePostsFiltered.length > 0) args.post__in = includePostsFiltered;
+      if (includePostsFiltered.length > 0) {
+        args.post__in = includePostsFiltered;
+      }
 
       const excludePostsFiltered = excludePosts.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id));
-      if (excludePostsFiltered.length > 0) args.post__not_in = excludePostsFiltered;
+      if (excludePostsFiltered.length > 0) {
+        args.post__not_in = excludePostsFiltered;
+      }
 
       const includeTaxFiltered = includeTaxonomies.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id));
       const excludeTaxFiltered = excludeTaxonomies.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id));
@@ -513,13 +517,14 @@
     }
   });
 
-  // Clear include/exclude arrays when post type changes
+  // Clear include/exclude arrays when post type changes (but not during initial load)
   let previousPostType = $state('');
   $effect(() => {
     if (previousPostType === '') {
       // Initialize on first run
       previousPostType = postType;
-    } else if (postType !== previousPostType) {
+    } else if (postType !== previousPostType && !isInitialLoad && !isUpdatingFromQuery) {
+      // Only clear if user is actively changing post type, not during load
       includePosts = [];
       excludePosts = [];
       previousPostType = postType;

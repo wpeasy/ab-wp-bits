@@ -62,6 +62,48 @@ final class REST {
                 ],
             ],
         ]);
+
+        // Get module settings
+        register_rest_route(self::NAMESPACE, '/module-settings/(?P<module_id>[a-zA-Z0-9_-]+)', [
+            'methods' => 'GET',
+            'callback' => [__CLASS__, 'get_module_settings'],
+            'permission_callback' => [__CLASS__, 'check_permissions'],
+            'args' => [
+                'module_id' => [
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_key',
+                ],
+            ],
+        ]);
+
+        // Save module settings
+        register_rest_route(self::NAMESPACE, '/module-settings/(?P<module_id>[a-zA-Z0-9_-]+)', [
+            'methods' => 'POST',
+            'callback' => [__CLASS__, 'save_module_settings'],
+            'permission_callback' => [__CLASS__, 'check_permissions'],
+            'args' => [
+                'module_id' => [
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_key',
+                ],
+            ],
+        ]);
+
+        // Clear module cache
+        register_rest_route(self::NAMESPACE, '/module-settings/(?P<module_id>[a-zA-Z0-9_-]+)/clear-cache', [
+            'methods' => 'POST',
+            'callback' => [__CLASS__, 'clear_module_cache'],
+            'permission_callback' => [__CLASS__, 'check_permissions'],
+            'args' => [
+                'module_id' => [
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_key',
+                ],
+            ],
+        ]);
     }
 
     /**
@@ -165,6 +207,69 @@ final class REST {
                 'module_id' => $module_id,
                 'enabled' => $enabled,
             ],
+        ], 200);
+    }
+
+    /**
+     * Get module settings
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error
+     */
+    public static function get_module_settings(WP_REST_Request $request) {
+        $module_id = sanitize_key($request->get_param('module_id'));
+
+        $settings = get_option("ab_wp_bits_{$module_id}_settings", []);
+
+        return new WP_REST_Response([
+            'success' => true,
+            'settings' => $settings,
+        ], 200);
+    }
+
+    /**
+     * Save module settings
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error
+     */
+    public static function save_module_settings(WP_REST_Request $request) {
+        $module_id = sanitize_key($request->get_param('module_id'));
+        $body = $request->get_json_params();
+
+        // Sanitize settings based on module
+        $settings = [];
+        if ($module_id === 'menu-queries') {
+            $settings['cache_ttl'] = isset($body['cache_ttl']) ? absint($body['cache_ttl']) : 3600;
+        }
+
+        update_option("ab_wp_bits_{$module_id}_settings", $settings);
+
+        return new WP_REST_Response([
+            'success' => true,
+            'settings' => $settings,
+        ], 200);
+    }
+
+    /**
+     * Clear module cache
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error
+     */
+    public static function clear_module_cache(WP_REST_Request $request) {
+        $module_id = sanitize_key($request->get_param('module_id'));
+
+        // Clear module-specific transients
+        if ($module_id === 'menu-queries') {
+            global $wpdb;
+            $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_menu_query_%'");
+            $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_menu_query_%'");
+        }
+
+        return new WP_REST_Response([
+            'success' => true,
+            'message' => __('Cache cleared successfully.', 'ab-wp-bits'),
         ], 200);
     }
 }

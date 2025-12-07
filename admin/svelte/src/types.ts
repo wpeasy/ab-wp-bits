@@ -9,6 +9,7 @@ export interface Module {
   logo: string;
   has_settings: boolean;
   enabled: boolean;
+  category: string;
 }
 
 export interface ABWPBitsData {

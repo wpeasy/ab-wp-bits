@@ -1,42 +1,56 @@
 <script lang="ts">
   import type { Module } from './types';
   import ModuleManager from './ModuleManager.svelte';
+  import ModuleSettings from './ModuleSettings.svelte';
   import Tabs from './lib/Tabs.svelte';
-  import { createRawSnippet } from 'svelte';
 
   // Get initial data from WordPress
   const initialModules: Module[] = window.abWpBitsData.modules;
 
   // State
   let modules = $state<Module[]>(initialModules);
+  let activeTab = $state('modules');
+  let activeModuleSubTab = $state<'settings' | 'instructions'>('settings');
 
-  // Create tabs with raw snippets for content
-  const tabs = [
+  // Compute enabled modules for tabs
+  let enabledModules = $derived(modules.filter(m => m.enabled && m.has_settings));
+
+  // Build tabs dynamically
+  let tabs = $derived([
     {
       id: 'modules',
-      label: 'Module Manager',
-      content: createRawSnippet(() => ({
-        render: () => `<div id="module-manager-content"></div>`
-      }))
-    }
-  ];
+      label: 'Module Manager'
+    },
+    ...enabledModules.map(module => ({
+      id: `module-${module.id}`,
+      label: module.name
+    }))
+  ]);
 
-  // Mount the module manager content after tab renders
-  $effect(() => {
-    const container = document.getElementById('module-manager-content');
-    if (container && !container.hasChildNodes()) {
-      // The content will be rendered by the ModuleManager component below
-    }
-  });
+  function handleNavigate(moduleId: string, tab: 'settings' | 'instructions') {
+    activeTab = `module-${moduleId}`;
+    activeModuleSubTab = tab;
+  }
+
+  // Extract module ID from active tab
+  let activeModuleId = $derived(
+    activeTab.startsWith('module-') ? activeTab.replace('module-', '') : null
+  );
 </script>
 
 <div class="wpea wpea-cq ab-wp-bits-admin">
-  <Tabs {tabs} />
-
-  <!-- Module Manager is always rendered, displayed based on active tab -->
-  <div class="wpea-tab-panel">
-    <ModuleManager bind:modules />
-  </div>
+  <Tabs {tabs} bind:activeTab orientation="vertical">
+    {#snippet content()}
+      {#if activeTab === 'modules'}
+        <ModuleManager bind:modules onNavigate={handleNavigate} />
+      {:else if activeModuleId}
+        <ModuleSettings
+          moduleId={activeModuleId}
+          bind:activeSubTab={activeModuleSubTab}
+        />
+      {/if}
+    {/snippet}
+  </Tabs>
 </div>
 
 <style>
@@ -44,9 +58,5 @@
     font-family: var(--wpea-font-sans);
     background: var(--wpea-color--surface);
     min-height: 400px;
-  }
-
-  .wpea-tab-panel {
-    padding: var(--wpea-space--lg);
   }
 </style>
