@@ -12,14 +12,19 @@
   let activeTab = $state('modules');
   let activeModuleSubTab = $state<'settings' | 'instructions'>('settings');
 
-  // Compute enabled modules for tabs
-  let enabledModules = $derived(modules.filter(m => m.enabled && m.has_settings));
+  // Compute enabled modules for tabs (sorted alphabetically)
+  let enabledModules = $derived(
+    modules
+      .filter(m => m.enabled && m.has_settings)
+      .sort((a, b) => a.name.localeCompare(b.name))
+  );
 
-  // Build tabs dynamically
+  // Build tabs dynamically (Module Manager first, then alphabetically sorted modules)
   let tabs = $derived([
     {
       id: 'modules',
-      label: 'Module Manager'
+      label: 'Module Manager',
+      separator: true // Add separator after this tab
     },
     ...enabledModules.map(module => ({
       id: `module-${module.id}`,

@@ -28,11 +28,12 @@
     }))
   );
 
-  // Filter modules by category
+  // Filter modules by category and sort alphabetically
   let filteredModules = $derived(
-    activeCategory === 'all'
+    (activeCategory === 'all'
       ? modules
       : modules.filter(m => m.category === activeCategory)
+    ).sort((a, b) => a.name.localeCompare(b.name))
   );
 
   function addToast(message: string, variant: 'success' | 'danger' | 'warning' = 'success') {

@@ -9,8 +9,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Svelte build artifacts
-admin/svelte/dist/
+# Svelte build artifacts (keep dist/ in repo for WordPress)
+# admin/svelte/dist/
 admin/svelte/.svelte-kit/
 admin/svelte/.vite/
 

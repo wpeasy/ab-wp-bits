@@ -6,6 +6,7 @@
     id: string;
     label: string;
     content?: any;
+    separator?: boolean;
   };
 
   type Props = {
@@ -40,6 +41,7 @@
     {#each tabs as tab}
       <button
         class="wpea-tabs__tab"
+        class:wpea-tabs__tab--separator={tab.separator}
         role="tab"
         aria-selected={activeTab === tab.id}
         onclick={() => selectTab(tab.id)}
@@ -121,5 +123,12 @@
 
   .wpea-tabs--vertical .wpea-tabs__panel {
     width: 100%;
+  }
+
+  /* Separator after Module Manager tab */
+  .wpea-tabs--vertical > .wpea-tabs__list > .wpea-tabs__tab--separator {
+    border-bottom: 1px solid var(--wpea-color--border);
+    padding-bottom: var(--wpea-space--md);
+    margin-bottom: var(--wpea-space--sm);
   }
 </style>
