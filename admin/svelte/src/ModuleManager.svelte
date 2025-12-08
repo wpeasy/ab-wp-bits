@@ -33,7 +33,7 @@
     (activeCategory === 'all'
       ? modules
       : modules.filter(m => m.category === activeCategory)
-    ).sort((a, b) => a.name.localeCompare(b.name))
+    ).toSorted((a, b) => a.name.localeCompare(b.name))
   );
 
   function addToast(message: string, variant: 'success' | 'danger' | 'warning' = 'success') {

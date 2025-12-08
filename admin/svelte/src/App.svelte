@@ -16,7 +16,7 @@
   let enabledModules = $derived(
     modules
       .filter(m => m.enabled && m.has_settings)
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .toSorted((a, b) => a.name.localeCompare(b.name))
   );
 
   // Build tabs dynamically (Module Manager first, then alphabetically sorted modules)
