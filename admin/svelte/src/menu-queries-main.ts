@@ -261,19 +261,21 @@ async function saveQueryConfigCustomizer(config: QueryConfig) {
   if (setting) {
     const currentValue = setting();
 
-    // Always generate title from the query config
+    // Only generate title from query config if it's still the default "Query Item"
     let title = currentValue.title || 'Query Item';
-    try {
-      const parsed = JSON.parse(queryToSave);
-      const postType = parsed.post_type || '';
-      const taxonomy = parsed.taxonomy || '';
-      const newTitle = taxonomy ? `Query: ${taxonomy}` : `Query: ${postType}`;
+    if (title === 'Query Item' || !title) {
+      try {
+        const parsed = JSON.parse(queryToSave);
+        const postType = parsed.post_type || '';
+        const taxonomy = parsed.taxonomy || '';
+        const newTitle = taxonomy ? `Query: ${taxonomy}` : `Query: ${postType}`;
 
-      if (newTitle && newTitle !== 'Query: ') {
-        title = newTitle;
+        if (newTitle && newTitle !== 'Query: ') {
+          title = newTitle;
+        }
+      } catch (e) {
+        // Keep existing title
       }
-    } catch (e) {
-      // Keep existing title
     }
 
     // CRITICAL: Store query_config in the description field (which IS whitelisted)

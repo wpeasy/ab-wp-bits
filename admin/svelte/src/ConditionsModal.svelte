@@ -123,7 +123,6 @@
     {:else}
       <ConditionsResults
         conditions={currentConditionsConfig}
-        {capabilities}
         onEvaluate={evaluateConditions}
       />
     {/if}
@@ -149,3 +148,9 @@
     </div>
   {/snippet}
 </Modal>
+
+<style>
+  :global(.wpea-modal--large .wpea-modal__container) {
+    min-height: 80vh !important;
+  }
+</style>

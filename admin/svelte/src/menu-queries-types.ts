@@ -29,6 +29,7 @@ export interface QueryConfig {
   hierarchical: boolean;
   showLabelOnEmpty: boolean;
   emptyLabel: string;
+  showDefaultMenuItem: boolean;
   includePosts: number[];
   excludePosts: number[];
   includeTerms: number[];

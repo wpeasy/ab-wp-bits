@@ -91,7 +91,7 @@
   .wpea-module-logo :global(svg) {
     width: 32px;
     height: 32px;
-    color: var(--wpea-color--primary);
+    color: var(--wpea-color--secondary);
   }
 
   .wpea-module-details {

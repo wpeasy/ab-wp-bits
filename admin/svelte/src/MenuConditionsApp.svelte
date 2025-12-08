@@ -17,6 +17,17 @@
   $effect(() => {
     fetchCapabilities();
     attachButtonListeners();
+
+    // Listen for Customizer button injection
+    const handler = () => {
+      console.log('menu-conditions-buttons-added event received');
+      attachButtonListeners();
+    };
+    document.addEventListener('menu-conditions-buttons-added', handler);
+
+    return () => {
+      document.removeEventListener('menu-conditions-buttons-added', handler);
+    };
   });
 
   async function fetchCapabilities() {
@@ -37,6 +48,8 @@
   function attachButtonListeners() {
     // Find all condition buttons
     const buttons = document.querySelectorAll('.ab-menu-conditions-button');
+
+    console.log('Attaching listeners to', buttons.length, 'buttons');
 
     buttons.forEach(button => {
       button.addEventListener('click', handleButtonClick);
@@ -108,6 +121,13 @@
 
         // Update button data attribute
         updateButtonData(currentMenuItemId, data.conditions);
+
+        // Trigger Customizer change detection if in Customizer
+        if (typeof wp !== 'undefined' && wp.customize) {
+          // Trigger state dirty to activate Publish button
+          wp.customize.state('saved').set(false);
+          console.log('Marked Customizer as having unsaved changes');
+        }
       } else {
         addToast('Failed to save conditions', 'danger');
       }
@@ -119,42 +139,57 @@
 
   function updateButtonData(menuItemId: number, conditions: ConditionsConfig) {
     const button = document.querySelector(`.ab-menu-conditions-button[data-menu-item-id="${menuItemId}"]`) as HTMLButtonElement;
-    if (!button) {
-      return;
-    }
-
-    button.setAttribute('data-conditions', JSON.stringify(conditions));
 
     const hasConditions = conditions.conditions && conditions.conditions.length > 0;
 
-    // Update button class
-    if (hasConditions) {
-      button.classList.add('has-conditions');
-    } else {
-      button.classList.remove('has-conditions');
-    }
+    // Update button if it exists (item is expanded)
+    if (button) {
+      button.setAttribute('data-conditions', JSON.stringify(conditions));
 
-    // Update indicator
-    let indicator = button.querySelector('.ab-conditions-indicator');
-    if (hasConditions) {
-      if (!indicator) {
-        // Create new indicator
-        const span = document.createElement('span');
-        span.className = 'ab-conditions-indicator';
-        span.textContent = ' ●';
-        span.style.color = '#2271b1';
-        span.style.marginLeft = '4px';
+      // Update button class
+      if (hasConditions) {
+        button.classList.add('has-conditions');
+      } else {
+        button.classList.remove('has-conditions');
+      }
 
-        // Find the text span (the one with "Conditions" text)
-        const textSpan = button.querySelector('span');
-        if (textSpan) {
-          textSpan.appendChild(span);
+      // Update indicator
+      let indicator = button.querySelector('.ab-conditions-indicator');
+      if (hasConditions) {
+        if (!indicator) {
+          // Create new indicator
+          const span = document.createElement('span');
+          span.className = 'ab-conditions-indicator';
+          span.textContent = '●';
+          span.style.color = '#2271b1';
+          span.style.marginLeft = '4px';
+
+          // Find the text span (the one with "Conditions" text)
+          const textSpan = button.querySelector('span');
+          if (textSpan) {
+            textSpan.appendChild(span);
+          }
+        }
+      } else {
+        // Remove indicator if it exists
+        if (indicator) {
+          indicator.remove();
         }
       }
-    } else {
-      // Remove indicator if it exists
-      if (indicator) {
-        indicator.remove();
+    }
+
+    // Update menu item header styling for ALL items (both expanded and collapsed)
+    // Find by menu item ID in the control
+    const control = document.querySelector(`#customize-control-nav_menu_item-${menuItemId}`);
+    if (control) {
+      const menuItemHandle = control.querySelector('.menu-item-handle') as HTMLElement;
+
+      if (menuItemHandle) {
+        if (hasConditions) {
+          menuItemHandle.classList.add('has-menu-conditions');
+        } else {
+          menuItemHandle.classList.remove('has-menu-conditions');
+        }
       }
     }
   }

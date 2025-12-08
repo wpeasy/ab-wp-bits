@@ -36,10 +36,10 @@ final class MenuConditions {
         // Register the module
         ModuleManager::register_module(self::MODULE_ID, [
             'name' => __('WP Menu Conditions', 'ab-wp-bits'),
-            'description' => __('Adds the ability to conditionally display menu items based on Abilities API', 'ab-wp-bits'),
+            'description' => __('Conditionally display menu items based on WordPress user capabilities', 'ab-wp-bits'),
             'logo' => self::get_logo(),
             'category' => __('General WordPress', 'ab-wp-bits'),
-            'has_settings' => false,
+            'has_settings' => true,
             'init_callback' => [__CLASS__, 'run'],
         ]);
     }
@@ -59,6 +59,10 @@ final class MenuConditions {
             add_action('wp_nav_menu_item_custom_fields', [__CLASS__, 'add_condition_button'], 10, 2);
             add_action('admin_head', [__CLASS__, 'add_menu_item_styles']);
         }
+
+        // Customizer hooks
+        add_action('customize_controls_enqueue_scripts', [__CLASS__, 'enqueue_customizer_assets']);
+        add_action('customize_controls_print_styles', [__CLASS__, 'add_customizer_styles']);
 
         // Frontend hooks
         add_filter('wp_nav_menu_objects', [__CLASS__, 'filter_menu_items'], 10, 2);
@@ -165,6 +169,83 @@ final class MenuConditions {
             'apiUrl' => rest_url('ab-wp-bits/v1'),
             'nonce' => wp_create_nonce('wp_rest'),
         ]);
+    }
+
+    /**
+     * Enqueue Customizer assets
+     *
+     * @return void
+     */
+    public static function enqueue_customizer_assets(): void {
+        // Enqueue WPEA framework CSS
+        wp_enqueue_style(
+            'ab-wp-bits-wpea-resets',
+            AB_WP_BITS_PLUGIN_URL . 'assets/wpea/wpea/wpea-wp-resets.css',
+            [],
+            AB_WP_BITS_VERSION
+        );
+
+        wp_enqueue_style(
+            'ab-wp-bits-wpea-framework',
+            AB_WP_BITS_PLUGIN_URL . 'assets/wpea/wpea/wpea-framework.css',
+            ['ab-wp-bits-wpea-resets'],
+            AB_WP_BITS_VERSION
+        );
+
+        // Enqueue Customizer button injector (must load before main app)
+        wp_enqueue_script(
+            'ab-wp-bits-menu-conditions-customizer',
+            AB_WP_BITS_PLUGIN_URL . 'admin/js/menu-conditions-customizer.js',
+            ['jquery', 'customize-controls'],
+            AB_WP_BITS_VERSION,
+            true
+        );
+
+        // Enqueue Conditions app
+        wp_enqueue_script(
+            'ab-wp-bits-menu-conditions',
+            AB_WP_BITS_PLUGIN_URL . 'admin/svelte/dist/menu-conditions.js',
+            ['ab-wp-bits-menu-conditions-customizer'],
+            AB_WP_BITS_VERSION,
+            true
+        );
+
+        wp_localize_script('ab-wp-bits-menu-conditions', 'abMenuConditionsData', [
+            'apiUrl' => rest_url('ab-wp-bits/v1'),
+            'nonce' => wp_create_nonce('wp_rest'),
+        ]);
+    }
+
+    /**
+     * Add styles for Customizer
+     *
+     * @return void
+     */
+    public static function add_customizer_styles(): void {
+        ?>
+        <style>
+            /* Highlight menu items with conditions in Customizer */
+            .menu-item-handle.has-menu-conditions {
+                background: linear-gradient(to right, #e8f4f8 0%, #ffffff 50%) !important;
+                border-left: 3px solid #2271b1 !important;
+            }
+
+            /* Add eye icon to menu item title in Customizer */
+            .menu-item-handle.has-menu-conditions .item-title::before {
+                content: '';
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                margin-right: 6px;
+                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%232271b1"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>');
+                background-size: contain;
+                background-repeat: no-repeat;
+                vertical-align: middle;
+                position: relative;
+                top: -1px;
+            }
+        </style>
+        <?php
     }
 
     /**

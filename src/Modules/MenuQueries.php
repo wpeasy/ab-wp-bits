@@ -659,18 +659,22 @@ final class MenuQueries {
         $type_result = update_post_meta($menu_item_id, '_menu_item_query_type', 'query_item');
 
         // Update the menu item title if it's still the default "Query Item"
-        $current_title = get_post_field('post_title', $menu_item_id);
-        if ($current_title === 'Query Item' || empty($current_title)) {
-            // Generate a descriptive title from the query
-            $post_type = $parsed['post_type'] ?? '';
-            $taxonomy = $parsed['taxonomy'] ?? '';
-            $new_title = $taxonomy ? "Query: $taxonomy" : "Query: $post_type";
+        // Don't auto-set title in Customizer context as the user's Navigation Label
+        // changes are in the changeset and would be overwritten
+        if (!is_customize_preview()) {
+            $current_title = get_post_field('post_title', $menu_item_id);
+            if ($current_title === 'Query Item' || empty($current_title)) {
+                // Generate a descriptive title from the query
+                $post_type = $parsed['post_type'] ?? '';
+                $taxonomy = $parsed['taxonomy'] ?? '';
+                $new_title = $taxonomy ? "Query: $taxonomy" : "Query: $post_type";
 
-            wp_update_post([
-                'ID' => $menu_item_id,
-                'post_title' => $new_title,
-            ]);
+                wp_update_post([
+                    'ID' => $menu_item_id,
+                    'post_title' => $new_title,
+                ]);
 
+            }
         }
 
         // Verify what was saved
@@ -1521,10 +1525,10 @@ final class MenuQueries {
             $query_type = isset($query_args['taxonomy']) ? 'taxonomy' : 'post';
             $hierarchical = $query_args['hierarchical'] ?? false;
 
-            // Note: showLabelOnEmpty and emptyLabel are not in WP_Query args
-            // For now, default to not showing empty labels
-            $show_label_on_empty = false;
-            $empty_label = '';
+            // Extract UI-only properties
+            $show_label_on_empty = $query_args['showLabelOnEmpty'] ?? false;
+            $empty_label = $query_args['emptyLabel'] ?? '';
+            $show_default_menu_item = $query_args['showDefaultMenuItem'] ?? false;
 
             // Execute query and get results
             $results = self::execute_menu_query($query_args, $query_type, $hierarchical);
@@ -1548,10 +1552,23 @@ final class MenuQueries {
             // Get post_type for post queries (needed for menu item object property)
             $post_type = $query_type === 'post' ? ($query_args['post_type'] ?? 'post') : '';
 
+            // Determine parent ID for generated items
+            if ($show_default_menu_item) {
+                // Keep the original menu item and make generated items children
+                $parent_id_for_children = $item->ID;
+                // Add the original item to expanded items
+                $item->status = $item->post_status;
+                $item->position = $item->menu_order;
+                $item->_invalid = false;
+                $expanded_items[] = $item;
+            } else {
+                // Replace the query item with actual results (use item's parent, not the item itself)
+                $parent_id_for_children = $item->menu_item_parent;
+            }
+
             // Convert results to menu items
-            // Replace the query item with actual results (use item's parent, not the item itself)
             $menu_order_counter = null;
-            $child_items = self::results_to_menu_items($results, $item, $item_counter, $query_type, 0, $item->menu_item_parent, $menu_order_counter, $post_type);
+            $child_items = self::results_to_menu_items($results, $item, $item_counter, $query_type, 0, $parent_id_for_children, $menu_order_counter, $post_type);
             $expanded_items = array_merge($expanded_items, $child_items);
         }
 

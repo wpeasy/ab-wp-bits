@@ -475,10 +475,15 @@ final class REST {
 
             $visible = self::evaluate_conditions_for_test_user($test_user, $conditions);
 
+            // Get capabilities for this role
+            $role_object = $wp_roles->get_role($role_slug);
+            $capabilities = $role_object ? array_keys($role_object->capabilities) : [];
+
             $results[] = [
                 'role' => $role_slug,
                 'role_name' => translate_user_role($role_name),
                 'visible' => $visible,
+                'capabilities' => $capabilities,
             ];
         }
 
@@ -490,6 +495,7 @@ final class REST {
             'role' => 'logged_out',
             'role_name' => __('Not Logged In', 'ab-wp-bits'),
             'visible' => $visible,
+            'capabilities' => [],
         ];
 
         return new WP_REST_Response([

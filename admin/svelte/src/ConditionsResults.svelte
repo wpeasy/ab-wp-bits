@@ -1,25 +1,21 @@
 <script lang="ts">
-  import type { ConditionsConfig, RoleEvaluationResult, Capability, UserData } from './menu-conditions-types';
+  import type { ConditionsConfig, RoleEvaluationResult, UserData } from './menu-conditions-types';
   import Card from './lib/Card.svelte';
-  import Toggle3State from './lib/Toggle3State.svelte';
   import Select from './lib/Select.svelte';
+  import FilterableList from './lib/FilterableList.svelte';
   import Stack from './lib/Stack.svelte';
   import Badge from './lib/Badge.svelte';
 
   interface Props {
     conditions: ConditionsConfig;
-    capabilities: Capability[];
     onEvaluate: (conditions: ConditionsConfig) => Promise<RoleEvaluationResult[]>;
   }
 
-  let { conditions, capabilities, onEvaluate }: Props = $props();
+  let { conditions, onEvaluate }: Props = $props();
 
   const { apiUrl, nonce } = window.abMenuConditionsData;
 
   // State
-  let viewMode = $state<'role' | 'capability'>('role');
-  let selectedRole = $state('all');
-  let selectedCapability = $state('all');
   let selectedUser = $state<number>(0);
   let results = $state<RoleEvaluationResult[]>([]);
   let users = $state<UserData[]>([]);
@@ -100,38 +96,14 @@
     }
   });
 
-  // Get filtered results based on view mode and selection
-  let filteredResults = $derived(() => {
-    if (viewMode === 'role') {
-      if (selectedRole === 'all') {
-        return results;
-      }
-      return results.filter(r => r.role === selectedRole);
-    } else {
-      // Capability mode - filter by which roles have this capability
-      if (selectedCapability === 'all') {
-        return results;
-      }
-      // This would need backend support to know which roles have which caps
-      // For now, just show all
-      return results;
-    }
-  });
-
-  // Role options
-  let roleOptions = $derived([
-    { value: 'all', label: 'All Roles' },
-    ...results.map(r => ({
+  // Convert results to SelectOption format for FilterableList
+  let roleItems = $derived(
+    results.map(r => ({
       value: r.role,
-      label: r.role_name
+      label: r.role_name,
+      visible: r.visible
     }))
-  ]);
-
-  // Capability options
-  let capabilityOptions = $derived([
-    { value: 'all', label: 'All Capabilities' },
-    ...capabilities
-  ]);
+  );
 
   // User options
   let userOptions = $derived([
@@ -144,58 +116,6 @@
 </script>
 
 <Stack>
-  <Card title="Results Preview">
-    <Stack>
-      <div class="results-controls">
-        <div class="view-toggle">
-          <label for="view-mode">View By:</label>
-          <Toggle3State
-            value={viewMode}
-            onChange={(value) => viewMode = value as 'role' | 'capability'}
-            options={[
-              { value: 'role', label: 'Role' },
-              { value: 'capability', label: 'Capability' }
-            ]}
-            ariaLabel="View mode"
-          />
-        </div>
-
-        {#if viewMode === 'role'}
-          <Select
-            id="filter-role"
-            label="Filter by Role"
-            bind:value={selectedRole}
-            options={roleOptions}
-          />
-        {:else}
-          <Select
-            id="filter-capability"
-            label="Filter by Capability"
-            bind:value={selectedCapability}
-            options={capabilityOptions}
-          />
-        {/if}
-      </div>
-
-      {#if isLoading}
-        <p class="wpea-text-muted">Evaluating conditions...</p>
-      {:else if filteredResults().length === 0}
-        <p class="wpea-text-muted">No results to display.</p>
-      {:else}
-        <div class="results-grid">
-          {#each filteredResults() as result (result.role)}
-            <div class="result-row">
-              <span class="result-role">{result.role_name}</span>
-              <Badge variant={result.visible ? 'success' : 'danger'}>
-                {result.visible ? 'Visible' : 'Hidden'}
-              </Badge>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </Stack>
-  </Card>
-
   <Card title="Test with Specific User">
     <Stack>
       <Select
@@ -213,44 +133,39 @@
       {/if}
     </Stack>
   </Card>
+
+  <Card title="Results Preview">
+    <Stack>
+      {#if isLoading}
+        <p class="wpea-text-muted">Evaluating conditions...</p>
+      {:else if roleItems.length === 0}
+        <p class="wpea-text-muted">No results to display.</p>
+      {:else}
+        <FilterableList
+          items={roleItems}
+          placeholder="Search roles..."
+          emptyMessage="No roles found"
+        >
+          {#snippet children(role)}
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div>
+                <span style="font-weight: 500;">{role.label}</span>
+                <span style="color: var(--wpea-color--text-muted); font-size: 0.875rem; margin-left: var(--wpea-space--xs);">
+                  ({role.value})
+                </span>
+              </div>
+              <Badge variant={role.visible ? 'success' : 'danger'}>
+                {role.visible ? 'Visible' : 'Hidden'}
+              </Badge>
+            </div>
+          {/snippet}
+        </FilterableList>
+      {/if}
+    </Stack>
+  </Card>
 </Stack>
 
 <style>
-  .results-controls {
-    display: flex;
-    flex-direction: column;
-    gap: var(--wpea-space--md);
-  }
-
-  .view-toggle {
-    display: flex;
-    align-items: center;
-    gap: var(--wpea-space--sm);
-  }
-
-  .view-toggle label {
-    font-weight: 500;
-  }
-
-  .results-grid {
-    display: flex;
-    flex-direction: column;
-    gap: var(--wpea-space--xs);
-  }
-
-  .result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--wpea-space--sm);
-    background: var(--wpea-color--surface-raised);
-    border-radius: var(--wpea-radius--md);
-  }
-
-  .result-role {
-    font-weight: 500;
-  }
-
   .user-result {
     padding: var(--wpea-space--md);
     border-radius: var(--wpea-radius--md);

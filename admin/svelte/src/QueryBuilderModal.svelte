@@ -35,6 +35,7 @@
   let hierarchical = $state(false);
   let showLabelOnEmpty = $state(false);
   let emptyLabel = $state('');
+  let showDefaultMenuItem = $state(false);
   let includePosts = $state<(string | number)[]>([]);
   let excludePosts = $state<(string | number)[]>([]);
   let includeTerms = $state<(string | number)[]>([]);
@@ -86,6 +87,7 @@
           hierarchical = initialConfig.hierarchical ?? false;
           showLabelOnEmpty = initialConfig.showLabelOnEmpty ?? false;
           emptyLabel = initialConfig.emptyLabel || '';
+          showDefaultMenuItem = initialConfig.showDefaultMenuItem ?? false;
           includePosts = initialConfig.includePosts || [];
           excludePosts = initialConfig.excludePosts || [];
           includeTerms = initialConfig.includeTerms || [];
@@ -115,6 +117,7 @@
         hierarchical = false;
         showLabelOnEmpty = false;
         emptyLabel = '';
+        showDefaultMenuItem = false;
         includePosts = [];
         excludePosts = [];
         includeTerms = [];
@@ -231,6 +234,11 @@
       order = args.order || 'ASC';
       includeChildren = args.include_children ?? false;
       hierarchical = args.hierarchical ?? false;
+
+      // UI-only properties
+      showLabelOnEmpty = args.showLabelOnEmpty ?? false;
+      emptyLabel = args.emptyLabel || '';
+      showDefaultMenuItem = args.showDefaultMenuItem ?? false;
 
     } catch (e) {
       // Silently fail parsing
@@ -363,7 +371,7 @@
           'taxonomy', 'number', 'child_of', 'parent', 'include', 'exclude',
           // UI-only properties (camelCase) - should never be in WP_Query
           'queryType', 'postType', 'orderBy', 'postCount', 'childOf', 'includeChildren',
-          'showLabelOnEmpty', 'emptyLabel', 'includePosts', 'excludePosts',
+          'showLabelOnEmpty', 'emptyLabel', 'showDefaultMenuItem', 'includePosts', 'excludePosts',
           'includeTerms', 'excludeTerms', 'includeTaxonomies', 'excludeTaxonomies',
           'metaQueries', 'metaQueryRelation'
         ]);
@@ -487,6 +495,11 @@
     // Add custom properties at the end
     Object.assign(args, existingCustomProps);
 
+    // Add UI-only properties so they can be loaded when editing
+    args.showLabelOnEmpty = showLabelOnEmpty;
+    args.emptyLabel = emptyLabel;
+    args.showDefaultMenuItem = showDefaultMenuItem;
+
     rawWPQuery = JSON.stringify(args, null, 2);
 
     setTimeout(() => {
@@ -576,6 +589,7 @@
       hierarchical,
       showLabelOnEmpty,
       emptyLabel,
+      showDefaultMenuItem,
       includePosts: includePosts.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
       excludePosts: excludePosts.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
       includeTerms: includeTerms.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
@@ -728,6 +742,31 @@
     {#if activeTab === 'builder'}
     <!-- Builder Tab -->
     <Stack>
+      <Card title="Settings">
+        <Stack>
+          <Switch
+            id="show-default-menu-item"
+            label="Show Default Menu Item"
+            bind:checked={showDefaultMenuItem}
+            help="When enabled, adds the default WP Menu Item with the generated menu as a sub-menu. When disabled, the generated menu replaces the default menu item."
+          />
+          <Switch
+            id="show-label-on-empty"
+            label="Show Label on Empty Result"
+            bind:checked={showLabelOnEmpty}
+            help="Replaces the generated menu with the label text if there is no query result"
+          />
+          {#if showLabelOnEmpty}
+            <Input
+              id="empty-label"
+              label="Empty Label Text"
+              bind:value={emptyLabel}
+              placeholder="No items found"
+            />
+          {/if}
+        </Stack>
+      </Card>
+
       <Card title="Query Type">
         <div class="wpea-grid-2">
           <Select
@@ -800,23 +839,6 @@
             help="When checked, results are nested by parent/child relationships"
           />
         </div>
-      </Card>
-
-      <Card title="Empty Results">
-        <Switch
-          id="show-label-on-empty"
-          label="Show Label on Empty Result"
-          bind:checked={showLabelOnEmpty}
-          help="Display a label when query returns no results"
-        />
-        {#if showLabelOnEmpty}
-          <Input
-            id="empty-label"
-            label="Empty Label Text"
-            bind:value={emptyLabel}
-            placeholder="No items found"
-          />
-        {/if}
       </Card>
 
       {#if queryType === 'post'}
