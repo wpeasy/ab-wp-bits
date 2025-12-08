@@ -16,3 +16,4 @@
 **Network**: true
 **Update URI**: https://github.com/wpeasy/ab-wp-bits
 - with WordPress Classes, Functions and Hookd, never assume, always check the documentation
+- When updating the plugin version, set the Tested up to, to teh latest WP version.

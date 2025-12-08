@@ -2,6 +2,23 @@
 
 All notable changes to Alan Blair's WP Bits will be documented in this file.
 
+## [0.0.5-beta] - 2025-12-08
+
+### Added
+- **Menu Queries**: "Include This ID" feature - when "Child of" field has a value > 0, displays a switch to include the parent item as the first menu item with query results as children
+- **Menu Queries**: New `get_parent_item_data()` method to fetch parent post/term details dynamically
+- **UI**: Modal border-radius added to Query Builder modal for visual consistency with other modals
+
+### Changed
+- **Compatibility**: Updated "Tested up to" from 6.7 to 6.9 (latest WordPress version)
+
+### Technical Details
+- New `includeParentItem` boolean property in QueryConfig TypeScript type
+- Conditional Switch component in Svelte that only displays when childOf > 0
+- PHP backend extracts `includeParentItem` from query configuration
+- Creates proper WordPress nav menu structure with parent-child relationships
+- Handles both post type and taxonomy queries
+
 ## [0.0.4-beta] - 2025-12-08
 
 ### Fixed
