@@ -127,8 +127,8 @@
 
   /* Separator after Module Manager tab */
   .wpea-tabs--vertical > .wpea-tabs__list > .wpea-tabs__tab--separator {
-    border-bottom: 1px solid var(--wpea-color--border);
+    border-bottom: 1px solid var(--wpea-color--border) !important;
     padding-bottom: var(--wpea-space--md);
-    margin-bottom: var(--wpea-space--sm);
+    margin-bottom: var(--wpea-space--md);
   }
 </style>
