@@ -46,6 +46,12 @@ final class MenuQueries {
             'settings_callback' => [__CLASS__, 'render_settings'],
             'init_callback' => [__CLASS__, 'run'],
         ]);
+
+        // Register hooks early, outside of run() callback
+        // Check if module is enabled on each hook
+        add_action('admin_menu', [__CLASS__, 'add_nav_menu_meta_box']);
+        add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_menu_scripts']);
+        add_action('customize_controls_enqueue_scripts', [__CLASS__, 'enqueue_customizer_scripts']);
     }
 
     /**
@@ -54,16 +60,9 @@ final class MenuQueries {
      * @return void
      */
     public static function run(): void {
-        // Add meta box to Appearance > Menus
-        // We need to hook early because load-nav-menus.php fires before init
-        // So we check on admin_menu which fires after plugins_loaded but before the page loads
-        add_action('admin_menu', [__CLASS__, 'add_nav_menu_meta_box']);
-
-        // Enqueue scripts for menu admin
-        add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_menu_scripts']);
-
-        // Enqueue scripts for Customizer
-        add_action('customize_controls_enqueue_scripts', [__CLASS__, 'enqueue_customizer_scripts']);
+        // Hooks are now registered in register() method
+        // This method is called when module is enabled to run any initialization
+        // For now, nothing needs to happen here as hooks check module status themselves
 
         // Add module type to scripts
         add_filter('script_loader_tag', [__CLASS__, 'add_module_type'], 10, 3);
@@ -134,16 +133,10 @@ final class MenuQueries {
      * @return void
      */
     public static function add_nav_menu_meta_box(): void {
-        // Debug: Log when this function is called
-        error_log('MenuQueries::add_nav_menu_meta_box() called');
-        error_log('Module enabled: ' . (ModuleManager::is_module_enabled(self::MODULE_ID) ? 'YES' : 'NO'));
-
         if (!ModuleManager::is_module_enabled(self::MODULE_ID)) {
-            error_log('MenuQueries meta box NOT added - module disabled');
             return;
         }
 
-        error_log('MenuQueries meta box being added...');
         add_meta_box(
             'add-query-items',
             __('Query Items', 'ab-wp-bits'),
@@ -152,7 +145,6 @@ final class MenuQueries {
             'side',
             'default'
         );
-        error_log('MenuQueries meta box added successfully');
     }
 
     /**
