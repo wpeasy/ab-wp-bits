@@ -62,7 +62,7 @@
     align-items: center;
     gap: var(--wpea-space--md);
     padding: var(--wpea-space--md);
-    background: var(--wpea-color--surface-raised);
+    background: var(--wpea-surface--panel);
     border: 1px solid var(--wpea-color--border);
     border-radius: var(--wpea-radius--md);
   }

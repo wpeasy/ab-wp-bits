@@ -201,7 +201,7 @@
   }
 
   .instructions code {
-    background: var(--wpea-color--surface-raised);
+    background: var(--wpea-surface--panel);
     padding: 0.125rem 0.375rem;
     border-radius: var(--wpea-radius--sm);
     font-family: 'Courier New', monospace;
@@ -209,7 +209,7 @@
   }
 
   .instructions pre {
-    background: var(--wpea-color--surface-raised);
+    background: var(--wpea-surface--panel);
     padding: var(--wpea-space--sm);
     border-radius: var(--wpea-radius--md);
     overflow-x: auto;

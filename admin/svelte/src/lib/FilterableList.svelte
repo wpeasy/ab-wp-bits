@@ -62,7 +62,7 @@
     gap: var(--wpea-space--sm);
     border: 1px solid var(--wpea-color--border);
     border-radius: var(--wpea-radius--md);
-    background: var(--wpea-color--surface);
+    background: var(--wpea-surface--bg);
   }
 
   .wpea-filterable-list__search {
@@ -85,7 +85,7 @@
   }
 
   .wpea-filterable-list__item:hover {
-    background: var(--wpea-color--surface-raised);
+    background: var(--wpea-surface--panel);
   }
 
   .wpea-filterable-list__empty {

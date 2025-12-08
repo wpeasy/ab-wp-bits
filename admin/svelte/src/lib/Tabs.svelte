@@ -117,7 +117,7 @@
 
   .wpea-tabs--vertical > .wpea-tabs__list > .wpea-tabs__tab[aria-selected="true"] {
     border-left-color: var(--wpea-color--primary);
-    background-color: var(--wpea-color--surface-raised);
+    background-color: var(--wpea-surface--panel);
     color: var(--wpea-color--primary) !important;
   }
 

@@ -61,7 +61,7 @@
 <style>
   .ab-wp-bits-admin {
     font-family: var(--wpea-font-sans);
-    background: var(--wpea-color--surface);
+    background: var(--wpea-surface--bg);
     min-height: 400px;
   }
 </style>
