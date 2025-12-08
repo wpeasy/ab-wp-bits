@@ -227,6 +227,18 @@ final class MenuQueries {
             'cacheTTL' => self::get_cache_ttl(),
         ]);
 
+        // Remove hide-if-js class to make meta box visible by default
+        if ($hook === 'nav-menus.php') {
+            wp_add_inline_script('ab-menu-queries-app', '
+                document.addEventListener("DOMContentLoaded", function() {
+                    const metaBox = document.getElementById("add-query-items");
+                    if (metaBox) {
+                        metaBox.classList.remove("hide-if-js");
+                    }
+                });
+            ');
+        }
+
         // Add modal container for Customizer
         if ($hook === 'customize.php') {
             add_action('admin_footer', function() {
