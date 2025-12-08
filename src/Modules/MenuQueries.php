@@ -1573,6 +1573,8 @@ final class MenuQueries {
                 $item->status = $item->post_status;
                 $item->position = $item->menu_order;
                 $item->_invalid = false;
+                // Clear description to prevent query config from displaying in frontend
+                $item->description = '';
                 $expanded_items[] = $item;
             } else {
                 // Replace the query item with actual results (use item's parent, not the item itself)
