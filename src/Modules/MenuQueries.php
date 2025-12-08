@@ -132,10 +132,16 @@ final class MenuQueries {
      * @return void
      */
     public static function add_nav_menu_meta_box(): void {
+        // Debug: Log when this function is called
+        error_log('MenuQueries::add_nav_menu_meta_box() called');
+        error_log('Module enabled: ' . (ModuleManager::is_module_enabled(self::MODULE_ID) ? 'YES' : 'NO'));
+
         if (!ModuleManager::is_module_enabled(self::MODULE_ID)) {
+            error_log('MenuQueries meta box NOT added - module disabled');
             return;
         }
 
+        error_log('MenuQueries meta box being added...');
         add_meta_box(
             'add-query-items',
             __('Query Items', 'ab-wp-bits'),
@@ -144,6 +150,7 @@ final class MenuQueries {
             'side',
             'default'
         );
+        error_log('MenuQueries meta box added successfully');
     }
 
     /**
