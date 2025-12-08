@@ -54,8 +54,10 @@ final class MenuQueries {
      * @return void
      */
     public static function run(): void {
-        // Add meta box to Appearance > Menus - use load-nav-menus.php hook
-        add_action('load-nav-menus.php', [__CLASS__, 'add_nav_menu_meta_box']);
+        // Add meta box to Appearance > Menus
+        // We need to hook early because load-nav-menus.php fires before init
+        // So we check on admin_menu which fires after plugins_loaded but before the page loads
+        add_action('admin_menu', [__CLASS__, 'add_nav_menu_meta_box']);
 
         // Enqueue scripts for menu admin
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_menu_scripts']);
