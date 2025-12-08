@@ -1542,6 +1542,8 @@ final class MenuQueries {
             $show_label_on_empty = $query_args['showLabelOnEmpty'] ?? false;
             $empty_label = $query_args['emptyLabel'] ?? '';
             $show_default_menu_item = $query_args['showDefaultMenuItem'] ?? false;
+            $include_parent_item = $query_args['includeParentItem'] ?? false;
+            $child_of = isset($query_args['post_parent']) ? $query_args['post_parent'] : (isset($query_args['parent']) || isset($query_args['child_of']) ? ($query_args['parent'] ?? $query_args['child_of']) : 0);
 
             // Execute query and get results
             $results = self::execute_menu_query($query_args, $query_type, $hierarchical);
@@ -1564,6 +1566,52 @@ final class MenuQueries {
 
             // Get post_type for post queries (needed for menu item object property)
             $post_type = $query_type === 'post' ? ($query_args['post_type'] ?? 'post') : '';
+
+            // Handle "Include This ID" - add parent item as first item with query results as children
+            if ($include_parent_item && $child_of > 0 && !empty($results)) {
+                $parent_item_data = self::get_parent_item_data($child_of, $query_type, $post_type);
+
+                if ($parent_item_data) {
+                    // Create parent menu item
+                    $parent_menu_item = new \stdClass();
+                    $parent_menu_item->ID = ++$item_counter;
+                    $parent_menu_item->db_id = $item_counter;
+                    $parent_menu_item->menu_item_parent = $item->menu_item_parent;
+                    $parent_menu_item->menu_order = $item->menu_order;
+                    $parent_menu_item->post_parent = 0;
+                    $parent_menu_item->object_id = $parent_item_data['id'];
+                    $parent_menu_item->object = $parent_item_data['object'];
+                    $parent_menu_item->type = $parent_item_data['type'];
+                    $parent_menu_item->type_label = $parent_item_data['type_label'];
+                    $parent_menu_item->title = $parent_item_data['title'];
+                    $parent_menu_item->url = $parent_item_data['url'];
+                    $parent_menu_item->target = '';
+                    $parent_menu_item->attr_title = '';
+                    $parent_menu_item->description = '';
+                    $parent_menu_item->classes = ['menu-item'];
+                    $parent_menu_item->xfn = '';
+                    $parent_menu_item->current = false;
+                    $parent_menu_item->current_item_ancestor = false;
+                    $parent_menu_item->current_item_parent = false;
+                    $parent_menu_item->_invalid = false;
+                    $parent_menu_item->status = 'publish';
+                    $parent_menu_item->position = $parent_menu_item->menu_order;
+                    $parent_menu_item->post_status = 'publish';
+                    $parent_menu_item->post_type = 'nav_menu_item';
+                    $parent_menu_item->post_name = sanitize_title($parent_menu_item->title);
+                    $parent_menu_item->post_title = $parent_menu_item->title;
+                    $parent_menu_item->filter = 'raw';
+
+                    $expanded_items[] = $parent_menu_item;
+
+                    // Convert results to menu items as children of the parent
+                    $menu_order_counter = $parent_menu_item->menu_order;
+                    $child_items = self::results_to_menu_items($results, $item, $item_counter, $query_type, 0, $parent_menu_item->ID, $menu_order_counter, $post_type);
+                    $expanded_items = array_merge($expanded_items, $child_items);
+
+                    continue;
+                }
+            }
 
             // Determine parent ID for generated items
             if ($show_default_menu_item) {
@@ -1591,6 +1639,48 @@ final class MenuQueries {
         // Log the args to see what walker is being used
 
         return $expanded_items;
+    }
+
+    /**
+     * Get parent item data for "Include This ID" feature
+     *
+     * @param int    $parent_id Parent post/term ID
+     * @param string $query_type Query type (post/taxonomy)
+     * @param string $post_type Post type (for post queries)
+     * @return array|null Parent item data or null if not found
+     */
+    private static function get_parent_item_data(int $parent_id, string $query_type, string $post_type): ?array {
+        if ($query_type === 'taxonomy') {
+            // Get term by ID - need to loop through taxonomies to find it
+            $term = get_term($parent_id);
+            if (!$term || is_wp_error($term)) {
+                return null;
+            }
+
+            return [
+                'id' => $term->term_id,
+                'title' => $term->name,
+                'url' => get_term_link($term),
+                'object' => $term->taxonomy,
+                'type' => 'taxonomy',
+                'type_label' => __('Taxonomy', 'ab-wp-bits'),
+            ];
+        } else {
+            // Get post by ID
+            $post = get_post($parent_id);
+            if (!$post) {
+                return null;
+            }
+
+            return [
+                'id' => $post->ID,
+                'title' => get_the_title($post),
+                'url' => get_permalink($post),
+                'object' => $post_type,
+                'type' => 'post_type',
+                'type_label' => __('Post', 'ab-wp-bits'),
+            ];
+        }
     }
 
     /**

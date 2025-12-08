@@ -32,6 +32,7 @@
   let offset = $state(0);
   let childOf = $state(0);
   let includeChildren = $state(false);
+  let includeParentItem = $state(false);
   let hierarchical = $state(false);
   let showLabelOnEmpty = $state(false);
   let emptyLabel = $state('');
@@ -84,6 +85,7 @@
           offset = typeof initialConfig.offset === 'string' ? parseInt(initialConfig.offset, 10) : (initialConfig.offset || 0);
           childOf = typeof initialConfig.childOf === 'string' ? parseInt(initialConfig.childOf, 10) : (initialConfig.childOf || 0);
           includeChildren = initialConfig.includeChildren ?? false;
+          includeParentItem = initialConfig.includeParentItem ?? false;
           hierarchical = initialConfig.hierarchical ?? false;
           showLabelOnEmpty = initialConfig.showLabelOnEmpty ?? false;
           emptyLabel = initialConfig.emptyLabel || '';
@@ -114,6 +116,7 @@
         offset = 0;
         childOf = 0;
         includeChildren = false;
+        includeParentItem = false;
         hierarchical = false;
         showLabelOnEmpty = false;
         emptyLabel = '';
@@ -236,6 +239,7 @@
       hierarchical = args.hierarchical ?? false;
 
       // UI-only properties
+      includeParentItem = args.includeParentItem ?? false;
       showLabelOnEmpty = args.showLabelOnEmpty ?? false;
       emptyLabel = args.emptyLabel || '';
       showDefaultMenuItem = args.showDefaultMenuItem ?? false;
@@ -370,7 +374,7 @@
           'post_parent', 'post__in', 'post__not_in', 'tax_query', 'meta_query',
           'taxonomy', 'number', 'child_of', 'parent', 'include', 'exclude',
           // UI-only properties (camelCase) - should never be in WP_Query
-          'queryType', 'postType', 'orderBy', 'postCount', 'childOf', 'includeChildren',
+          'queryType', 'postType', 'orderBy', 'postCount', 'childOf', 'includeChildren', 'includeParentItem',
           'showLabelOnEmpty', 'emptyLabel', 'showDefaultMenuItem', 'includePosts', 'excludePosts',
           'includeTerms', 'excludeTerms', 'includeTaxonomies', 'excludeTaxonomies',
           'metaQueries', 'metaQueryRelation'
@@ -496,6 +500,7 @@
     Object.assign(args, existingCustomProps);
 
     // Add UI-only properties so they can be loaded when editing
+    args.includeParentItem = includeParentItem;
     args.showLabelOnEmpty = showLabelOnEmpty;
     args.emptyLabel = emptyLabel;
     args.showDefaultMenuItem = showDefaultMenuItem;
@@ -557,6 +562,7 @@
       offset,
       childOf,
       includeChildren,
+      includeParentItem,
       hierarchical,
       showLabelOnEmpty,
       emptyLabel,
@@ -586,6 +592,7 @@
       offset: typeof offset === 'string' ? parseInt(offset, 10) : offset,
       childOf: typeof childOf === 'string' ? parseInt(childOf, 10) : childOf,
       includeChildren,
+      includeParentItem,
       hierarchical,
       showLabelOnEmpty,
       emptyLabel,
@@ -638,6 +645,7 @@
       offset = 0;
       childOf = 0;
       includeChildren = false;
+      includeParentItem = false;
       hierarchical = false;
       showLabelOnEmpty = false;
       emptyLabel = '';
@@ -826,6 +834,18 @@
             help="Show only children of this ID"
           />
         </div>
+
+        {#if childOf > 0}
+          <div class="wpea-grid-2">
+            <Switch
+              id="include-parent-item"
+              label="Include This ID"
+              bind:checked={includeParentItem}
+              help="When enabled, includes the parent item (Child Of ID) as the first menu item, with query results as sub-menu items"
+            />
+          </div>
+        {/if}
+
         <div class="wpea-grid-2">
           <Switch
             id="include-children"
@@ -981,6 +1001,7 @@
     height: 90vh !important;
     max-width: 800px !important;
     max-height: 90vh !important;
+    border-radius: var(--wpea-radius--lg) !important;
   }
 
   .wpea-grid-2 {

@@ -26,6 +26,7 @@ export interface QueryConfig {
   offset: number;
   childOf: number;
   includeChildren: boolean;
+  includeParentItem: boolean;
   hierarchical: boolean;
   showLabelOnEmpty: boolean;
   emptyLabel: string;

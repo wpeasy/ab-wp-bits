@@ -128,6 +128,7 @@
     height: 90vh !important;
     max-width: 800px !important;
     max-height: 90vh !important;
+    border-radius: var(--wpea-radius--lg) !important;
   }
 
   .wpea-grid-2.svelte-15s92sb {
@@ -4890,18 +4891,19 @@
   delegate(["click", "keydown"]);
   var root_5 = /* @__PURE__ */ from_html(`<!> <!> <!>`, 1);
   var root_7 = /* @__PURE__ */ from_html(`<div class="wpea-grid-2 svelte-15s92sb"><!> <!></div>`);
-  var root_10 = /* @__PURE__ */ from_html(`<div class="wpea-grid-3 svelte-15s92sb"><!> <!> <!> <!></div> <div class="wpea-grid-2 svelte-15s92sb"><!> <!></div>`, 1);
-  var root_12 = /* @__PURE__ */ from_html(`<div class="wpea-grid-2 svelte-15s92sb"><!> <!></div>`);
-  var root_13 = /* @__PURE__ */ from_html(`<p class="wpea-text-muted wpea-text-sm">Filter posts by taxonomies.</p> <div class="wpea-grid-2 svelte-15s92sb"><!> <!></div>`, 1);
-  var root_11 = /* @__PURE__ */ from_html(`<!> <!> <!>`, 1);
-  var root_16 = /* @__PURE__ */ from_html(`<div class="wpea-grid-2 svelte-15s92sb"><!> <!></div>`);
+  var root_11 = /* @__PURE__ */ from_html(`<div class="wpea-grid-2 svelte-15s92sb"><!></div>`);
+  var root_10 = /* @__PURE__ */ from_html(`<div class="wpea-grid-3 svelte-15s92sb"><!> <!> <!> <!></div> <!> <div class="wpea-grid-2 svelte-15s92sb"><!> <!></div>`, 1);
+  var root_13 = /* @__PURE__ */ from_html(`<div class="wpea-grid-2 svelte-15s92sb"><!> <!></div>`);
+  var root_14 = /* @__PURE__ */ from_html(`<p class="wpea-text-muted wpea-text-sm">Filter posts by taxonomies.</p> <div class="wpea-grid-2 svelte-15s92sb"><!> <!></div>`, 1);
+  var root_12 = /* @__PURE__ */ from_html(`<!> <!> <!>`, 1);
+  var root_17 = /* @__PURE__ */ from_html(`<div class="wpea-grid-2 svelte-15s92sb"><!> <!></div>`);
   var root_3 = /* @__PURE__ */ from_html(`<!> <!> <!> <!>`, 1);
-  var root_20 = /* @__PURE__ */ from_html(`<p class="wpea-text-muted wpea-text-sm">Edit the generated WP_Query JSON below. This will be used to fetch items.</p> <!>`, 1);
-  var root_24 = /* @__PURE__ */ from_html(`<p class="wpea-text-muted">Loading results...</p>`);
-  var root_26 = /* @__PURE__ */ from_html(`<p class="wpea-text-danger"> </p>`);
-  var root_29 = /* @__PURE__ */ from_html(`<p class="wpea-text-muted">No results yet. Switch to this tab after creating a query.</p>`);
+  var root_21 = /* @__PURE__ */ from_html(`<p class="wpea-text-muted wpea-text-sm">Edit the generated WP_Query JSON below. This will be used to fetch items.</p> <!>`, 1);
+  var root_25 = /* @__PURE__ */ from_html(`<p class="wpea-text-muted">Loading results...</p>`);
+  var root_27 = /* @__PURE__ */ from_html(`<p class="wpea-text-danger"> </p>`);
+  var root_30 = /* @__PURE__ */ from_html(`<p class="wpea-text-muted">No results yet. Switch to this tab after creating a query.</p>`);
   var root_1 = /* @__PURE__ */ from_html(`<div class="wpea-tabs"><div class="wpea-tabs__list" role="tablist"><button class="wpea-tabs__tab" role="tab">Builder</button> <button class="wpea-tabs__tab" role="tab">WP_Query</button> <button class="wpea-tabs__tab" role="tab">Results</button></div></div> <!>`, 1);
-  var root_30 = /* @__PURE__ */ from_html(`<div style="display: flex; justify-content: space-between; width: 100%;"><div><!></div> <div style="display: flex; gap: var(--wpea-space--sm);"><!> <!></div></div>`);
+  var root_31 = /* @__PURE__ */ from_html(`<div style="display: flex; justify-content: space-between; width: 100%;"><div><!></div> <div style="display: flex; gap: var(--wpea-space--sm);"><!> <!></div></div>`);
   function QueryBuilderModal($$anchor, $$props) {
     push($$props, true);
     let open = prop($$props, "open", 15, false), initialConfig = prop($$props, "initialConfig", 3, null);
@@ -4915,6 +4917,7 @@
     let offset = /* @__PURE__ */ state(0);
     let childOf = /* @__PURE__ */ state(0);
     let includeChildren = /* @__PURE__ */ state(false);
+    let includeParentItem = /* @__PURE__ */ state(false);
     let hierarchical = /* @__PURE__ */ state(false);
     let showLabelOnEmpty = /* @__PURE__ */ state(false);
     let emptyLabel = /* @__PURE__ */ state("");
@@ -4972,6 +4975,7 @@
               true
             );
             set(includeChildren, initialConfig().includeChildren ?? false, true);
+            set(includeParentItem, initialConfig().includeParentItem ?? false, true);
             set(hierarchical, initialConfig().hierarchical ?? false, true);
             set(showLabelOnEmpty, initialConfig().showLabelOnEmpty ?? false, true);
             set(emptyLabel, initialConfig().emptyLabel || "", true);
@@ -5002,6 +5006,7 @@
           set(offset, 0);
           set(childOf, 0);
           set(includeChildren, false);
+          set(includeParentItem, false);
           set(hierarchical, false);
           set(showLabelOnEmpty, false);
           set(emptyLabel, "");
@@ -5107,6 +5112,7 @@
         set(order, args.order || "ASC", true);
         set(includeChildren, args.include_children ?? false, true);
         set(hierarchical, args.hierarchical ?? false, true);
+        set(includeParentItem, args.includeParentItem ?? false, true);
         set(showLabelOnEmpty, args.showLabelOnEmpty ?? false, true);
         set(emptyLabel, args.emptyLabel || "", true);
         set(showDefaultMenuItem, args.showDefaultMenuItem ?? false, true);
@@ -5232,6 +5238,7 @@
             "postCount",
             "childOf",
             "includeChildren",
+            "includeParentItem",
             "showLabelOnEmpty",
             "emptyLabel",
             "showDefaultMenuItem",
@@ -5342,6 +5349,7 @@
         if (excludeTermsFiltered.length > 0) args.exclude = excludeTermsFiltered;
       }
       Object.assign(args, existingCustomProps);
+      args.includeParentItem = get(includeParentItem);
       args.showLabelOnEmpty = get(showLabelOnEmpty);
       args.emptyLabel = get(emptyLabel);
       args.showDefaultMenuItem = get(showDefaultMenuItem);
@@ -5394,6 +5402,7 @@
         offset: get(offset),
         childOf: get(childOf),
         includeChildren: get(includeChildren),
+        includeParentItem: get(includeParentItem),
         hierarchical: get(hierarchical),
         showLabelOnEmpty: get(showLabelOnEmpty),
         emptyLabel: get(emptyLabel),
@@ -5420,6 +5429,7 @@
         offset: typeof get(offset) === "string" ? parseInt(get(offset), 10) : get(offset),
         childOf: typeof get(childOf) === "string" ? parseInt(get(childOf), 10) : get(childOf),
         includeChildren: get(includeChildren),
+        includeParentItem: get(includeParentItem),
         hierarchical: get(hierarchical),
         showLabelOnEmpty: get(showLabelOnEmpty),
         emptyLabel: get(emptyLabel),
@@ -5465,6 +5475,7 @@
         set(offset, 0);
         set(childOf, 0);
         set(includeChildren, false);
+        set(includeParentItem, false);
         set(hierarchical, false);
         set(showLabelOnEmpty, false);
         set(emptyLabel, "");
@@ -5531,7 +5542,7 @@
         button_2.__click = () => set(activeTab, "results");
         var node = sibling(div, 2);
         {
-          var consequent_3 = ($$anchor3) => {
+          var consequent_4 = ($$anchor3) => {
             Stack($$anchor3, {
               children: ($$anchor4, $$slotProps) => {
                 var fragment_3 = root_3();
@@ -5712,9 +5723,31 @@
                         set(childOf, $$value, true);
                       }
                     });
-                    var div_4 = sibling(div_3, 2);
-                    var node_13 = child(div_4);
-                    Switch(node_13, {
+                    var node_13 = sibling(div_3, 2);
+                    {
+                      var consequent_2 = ($$anchor6) => {
+                        var div_4 = root_11();
+                        var node_14 = child(div_4);
+                        Switch(node_14, {
+                          id: "include-parent-item",
+                          label: "Include This ID",
+                          help: "When enabled, includes the parent item (Child Of ID) as the first menu item, with query results as sub-menu items",
+                          get checked() {
+                            return get(includeParentItem);
+                          },
+                          set checked($$value) {
+                            set(includeParentItem, $$value, true);
+                          }
+                        });
+                        append($$anchor6, div_4);
+                      };
+                      if_block(node_13, ($$render) => {
+                        if (get(childOf) > 0) $$render(consequent_2);
+                      });
+                    }
+                    var div_5 = sibling(node_13, 2);
+                    var node_15 = child(div_5);
+                    Switch(node_15, {
                       id: "include-children",
                       label: "Include Children",
                       get checked() {
@@ -5724,8 +5757,8 @@
                         set(includeChildren, $$value, true);
                       }
                     });
-                    var node_14 = sibling(node_13, 2);
-                    Switch(node_14, {
+                    var node_16 = sibling(node_15, 2);
+                    Switch(node_16, {
                       id: "hierarchical",
                       label: "Hierarchical Results",
                       help: "When checked, results are nested by parent/child relationships",
@@ -5740,17 +5773,17 @@
                   },
                   $$slots: { default: true }
                 });
-                var node_15 = sibling(node_8, 2);
+                var node_17 = sibling(node_8, 2);
                 {
-                  var consequent_2 = ($$anchor5) => {
-                    var fragment_10 = root_11();
-                    var node_16 = first_child(fragment_10);
-                    Card(node_16, {
+                  var consequent_3 = ($$anchor5) => {
+                    var fragment_10 = root_12();
+                    var node_18 = first_child(fragment_10);
+                    Card(node_18, {
                       title: "Include / Exclude Posts",
                       children: ($$anchor6, $$slotProps2) => {
-                        var div_5 = root_12();
-                        var node_17 = child(div_5);
-                        MultiSelect(node_17, {
+                        var div_6 = root_13();
+                        var node_19 = child(div_6);
+                        MultiSelect(node_19, {
                           id: "include-posts",
                           label: "Include Posts",
                           get options() {
@@ -5764,8 +5797,8 @@
                             set(includePosts, $$value, true);
                           }
                         });
-                        var node_18 = sibling(node_17, 2);
-                        MultiSelect(node_18, {
+                        var node_20 = sibling(node_19, 2);
+                        MultiSelect(node_20, {
                           id: "exclude-posts",
                           label: "Exclude Posts",
                           get options() {
@@ -5779,18 +5812,18 @@
                             set(excludePosts, $$value, true);
                           }
                         });
-                        append($$anchor6, div_5);
+                        append($$anchor6, div_6);
                       },
                       $$slots: { default: true }
                     });
-                    var node_19 = sibling(node_16, 2);
-                    Card(node_19, {
+                    var node_21 = sibling(node_18, 2);
+                    Card(node_21, {
                       title: "Include / Exclude Taxonomies",
                       children: ($$anchor6, $$slotProps2) => {
-                        var fragment_11 = root_13();
-                        var div_6 = sibling(first_child(fragment_11), 2);
-                        var node_20 = child(div_6);
-                        MultiSelect(node_20, {
+                        var fragment_11 = root_14();
+                        var div_7 = sibling(first_child(fragment_11), 2);
+                        var node_22 = child(div_7);
+                        MultiSelect(node_22, {
                           id: "include-taxonomies",
                           label: "Include Taxonomies",
                           get options() {
@@ -5804,8 +5837,8 @@
                             set(includeTaxonomies, $$value, true);
                           }
                         });
-                        var node_21 = sibling(node_20, 2);
-                        MultiSelect(node_21, {
+                        var node_23 = sibling(node_22, 2);
+                        MultiSelect(node_23, {
                           id: "exclude-taxonomies",
                           label: "Exclude Taxonomies",
                           get options() {
@@ -5823,8 +5856,8 @@
                       },
                       $$slots: { default: true }
                     });
-                    var node_22 = sibling(node_19, 2);
-                    Card(node_22, {
+                    var node_24 = sibling(node_21, 2);
+                    Card(node_24, {
                       children: ($$anchor6, $$slotProps2) => {
                         MetaQueryRepeater($$anchor6, {
                           onUpdate: handleMetaQueriesUpdate,
@@ -5850,9 +5883,9 @@
                     Card($$anchor5, {
                       title: "Include / Exclude Terms",
                       children: ($$anchor6, $$slotProps2) => {
-                        var div_7 = root_16();
-                        var node_23 = child(div_7);
-                        MultiSelect(node_23, {
+                        var div_8 = root_17();
+                        var node_25 = child(div_8);
+                        MultiSelect(node_25, {
                           id: "include-terms",
                           label: "Include Terms",
                           get options() {
@@ -5866,8 +5899,8 @@
                             set(includeTerms, $$value, true);
                           }
                         });
-                        var node_24 = sibling(node_23, 2);
-                        MultiSelect(node_24, {
+                        var node_26 = sibling(node_25, 2);
+                        MultiSelect(node_26, {
                           id: "exclude-terms",
                           label: "Exclude Terms",
                           get options() {
@@ -5881,13 +5914,13 @@
                             set(excludeTerms, $$value, true);
                           }
                         });
-                        append($$anchor6, div_7);
+                        append($$anchor6, div_8);
                       },
                       $$slots: { default: true }
                     });
                   };
-                  if_block(node_15, ($$render) => {
-                    if (get(queryType) === "post") $$render(consequent_2);
+                  if_block(node_17, ($$render) => {
+                    if (get(queryType) === "post") $$render(consequent_3);
                     else $$render(alternate_1, false);
                   });
                 }
@@ -5897,17 +5930,17 @@
           };
           var alternate_6 = ($$anchor3) => {
             var fragment_14 = comment();
-            var node_25 = first_child(fragment_14);
+            var node_27 = first_child(fragment_14);
             {
-              var consequent_4 = ($$anchor4) => {
+              var consequent_5 = ($$anchor4) => {
                 Stack($$anchor4, {
                   children: ($$anchor5, $$slotProps) => {
                     Card($$anchor5, {
                       title: "Raw WP_Query",
                       children: ($$anchor6, $$slotProps2) => {
-                        var fragment_17 = root_20();
-                        var node_26 = sibling(first_child(fragment_17), 2);
-                        Textarea(node_26, {
+                        var fragment_17 = root_21();
+                        var node_28 = sibling(first_child(fragment_17), 2);
+                        Textarea(node_28, {
                           id: "raw-wp-query",
                           rows: 20,
                           placeholder: "Click 'Build Query' in the Builder tab to generate...",
@@ -5932,27 +5965,27 @@
                       title: "Query Results",
                       children: ($$anchor6, $$slotProps2) => {
                         var fragment_20 = comment();
-                        var node_27 = first_child(fragment_20);
+                        var node_29 = first_child(fragment_20);
                         {
-                          var consequent_5 = ($$anchor7) => {
-                            var p = root_24();
+                          var consequent_6 = ($$anchor7) => {
+                            var p = root_25();
                             append($$anchor7, p);
                           };
                           var alternate_4 = ($$anchor7) => {
                             var fragment_21 = comment();
-                            var node_28 = first_child(fragment_21);
+                            var node_30 = first_child(fragment_21);
                             {
-                              var consequent_6 = ($$anchor8) => {
-                                var p_1 = root_26();
+                              var consequent_7 = ($$anchor8) => {
+                                var p_1 = root_27();
                                 var text2 = child(p_1);
                                 template_effect(() => set_text(text2, get(resultsError)));
                                 append($$anchor8, p_1);
                               };
                               var alternate_3 = ($$anchor8) => {
                                 var fragment_22 = comment();
-                                var node_29 = first_child(fragment_22);
+                                var node_31 = first_child(fragment_22);
                                 {
-                                  var consequent_7 = ($$anchor9) => {
+                                  var consequent_8 = ($$anchor9) => {
                                     Textarea($$anchor9, {
                                       id: "query-results",
                                       get value() {
@@ -5963,13 +5996,13 @@
                                     });
                                   };
                                   var alternate_2 = ($$anchor9) => {
-                                    var p_2 = root_29();
+                                    var p_2 = root_30();
                                     append($$anchor9, p_2);
                                   };
                                   if_block(
-                                    node_29,
+                                    node_31,
                                     ($$render) => {
-                                      if (get(queryResults)) $$render(consequent_7);
+                                      if (get(queryResults)) $$render(consequent_8);
                                       else $$render(alternate_2, false);
                                     },
                                     true
@@ -5978,9 +6011,9 @@
                                 append($$anchor8, fragment_22);
                               };
                               if_block(
-                                node_28,
+                                node_30,
                                 ($$render) => {
-                                  if (get(resultsError)) $$render(consequent_6);
+                                  if (get(resultsError)) $$render(consequent_7);
                                   else $$render(alternate_3, false);
                                 },
                                 true
@@ -5988,8 +6021,8 @@
                             }
                             append($$anchor7, fragment_21);
                           };
-                          if_block(node_27, ($$render) => {
-                            if (get(isLoadingResults)) $$render(consequent_5);
+                          if_block(node_29, ($$render) => {
+                            if (get(isLoadingResults)) $$render(consequent_6);
                             else $$render(alternate_4, false);
                           });
                         }
@@ -6001,9 +6034,9 @@
                 });
               };
               if_block(
-                node_25,
+                node_27,
                 ($$render) => {
-                  if (get(activeTab) === "query") $$render(consequent_4);
+                  if (get(activeTab) === "query") $$render(consequent_5);
                   else $$render(alternate_5, false);
                 },
                 true
@@ -6012,7 +6045,7 @@
             append($$anchor3, fragment_14);
           };
           if_block(node, ($$render) => {
-            if (get(activeTab) === "builder") $$render(consequent_3);
+            if (get(activeTab) === "builder") $$render(consequent_4);
             else $$render(alternate_6, false);
           });
         }
@@ -6024,12 +6057,12 @@
         append($$anchor2, fragment_1);
       };
       const footer = ($$anchor2) => {
-        var div_8 = root_30();
-        var div_9 = child(div_8);
-        var node_30 = child(div_9);
+        var div_9 = root_31();
+        var div_10 = child(div_9);
+        var node_32 = child(div_10);
         {
           let $0 = /* @__PURE__ */ user_derived(() => get(showResetConfirm) ? "danger" : "ghost");
-          Button(node_30, {
+          Button(node_32, {
             get variant() {
               return get($0);
             },
@@ -6042,9 +6075,9 @@
             $$slots: { default: true }
           });
         }
-        var div_10 = sibling(div_9, 2);
-        var node_31 = child(div_10);
-        Button(node_31, {
+        var div_11 = sibling(div_10, 2);
+        var node_33 = child(div_11);
+        Button(node_33, {
           variant: "ghost",
           get onclick() {
             return $$props.onClose;
@@ -6055,9 +6088,9 @@
           },
           $$slots: { default: true }
         });
-        var node_32 = sibling(node_31, 2);
+        var node_34 = sibling(node_33, 2);
         {
-          var consequent_8 = ($$anchor3) => {
+          var consequent_9 = ($$anchor3) => {
             Button($$anchor3, {
               variant: "primary",
               onclick: handleSubmit,
@@ -6068,11 +6101,11 @@
               $$slots: { default: true }
             });
           };
-          if_block(node_32, ($$render) => {
-            if (get(canSave)) $$render(consequent_8);
+          if_block(node_34, ($$render) => {
+            if (get(canSave)) $$render(consequent_9);
           });
         }
-        append($$anchor2, div_8);
+        append($$anchor2, div_9);
       };
       Modal($$anchor, {
         size: "fullscreen",
