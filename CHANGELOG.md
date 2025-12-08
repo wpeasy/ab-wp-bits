@@ -2,6 +2,20 @@
 
 All notable changes to Alan Blair's WP Bits will be documented in this file.
 
+## [0.0.4-beta] - 2025-12-08
+
+### Fixed
+- **Critical**: Menu Queries meta box now visible in Appearance → Menus on fresh installations
+- **Menu Queries**: Changed hook from `admin_menu` to `load-nav-menus.php` for proper meta box registration
+- **Menu Queries**: Removed `hide-if-js` class via JavaScript to make meta box visible by default
+- **Menu Queries**: Cleared description field to prevent query config JSON from displaying in frontend menus
+- **Hook Timing**: Moved hook registration from `run()` to `register()` method for earlier execution
+
+### Technical Notes
+- WordPress requires nav menu meta boxes to use `load-nav-menus.php` hook, not `admin_menu`
+- Custom nav menu meta boxes have `hide-if-js` class by default (controlled by Screen Options)
+- Query configuration stored in description field is now cleared before frontend rendering
+
 ## [0.0.3-beta] - 2025-12-08
 
 ### Added

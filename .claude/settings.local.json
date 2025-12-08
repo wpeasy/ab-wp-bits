@@ -23,7 +23,8 @@
       "Bash(powershell.exe -ExecutionPolicy Bypass -File create-plugin-zip.ps1)",
       "Bash(grep:*)",
       "Bash(git log:*)",
-      "Bash(wp option get:*)"
+      "Bash(wp option get:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []
