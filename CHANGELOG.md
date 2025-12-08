@@ -2,6 +2,30 @@
 
 All notable changes to Alan Blair's WP Bits will be documented in this file.
 
+## [0.0.3-beta] - 2025-12-08
+
+### Added
+- **Dashboard**: Alphabetical sorting for module tabs and module lists
+- **Dashboard**: Visual separator under Module Manager tab
+- **Documentation**: Comprehensive CSS variable validation rules in WPEA CLAUDE.md
+- **Documentation**: Complete list of available WPEA CSS variables with examples
+
+### Changed
+- **Dashboard**: Module Manager always appears first with underline separator
+- **Dashboard**: All modules sorted alphabetically by name
+- **WPEA Integration**: Changed from `.wpea` to `.wpea-scope` for proper variable inheritance
+
+### Fixed
+- **Critical**: Fixed all 8 hallucinated CSS variables (--wpea-color--surface, --wpea-color--border, etc.)
+- **Critical**: Replaced invented variables with actual WPEA framework variables
+- **CSS Variables**: --wpea-color--surface → --wpea-surface--bg
+- **CSS Variables**: --wpea-color--surface-raised → --wpea-surface--panel
+- **CSS Variables**: --wpea-color--border → --wpea-surface--border
+- **CSS Variables**: --wpea-color--border-subtle → --wpea-surface--divider
+- **CSS Variables**: Success/danger backgrounds now use color-mix() with actual variables
+- **Svelte 5**: Fixed state mutation error by using .toSorted() instead of .sort()
+- **Tab Separator**: Added !important and higher specificity to ensure visibility
+
 ## [0.0.2-beta] - 2025-12-08
 
 ### Added
