@@ -103,14 +103,19 @@
     display: flex;
     text-align: left;
     justify-content: flex-start;
-    border-bottom: none !important;
     border-left: 3px solid transparent;
     padding: var(--wpea-space--sm) var(--wpea-space--md);
     margin-bottom: 0;
   }
 
+  /* Separator after Module Manager tab - must come before [aria-selected] */
+  .wpea-tabs--vertical > .wpea-tabs__list > .wpea-tabs__tab.wpea-tabs__tab--separator {
+    border-bottom: 1px solid var(--wpea-color--border) !important;
+    padding-bottom: var(--wpea-space--md);
+    margin-bottom: var(--wpea-space--md);
+  }
+
   .wpea-tabs--vertical > .wpea-tabs__list > .wpea-tabs__tab[aria-selected="true"] {
-    border-bottom: none !important;
     border-left-color: var(--wpea-color--primary);
     background-color: var(--wpea-color--surface-raised);
     color: var(--wpea-color--primary) !important;
@@ -123,12 +128,5 @@
 
   .wpea-tabs--vertical .wpea-tabs__panel {
     width: 100%;
-  }
-
-  /* Separator after Module Manager tab */
-  .wpea-tabs--vertical > .wpea-tabs__list > .wpea-tabs__tab--separator {
-    border-bottom: 1px solid var(--wpea-color--border) !important;
-    padding-bottom: var(--wpea-space--md);
-    margin-bottom: var(--wpea-space--md);
   }
 </style>
