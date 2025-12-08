@@ -5,6 +5,109 @@
 - wpea-wp-resets.css - resets to overcome default WP Admin styles
 - test-ui.html - Sample HTML for usage of the framework for admin UI
 
+## ⚠️ CRITICAL: CSS Variable Usage
+
+**NEVER invent or hallucinate CSS variable names. ONLY use variables that are actually defined in wpea-framework.css.**
+
+### How to Use CSS Variables Correctly
+
+1. **Before using ANY CSS variable**, verify it exists in `wpea-framework.css`
+2. **Search the framework file** for the exact variable name
+3. **If a variable doesn't exist**, use one of these alternatives:
+   - Find a similar existing variable
+   - Use `color-mix()` to create derived colors (see examples below)
+   - Ask the user for clarification
+
+### Common Mistakes to AVOID
+
+❌ **DO NOT invent these (they don't exist):**
+- `--wpea-color--surface` (use `--wpea-surface--bg`)
+- `--wpea-color--surface-raised` (use `--wpea-surface--panel`)
+- `--wpea-color--border` (use `--wpea-surface--border`)
+- `--wpea-color--border-subtle` (use `--wpea-surface--divider`)
+- `--wpea-color--success-bg` (use `color-mix()` - see below)
+- `--wpea-color--success-text` (use `--wpea-surface--text`)
+- `--wpea-color--danger-bg` (use `color-mix()` - see below)
+- `--wpea-color--danger-text` (use `--wpea-surface--text`)
+
+### Available Variable Categories
+
+**Surface Colors:**
+- `--wpea-surface--bg` - Background color
+- `--wpea-surface--panel` - Raised panel/card background
+- `--wpea-surface--muted` - Muted background
+- `--wpea-surface--border` - Border color
+- `--wpea-surface--divider` - Subtle divider line
+- `--wpea-surface--text` - Text color on surfaces
+- `--wpea-surface--text-muted` - Muted text color
+- `--wpea-surface--elev-1`, `--wpea-surface--elev-2`, `--wpea-surface--elev-3` - Elevation levels
+
+**Brand Colors:**
+- `--wpea-color--primary` - Primary brand color
+- `--wpea-color--secondary` - Secondary brand color
+- `--wpea-color--neutral` - Neutral color
+
+**Semantic Colors:**
+- `--wpea-color--success` - Success color
+- `--wpea-color--warning` - Warning color
+- `--wpea-color--danger` - Danger/error color
+- `--wpea-color--info` - Info color
+
+**Text Colors:**
+- `--wpea-color--text` - Main text color
+- `--wpea-color--text-muted` - Muted text
+- `--wpea-color--heading` - Heading text
+
+**Input Colors:**
+- `--wpea-input--bg` - Input background
+- `--wpea-input--border` - Input border
+- `--wpea-input--border-hover` - Input border on hover
+- `--wpea-input--border-focus` - Input border on focus
+- `--wpea-input--placeholder` - Placeholder text
+
+**Spacing:**
+- `--wpea-space--xs`, `--wpea-space--sm`, `--wpea-space--md`, `--wpea-space--lg`, `--wpea-space--xl`, `--wpea-space--2xl`
+
+**Radius:**
+- `--wpea-radius--sm`, `--wpea-radius--md`, `--wpea-radius--lg`, `--wpea-radius--xl`
+
+### Using color-mix() for Derived Colors
+
+When you need a tinted background (like alert boxes), use `color-mix()` instead of inventing variables:
+
+**✅ CORRECT - Using color-mix():**
+```css
+.alert-success {
+  background: color-mix(in oklab, var(--wpea-color--success), transparent 85%);
+  border-color: var(--wpea-color--success);
+  color: var(--wpea-surface--text);
+}
+
+.alert-danger {
+  background: color-mix(in oklab, var(--wpea-color--danger), transparent 85%);
+  border-color: var(--wpea-color--danger);
+  color: var(--wpea-surface--text);
+}
+```
+
+**❌ WRONG - Inventing variables:**
+```css
+.alert-success {
+  background: var(--wpea-color--success-bg); /* DOESN'T EXIST */
+  color: var(--wpea-color--success-text); /* DOESN'T EXIST */
+}
+```
+
+### Verification Checklist
+
+Before writing ANY CSS variable:
+
+1. ✅ Open `wpea-framework.css`
+2. ✅ Search for the exact variable name (e.g., `--wpea-surface--border`)
+3. ✅ Confirm it exists in the file
+4. ✅ If it doesn't exist, use an alternative or `color-mix()`
+5. ✅ Never assume a variable exists based on naming patterns
+
 ## Class Usage
 
 ### `.wpea` vs `.wpea-scope`
