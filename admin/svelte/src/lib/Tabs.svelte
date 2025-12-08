@@ -110,7 +110,7 @@
 
   /* Separator after Module Manager tab - must come before [aria-selected] */
   .wpea-tabs--vertical > .wpea-tabs__list > .wpea-tabs__tab.wpea-tabs__tab--separator {
-    border-bottom: 1px solid var(--wpea-color--border) !important;
+    border-bottom: 1px solid var(--wpea-surface--border) !important;
     padding-bottom: var(--wpea-space--md);
     margin-bottom: var(--wpea-space--md);
   }

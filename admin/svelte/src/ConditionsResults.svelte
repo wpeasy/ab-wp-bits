@@ -173,14 +173,14 @@
   }
 
   .user-result--visible {
-    background: var(--wpea-color--success-bg);
+    background: color-mix(in oklab, var(--wpea-color--success), transparent 85%);
     border-color: var(--wpea-color--success);
-    color: var(--wpea-color--success-text);
+    color: var(--wpea-surface--text);
   }
 
   .user-result--hidden {
-    background: var(--wpea-color--danger-bg);
+    background: color-mix(in oklab, var(--wpea-color--danger), transparent 85%);
     border-color: var(--wpea-color--danger);
-    color: var(--wpea-color--danger-text);
+    color: var(--wpea-surface--text);
   }
 </style>

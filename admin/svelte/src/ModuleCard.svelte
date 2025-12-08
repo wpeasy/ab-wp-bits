@@ -63,7 +63,7 @@
     gap: var(--wpea-space--md);
     padding: var(--wpea-space--md);
     background: var(--wpea-surface--panel);
-    border: 1px solid var(--wpea-color--border);
+    border: 1px solid var(--wpea-surface--border);
     border-radius: var(--wpea-radius--md);
   }
 
