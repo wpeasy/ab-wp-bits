@@ -54,8 +54,8 @@ final class MenuQueries {
      * @return void
      */
     public static function run(): void {
-        // Add meta box to Appearance > Menus - call directly, not on admin_init
-        self::add_nav_menu_meta_box();
+        // Add meta box to Appearance > Menus - use load-nav-menus.php hook
+        add_action('load-nav-menus.php', [__CLASS__, 'add_nav_menu_meta_box']);
 
         // Enqueue scripts for menu admin
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_menu_scripts']);
