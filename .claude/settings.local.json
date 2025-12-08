@@ -20,7 +20,8 @@
       "WebFetch(domain:developer.wordpress.org)",
       "Bash(npm run build:menu-conditions:*)",
       "SlashCommand(/zip-plugin)",
-      "Bash(powershell.exe -ExecutionPolicy Bypass -File create-plugin-zip.ps1)"
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File create-plugin-zip.ps1)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

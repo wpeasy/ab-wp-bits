@@ -43,7 +43,7 @@
   );
 </script>
 
-<div class="wpea wpea-cq ab-wp-bits-admin">
+<div class="wpea-scope ab-wp-bits-admin">
   <Tabs {tabs} bind:activeTab orientation="vertical">
     {#snippet content()}
       {#if activeTab === 'modules'}
