@@ -49,7 +49,7 @@ final class MenuQueries {
 
         // Register hooks early, outside of run() callback
         // Check if module is enabled on each hook
-        add_action('admin_menu', [__CLASS__, 'add_nav_menu_meta_box']);
+        add_action('load-nav-menus.php', [__CLASS__, 'add_nav_menu_meta_box']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_menu_scripts']);
         add_action('customize_controls_enqueue_scripts', [__CLASS__, 'enqueue_customizer_scripts']);
     }
