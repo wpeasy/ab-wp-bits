@@ -9,4 +9,117 @@
     margin-top: 20px;
 }
 
-/* Additional plugin-specific styles can be added here if needed */
+/* ==========================================================================
+   Fix native select dropdown visibility in light/dark modes
+   ========================================================================== */
+
+/* Ensure select dropdown arrow is always visible using a contrasting color */
+.wpea .wpea-select,
+.wpea-scope .wpea-select,
+.wpea-modal .wpea-select {
+  color: var(--wpea-surface--text);
+  background-color: var(--wpea-input--bg);
+  background-image:
+    linear-gradient(45deg, transparent 49%, var(--wpea-surface--text-muted) 50%),
+    linear-gradient(135deg, var(--wpea-surface--text-muted) 50%, transparent 51%);
+  background-position:
+    calc(100% - .9rem) center,
+    calc(100% - .6rem) center;
+  background-size: .45rem .45rem, .45rem .45rem;
+  background-repeat: no-repeat;
+  padding-inline-end: 2.4rem;
+}
+
+/* Ensure focus/hover states maintain visible arrow */
+.wpea .wpea-select:hover,
+.wpea-scope .wpea-select:hover,
+.wpea-modal .wpea-select:hover,
+.wpea .wpea-select:focus,
+.wpea-scope .wpea-select:focus,
+.wpea-modal .wpea-select:focus {
+  background-image:
+    linear-gradient(45deg, transparent 49%, var(--wpea-surface--text) 50%),
+    linear-gradient(135deg, var(--wpea-surface--text) 50%, transparent 51%);
+  background-position:
+    calc(100% - .9rem) center,
+    calc(100% - .6rem) center;
+  background-size: .45rem .45rem, .45rem .45rem;
+  background-repeat: no-repeat;
+}
+
+/* ==========================================================================
+   Fix number input spinners visibility
+   ========================================================================== */
+
+/* Style number input spinners for webkit browsers */
+.wpea input[type="number"]::-webkit-inner-spin-button,
+.wpea input[type="number"]::-webkit-outer-spin-button,
+.wpea-scope input[type="number"]::-webkit-inner-spin-button,
+.wpea-scope input[type="number"]::-webkit-outer-spin-button,
+.wpea-modal input[type="number"]::-webkit-inner-spin-button,
+.wpea-modal input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+  height: auto;
+}
+
+/* Ensure number inputs have proper appearance */
+.wpea input[type="number"],
+.wpea-scope input[type="number"],
+.wpea-modal input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/* Show spinners on hover/focus for webkit */
+.wpea input[type="number"]:hover::-webkit-inner-spin-button,
+.wpea input[type="number"]:focus::-webkit-inner-spin-button,
+.wpea-scope input[type="number"]:hover::-webkit-inner-spin-button,
+.wpea-scope input[type="number"]:focus::-webkit-inner-spin-button,
+.wpea-modal input[type="number"]:hover::-webkit-inner-spin-button,
+.wpea-modal input[type="number"]:focus::-webkit-inner-spin-button {
+  appearance: auto;
+  -webkit-appearance: inner-spin-button;
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Native select option styling improvements
+   Note: Browser support for option styling is very limited.
+   For full control, use AdvancedSelect component instead.
+   ========================================================================== */
+
+/* Try to override browser default option highlighting */
+.wpea .wpea-select option,
+.wpea-scope .wpea-select option,
+.wpea-modal .wpea-select option {
+  background-color: var(--wpea-input--bg);
+  color: var(--wpea-surface--text);
+  padding: 8px 12px;
+}
+
+/* Selected option - subtle highlight instead of harsh browser default */
+.wpea .wpea-select option:checked,
+.wpea-scope .wpea-select option:checked,
+.wpea-modal .wpea-select option:checked {
+  background: linear-gradient(0deg, var(--wpea-color--primary-t-20) 0%, var(--wpea-color--primary-t-20) 100%);
+  color: var(--wpea-surface--text);
+}
+
+/* Hover state for options */
+.wpea .wpea-select option:hover,
+.wpea-scope .wpea-select option:hover,
+.wpea-modal .wpea-select option:hover {
+  background-color: var(--wpea-surface--muted);
+}
+
+/* ==========================================================================
+   wpea-scope class definition
+   Provides WPEA styling without full page layout
+   ========================================================================== */
+
+.wpea-scope {
+  font-family: var(--wpea-font-sans);
+  font-size: var(--wpea-text--md);
+  color: var(--wpea-surface--text);
+  line-height: 1.5;
+}
