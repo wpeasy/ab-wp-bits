@@ -61,29 +61,33 @@
         </button>
       {/each}
     </div>
-    {#if actions}
-      <div class="wpea-vtabs__actions">
-        {@render actions()}
-      </div>
-    {/if}
   </div>
 
-  <div class="wpea-vtabs__content">
-    {#if content}
-      {@render content()}
-    {:else}
-      {#each tabs as tab}
-        {#if tab.content}
-          <div
-            class="wpea-vtabs__panel"
-            role="tabpanel"
-            aria-hidden={activeTab !== tab.id}
-          >
-            {@render tab.content()}
-          </div>
-        {/if}
-      {/each}
+  <div class="wpea-vtabs__main">
+    {#if actions}
+      <div class="wpea-vtabs__header">
+        <div class="wpea-vtabs__actions">
+          {@render actions()}
+        </div>
+      </div>
     {/if}
+    <div class="wpea-vtabs__content">
+      {#if content}
+        {@render content()}
+      {:else}
+        {#each tabs as tab}
+          {#if tab.content}
+            <div
+              class="wpea-vtabs__panel"
+              role="tabpanel"
+              aria-hidden={activeTab !== tab.id}
+            >
+              {@render tab.content()}
+            </div>
+          {/if}
+        {/each}
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -91,13 +95,31 @@
   .wpea-vtabs__sidebar {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 100%;
+  }
+
+  .wpea-vtabs__main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wpea-vtabs__header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: var(--wpea-space--xs) var(--wpea-space--sm);
+    border-bottom: 1px solid var(--wpea-surface--divider);
   }
 
   .wpea-vtabs__actions {
-    padding: var(--wpea-space--sm);
-    border-top: 1px solid var(--wpea-surface--divider);
+    display: flex;
+    align-items: center;
+    gap: var(--wpea-space--sm);
+  }
+
+  .wpea-vtabs__content {
+    flex: 1;
   }
 
   .wpea-vtabs__tab--separator {

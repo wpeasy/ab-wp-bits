@@ -72,7 +72,6 @@
           {#if option.icon}
             {@render option.icon()}
           {/if}
-          <span>{option.label}</span>
         </button>
         <div class="wpea-popover__content {positionClass} {sizeClass}">
           {option.label}
@@ -91,7 +90,9 @@
         {#if option.icon}
           {@render option.icon()}
         {/if}
-        <span>{option.label}</span>
+        {#if !iconOnly}
+          <span>{option.label}</span>
+        {/if}
       </button>
     {/if}
   {/each}
