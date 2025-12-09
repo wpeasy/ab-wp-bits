@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import type { ConditionsConfig, RoleEvaluationResult, UserData } from './menu-conditions-types';
   import Card from './lib/Card.svelte';
-  import Select from './lib/Select.svelte';
+  import AdvancedSelect from './lib/AdvancedSelect.svelte';
   import FilterableList from './lib/FilterableList.svelte';
   import Stack from './lib/Stack.svelte';
   import Badge from './lib/Badge.svelte';
@@ -106,25 +106,28 @@
     }))
   );
 
-  // User options
-  let userOptions = $derived([
-    { value: '0', label: 'Select a user...' },
-    ...users.map(u => ({
+  // User options (without placeholder since AdvancedSelect handles that)
+  let userOptions = $derived(
+    users.map(u => ({
       value: u.id.toString(),
       label: `${u.name} (${u.roles.join(', ')})`
     }))
-  ]);
+  );
 </script>
 
 <Stack>
   <Card title="Test with Specific User">
     <Stack>
-      <Select
+      <AdvancedSelect
         id="test-user"
         label="Select User"
         value={selectedUser.toString()}
         options={userOptions}
-        onchange={(value) => selectedUser = parseInt(value, 10)}
+        onchange={(value) => selectedUser = parseInt(value as string, 10)}
+        multiple={false}
+        searchable={true}
+        clearable={true}
+        placeholder="Select a user..."
       />
 
       {#if userResult}

@@ -3,7 +3,7 @@
   import Modal from './lib/Modal.svelte';
   import Stack from './lib/Stack.svelte';
   import Card from './lib/Card.svelte';
-  import Select from './lib/Select.svelte';
+  import AdvancedSelect from './lib/AdvancedSelect.svelte';
   import Input from './lib/Input.svelte';
   import Button from './lib/Button.svelte';
   import Switch from './lib/Switch.svelte';
@@ -777,26 +777,35 @@
 
       <Card title="Query Type">
         <div class="wpea-grid-2">
-          <Select
+          <AdvancedSelect
             id="query-type"
             label="Type"
             bind:value={queryType}
             options={queryTypeOptions}
+            multiple={false}
+            searchable={false}
+            clearable={false}
           />
 
           {#if queryType === 'post'}
-            <Select
+            <AdvancedSelect
               id="post-type"
               label="Post Type"
               bind:value={postType}
               options={postTypeOptions}
+              multiple={false}
+              searchable={true}
+              clearable={false}
             />
           {:else}
-            <Select
+            <AdvancedSelect
               id="taxonomy"
               label="Taxonomy"
               bind:value={taxonomy}
               options={taxonomyOptions}
+              multiple={false}
+              searchable={true}
+              clearable={false}
             />
           {/if}
         </div>
@@ -804,18 +813,24 @@
 
       <Card title="Query Parameters">
         <div class="wpea-grid-3">
-          <Select
+          <AdvancedSelect
             id="order-by"
             label="Order By"
             bind:value={orderBy}
             options={orderByOptions}
+            multiple={false}
+            searchable={false}
+            clearable={false}
           />
 
-          <Select
+          <AdvancedSelect
             id="order"
             label="Order"
             bind:value={order}
             options={orderOptions}
+            multiple={false}
+            searchable={false}
+            clearable={false}
           />
 
           <Input

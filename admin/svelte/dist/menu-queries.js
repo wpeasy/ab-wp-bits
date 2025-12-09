@@ -218,11 +218,6 @@
   const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
   const UNINITIALIZED = Symbol();
   const NAMESPACE_HTML = "http://www.w3.org/1999/xhtml";
-  function select_multiple_invalid_value() {
-    {
-      console.warn(`https://svelte.dev/e/select_multiple_invalid_value`);
-    }
-  }
   function svelte_boundary_reset_noop() {
     {
       console.warn(`https://svelte.dev/e/svelte_boundary_reset_noop`);
@@ -1741,18 +1736,6 @@
       }
     );
   }
-  function get_proxied_value(value) {
-    try {
-      if (value !== null && typeof value === "object" && STATE_SYMBOL in value) {
-        return value[STATE_SYMBOL];
-      }
-    } catch {
-    }
-    return value;
-  }
-  function is(a, b) {
-    return Object.is(get_proxied_value(a), get_proxied_value(b));
-  }
   var $window;
   var is_firefox;
   var first_child_getter;
@@ -2742,6 +2725,7 @@
   // @__NO_SIDE_EFFECTS__
   function from_namespace(content, flags2, ns = "svg") {
     var has_start = !content.startsWith("<!>");
+    var is_fragment = (flags2 & TEMPLATE_FRAGMENT) !== 0;
     var wrapped = `<${ns}>${has_start ? content : "<!>" + content}</${ns}>`;
     var node;
     return () => {
@@ -2754,7 +2738,15 @@
           /** @type {Element} */
           /* @__PURE__ */ get_first_child(fragment)
         );
-        {
+        if (is_fragment) {
+          node = document.createDocumentFragment();
+          while (/* @__PURE__ */ get_first_child(root2)) {
+            node.appendChild(
+              /** @type {Node} */
+              /* @__PURE__ */ get_first_child(root2)
+            );
+          }
+        } else {
           node = /** @type {Element} */
           /* @__PURE__ */ get_first_child(root2);
         }
@@ -2763,7 +2755,17 @@
         /** @type {TemplateNode} */
         node.cloneNode(true)
       );
-      {
+      if (is_fragment) {
+        var start = (
+          /** @type {TemplateNode} */
+          /* @__PURE__ */ get_first_child(clone)
+        );
+        var end = (
+          /** @type {TemplateNode} */
+          clone.lastChild
+        );
+        assign_nodes(start, end);
+      } else {
         assign_nodes(clone, clone);
       }
       return clone;
@@ -3763,56 +3765,6 @@
     }
     return next_styles;
   }
-  function select_option(select, value, mounting = false) {
-    if (select.multiple) {
-      if (value == void 0) {
-        return;
-      }
-      if (!is_array(value)) {
-        return select_multiple_invalid_value();
-      }
-      for (var option of select.options) {
-        option.selected = value.includes(get_option_value(option));
-      }
-      return;
-    }
-    for (option of select.options) {
-      var option_value = get_option_value(option);
-      if (is(option_value, value)) {
-        option.selected = true;
-        return;
-      }
-    }
-    if (!mounting || value !== void 0) {
-      select.selectedIndex = -1;
-    }
-  }
-  function init_select(select) {
-    var observer = new MutationObserver(() => {
-      select_option(select, select.__value);
-    });
-    observer.observe(select, {
-      // Listen to option element changes
-      childList: true,
-      subtree: true,
-      // because of <optgroup>
-      // Listen to option element value attribute changes
-      // (doesn't get notified of select value changes,
-      // because that property is not reflected as an attribute)
-      attributes: true,
-      attributeFilter: ["value"]
-    });
-    teardown(() => {
-      observer.disconnect();
-    });
-  }
-  function get_option_value(option) {
-    if ("__value" in option) {
-      return option.__value;
-    } else {
-      return option.value;
-    }
-  }
   const IS_CUSTOM_ELEMENT = Symbol("is custom element");
   const IS_HTML = Symbol("is html");
   function set_value(element, value) {
@@ -4125,7 +4077,7 @@
       }
     };
   }
-  var root_3$6 = /* @__PURE__ */ from_html(`<h3 class="wpea-modal__title"> </h3>`);
+  var root_3$7 = /* @__PURE__ */ from_html(`<h3 class="wpea-modal__title"> </h3>`);
   var root_5$4 = /* @__PURE__ */ from_html(`<div class="wpea-modal__footer"><!></div>`);
   var root_1$8 = /* @__PURE__ */ from_html(`<div><div class="wpea-modal__backdrop" role="button" tabindex="0" aria-label="Close modal"></div> <div class="wpea-modal__container"><div class="wpea-modal__header"><!> <button class="wpea-modal__close" aria-label="Close">&times;</button></div> <div class="wpea-modal__body wpea-scope"><!></div> <!></div></div>`);
   function Modal($$anchor, $$props) {
@@ -4181,7 +4133,7 @@
             append($$anchor3, fragment_1);
           };
           var alternate = ($$anchor3) => {
-            var h3 = root_3$6();
+            var h3 = root_3$7();
             var text2 = child(h3);
             template_effect(() => set_text(text2, title()));
             append($$anchor3, h3);
@@ -4234,11 +4186,11 @@
     pop();
   }
   delegate(["click", "keydown"]);
-  var root$3 = /* @__PURE__ */ from_html(`<div><!></div>`);
+  var root$4 = /* @__PURE__ */ from_html(`<div><!></div>`);
   function Stack($$anchor, $$props) {
     let className = prop($$props, "class", 3, "");
     let sizeClass = /* @__PURE__ */ user_derived(() => $$props.size ? `wpea-stack--${$$props.size}` : "");
-    var div = root$3();
+    var div = root$4();
     var node = child(div);
     {
       var consequent = ($$anchor2) => {
@@ -4259,16 +4211,16 @@
   }
   var root_4$4 = /* @__PURE__ */ from_html(`<div class="wpea-card__title"> </div>`);
   var root_5$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__sub"> </div>`);
-  var root_3$5 = /* @__PURE__ */ from_html(`<!> <!>`, 1);
+  var root_3$6 = /* @__PURE__ */ from_html(`<!> <!>`, 1);
   var root_6$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__actions"><!></div>`);
   var root_1$7 = /* @__PURE__ */ from_html(`<div class="wpea-card__header"><div><!></div> <!></div>`);
-  var root$2 = /* @__PURE__ */ from_html(`<div><!> <!></div>`);
+  var root$3 = /* @__PURE__ */ from_html(`<div><!> <!></div>`);
   function Card($$anchor, $$props) {
     let muted = prop($$props, "muted", 3, false), hover = prop($$props, "hover", 3, false), className = prop($$props, "class", 3, "");
     let mutedClass = /* @__PURE__ */ user_derived(() => muted() ? "wpea-card--muted" : "");
     let hoverClass = /* @__PURE__ */ user_derived(() => hover() ? "wpea-card--hover" : "");
     let hasHeader = /* @__PURE__ */ user_derived(() => $$props.title || $$props.subtitle || $$props.header || $$props.actions);
-    var div = root$2();
+    var div = root$3();
     var node = child(div);
     {
       var consequent_4 = ($$anchor2) => {
@@ -4283,7 +4235,7 @@
             append($$anchor3, fragment);
           };
           var alternate = ($$anchor3) => {
-            var fragment_1 = root_3$5();
+            var fragment_1 = root_3$6();
             var node_3 = first_child(fragment_1);
             {
               var consequent_1 = ($$anchor4) => {
@@ -4351,156 +4303,471 @@
     });
     append($$anchor, div);
   }
-  var root_2$5 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
-  var root_5$2 = /* @__PURE__ */ from_html(`<option> </option>`);
-  var root_6$2 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
-  var root_1$6 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <select><!></select> <!></div>`);
-  var root_10$2 = /* @__PURE__ */ from_html(`<option> </option>`);
-  var root_7$3 = /* @__PURE__ */ from_html(`<select><!></select>`);
-  function Select($$anchor, $$props) {
+  var root_1$6 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_3$5 = /* @__PURE__ */ from_html(`<span class="wpea-select2__tag"><span class="wpea-select2__tag-label"> </span> <button type="button" class="wpea-select2__tag-remove" tabindex="-1"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></span>`);
+  var root_5$2 = /* @__PURE__ */ from_html(`<span class="wpea-select2__single-value"> </span>`);
+  var root_6$2 = /* @__PURE__ */ from_html(`<input type="text" class="wpea-select2__input"/>`);
+  var root_8$2 = /* @__PURE__ */ from_html(`<span class="wpea-select2__placeholder"> </span>`);
+  var root_9$1 = /* @__PURE__ */ from_html(`<button type="button" class="wpea-select2__clear" tabindex="-1" aria-label="Clear all"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button>`);
+  var root_14$1 = /* @__PURE__ */ from_svg(`<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>`, 1);
+  var root_15 = /* @__PURE__ */ from_svg(`<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>`, 1);
+  var root_13$1 = /* @__PURE__ */ from_html(`<button type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><!></svg></button> <button type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button>`, 1);
+  var root_17$1 = /* @__PURE__ */ from_html(`<span class="wpea-select2__option-protected" aria-label="Protected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg></span>`);
+  var root_12$1 = /* @__PURE__ */ from_html(`<div class="wpea-select2__option-actions"><!></div>`);
+  var root_19 = /* @__PURE__ */ from_svg(`<svg class="wpea-select2__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
+  var root_11$2 = /* @__PURE__ */ from_html(`<div role="option" tabindex="-1"><span class="wpea-select2__option-label"> </span> <!></div>`);
+  var root_21$1 = /* @__PURE__ */ from_html(`<div class="wpea-select2__no-options">No options</div>`);
+  var root_22 = /* @__PURE__ */ from_html(`<div role="option" tabindex="-1" aria-selected="false"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-right: 6px;"><path d="M7 2.5V11.5M2.5 7H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg> </div>`);
+  var root_10$2 = /* @__PURE__ */ from_html(`<div class="wpea-select2__menu" role="listbox"><div class="wpea-select2__menu-list"><!> <!></div></div>`);
+  var root_23 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
+  var root$2 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <div><div class="wpea-select2__control" role="combobox" aria-haspopup="listbox"><div class="wpea-select2__value-container"><!> <!></div> <div class="wpea-select2__indicators"><!> <span class="wpea-select2__separator"></span> <span class="wpea-select2__dropdown-indicator"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div></div> <!></div> <!></div>`);
+  function AdvancedSelect($$anchor, $$props) {
     push($$props, true);
-    let value = prop($$props, "value", 15, ""), disabled = prop($$props, "disabled", 3, false), required = prop($$props, "required", 3, false), className = prop($$props, "class", 3, ""), options = prop($$props, "options", 19, () => []);
-    function handleChange(event2) {
-      const target = event2.target;
-      value(target.value);
-      $$props.onchange?.(value());
+    let value = prop($$props, "value", 31, () => proxy([])), options = prop($$props, "options", 19, () => []), placeholder = prop($$props, "placeholder", 3, "Select..."), disabled = prop($$props, "disabled", 3, false), searchable = prop($$props, "searchable", 3, true), clearable = prop($$props, "clearable", 3, true), multiple = prop($$props, "multiple", 3, true), creatable = prop($$props, "creatable", 3, false), manageable = prop($$props, "manageable", 3, false);
+    let isOpen = /* @__PURE__ */ state(false);
+    let searchQuery = /* @__PURE__ */ state("");
+    let highlightedIndex = /* @__PURE__ */ state(-1);
+    let containerRef;
+    let searchInputRef = /* @__PURE__ */ state(null);
+    const listboxId = `wpea-select2-listbox-${Math.random().toString(36).slice(2, 9)}`;
+    let internalValue = /* @__PURE__ */ user_derived(() => Array.isArray(value()) ? value() : value() ? [value()] : []);
+    let filteredOptions = /* @__PURE__ */ user_derived(() => get(searchQuery) ? options().filter((opt) => opt.label.toLowerCase().includes(get(searchQuery).toLowerCase()) && !opt.disabled) : options().filter((opt) => !opt.disabled));
+    let selectedOptions = /* @__PURE__ */ user_derived(() => get(internalValue).map((v) => options().find((o) => o.value === v)).filter(Boolean));
+    let canAddMore = /* @__PURE__ */ user_derived(() => multiple() ? !$$props.maxItems || get(internalValue).length < $$props.maxItems : true);
+    let hasExactMatch = /* @__PURE__ */ user_derived(() => options().some((opt) => opt.label.toLowerCase() === get(searchQuery).toLowerCase()));
+    let showCreateOption = /* @__PURE__ */ user_derived(() => creatable() && get(searchQuery).trim() !== "" && !get(hasExactMatch) && get(canAddMore));
+    function dispatchEvent(eventName, detail) {
+      const event2 = new CustomEvent(`AdvancedSelect:${eventName}`, {
+        bubbles: true,
+        detail: { component: containerRef, id: $$props.id, ...detail }
+      });
+      containerRef?.dispatchEvent(event2);
     }
-    var fragment = comment();
-    var node = first_child(fragment);
+    function updateValue(newInternalValue) {
+      if (multiple()) {
+        value(newInternalValue);
+        $$props.onchange?.(newInternalValue);
+      } else {
+        value(newInternalValue[0] || "");
+        $$props.onchange?.(newInternalValue[0] || "");
+      }
+    }
+    function toggleDropdown() {
+      if (disabled()) return;
+      set(isOpen, !get(isOpen));
+      if (get(isOpen)) {
+        set(searchQuery, "");
+        set(highlightedIndex, -1);
+        setTimeout(() => get(searchInputRef)?.focus(), 10);
+      }
+    }
+    function selectOption(option) {
+      if (!get(canAddMore) && !get(internalValue).includes(option.value)) return;
+      let newValue;
+      if (multiple()) {
+        if (get(internalValue).includes(option.value)) {
+          newValue = get(internalValue).filter((v) => v !== option.value);
+        } else {
+          newValue = [...get(internalValue), option.value];
+        }
+      } else {
+        newValue = [option.value];
+        set(isOpen, false);
+      }
+      set(searchQuery, "");
+      updateValue(newValue);
+    }
+    function removeOption(optionValue, event2) {
+      event2?.stopPropagation();
+      const newValue = get(internalValue).filter((v) => v !== optionValue);
+      updateValue(newValue);
+    }
+    function clearAll(event2) {
+      event2.stopPropagation();
+      updateValue([]);
+    }
+    function handleCreate() {
+      if (!get(searchQuery).trim()) return;
+      dispatchEvent("create", {
+        value: get(searchQuery).trim(),
+        query: get(searchQuery).trim()
+      });
+      set(searchQuery, "");
+    }
+    function handleDelete(option, event2) {
+      event2.stopPropagation();
+      if (!option.deletable || option.locked) return;
+      dispatchEvent("delete", { value: option.value, option });
+    }
+    function handleLock(option, event2) {
+      event2.stopPropagation();
+      dispatchEvent("lock", { value: option.value, option });
+    }
+    function handleKeydown(event2) {
+      switch (event2.key) {
+        case "Escape":
+          set(isOpen, false);
+          break;
+        case "ArrowDown":
+          event2.preventDefault();
+          if (!get(isOpen)) {
+            set(isOpen, true);
+          } else {
+            const maxIndex = get(filteredOptions).length + (get(showCreateOption) ? 0 : -1);
+            set(highlightedIndex, Math.min(get(highlightedIndex) + 1, maxIndex), true);
+          }
+          break;
+        case "ArrowUp":
+          event2.preventDefault();
+          set(highlightedIndex, Math.max(get(highlightedIndex) - 1, 0), true);
+          break;
+        case "Enter":
+          event2.preventDefault();
+          if (get(showCreateOption) && (get(highlightedIndex) === get(filteredOptions).length || get(filteredOptions).length === 0)) {
+            handleCreate();
+          } else if (get(highlightedIndex) >= 0 && get(filteredOptions)[get(highlightedIndex)]) {
+            selectOption(get(filteredOptions)[get(highlightedIndex)]);
+          }
+          break;
+        case "Backspace":
+          if (get(searchQuery) === "" && get(internalValue).length > 0) {
+            removeOption(get(internalValue)[get(internalValue).length - 1]);
+          }
+          break;
+      }
+    }
+    function handleClickOutside(event2) {
+      if (containerRef && !containerRef.contains(event2.target)) {
+        set(isOpen, false);
+      }
+    }
+    user_effect(() => {
+      if (get(isOpen)) {
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
+      }
+    });
+    let colorClass = /* @__PURE__ */ user_derived(() => $$props.color ? `wpea-select2--${$$props.color}` : "");
+    var div = root$2();
+    var node = child(div);
     {
-      var consequent_3 = ($$anchor2) => {
-        var div = root_1$6();
-        var node_1 = child(div);
-        {
-          var consequent = ($$anchor3) => {
-            var label_1 = root_2$5();
-            var text2 = child(label_1);
-            template_effect(() => {
-              set_attribute(label_1, "for", $$props.id);
-              set_text(text2, $$props.label);
-            });
-            append($$anchor3, label_1);
-          };
-          if_block(node_1, ($$render) => {
-            if ($$props.label) $$render(consequent);
-          });
-        }
-        var select = sibling(node_1, 2);
-        select.__change = handleChange;
-        var node_2 = child(select);
-        {
-          var consequent_1 = ($$anchor3) => {
-            var fragment_1 = comment();
-            var node_3 = first_child(fragment_1);
-            snippet(node_3, () => $$props.children);
-            append($$anchor3, fragment_1);
-          };
-          var alternate = ($$anchor3) => {
-            var fragment_2 = comment();
-            var node_4 = first_child(fragment_2);
-            each(node_4, 17, options, index, ($$anchor4, option) => {
-              var option_1 = root_5$2();
-              var text_1 = child(option_1);
-              var option_1_value = {};
-              template_effect(() => {
-                set_text(text_1, get(option).label);
-                if (option_1_value !== (option_1_value = get(option).value)) {
-                  option_1.value = (option_1.__value = get(option).value) ?? "";
-                }
-              });
-              append($$anchor4, option_1);
-            });
-            append($$anchor3, fragment_2);
-          };
-          if_block(node_2, ($$render) => {
-            if ($$props.children) $$render(consequent_1);
-            else $$render(alternate, false);
-          });
-        }
-        var select_value;
-        init_select(select);
-        var node_5 = sibling(select, 2);
-        {
-          var consequent_2 = ($$anchor3) => {
-            var span = root_6$2();
-            var text_2 = child(span);
-            template_effect(() => set_text(text_2, $$props.help));
-            append($$anchor3, span);
-          };
-          if_block(node_5, ($$render) => {
-            if ($$props.help) $$render(consequent_2);
-          });
-        }
+      var consequent = ($$anchor2) => {
+        var label_1 = root_1$6();
+        var text2 = child(label_1);
         template_effect(() => {
-          set_class(select, 1, `wpea-select ${className() ?? ""}`);
-          set_style(select, $$props.style);
-          set_attribute(select, "id", $$props.id);
-          set_attribute(select, "name", $$props.name);
-          select.disabled = disabled();
-          select.required = required();
-          if (select_value !== (select_value = value())) {
-            select.value = (select.__value = value()) ?? "", select_option(select, value());
-          }
+          set_attribute(label_1, "for", $$props.id);
+          set_text(text2, $$props.label);
         });
-        append($$anchor2, div);
-      };
-      var alternate_2 = ($$anchor2) => {
-        var select_1 = root_7$3();
-        select_1.__change = handleChange;
-        var node_6 = child(select_1);
-        {
-          var consequent_4 = ($$anchor3) => {
-            var fragment_3 = comment();
-            var node_7 = first_child(fragment_3);
-            snippet(node_7, () => $$props.children);
-            append($$anchor3, fragment_3);
-          };
-          var alternate_1 = ($$anchor3) => {
-            var fragment_4 = comment();
-            var node_8 = first_child(fragment_4);
-            each(node_8, 17, options, index, ($$anchor4, option) => {
-              var option_2 = root_10$2();
-              var text_3 = child(option_2);
-              var option_2_value = {};
-              template_effect(() => {
-                set_text(text_3, get(option).label);
-                if (option_2_value !== (option_2_value = get(option).value)) {
-                  option_2.value = (option_2.__value = get(option).value) ?? "";
-                }
-              });
-              append($$anchor4, option_2);
-            });
-            append($$anchor3, fragment_4);
-          };
-          if_block(node_6, ($$render) => {
-            if ($$props.children) $$render(consequent_4);
-            else $$render(alternate_1, false);
-          });
-        }
-        var select_1_value;
-        init_select(select_1);
-        template_effect(() => {
-          set_class(select_1, 1, `wpea-select ${className() ?? ""}`);
-          set_style(select_1, $$props.style);
-          set_attribute(select_1, "id", $$props.id);
-          set_attribute(select_1, "name", $$props.name);
-          select_1.disabled = disabled();
-          select_1.required = required();
-          if (select_1_value !== (select_1_value = value())) {
-            select_1.value = (select_1.__value = value()) ?? "", select_option(select_1, value());
-          }
-        });
-        append($$anchor2, select_1);
+        append($$anchor2, label_1);
       };
       if_block(node, ($$render) => {
-        if ($$props.label || $$props.help) $$render(consequent_3);
-        else $$render(alternate_2, false);
+        if ($$props.label) $$render(consequent);
       });
     }
-    append($$anchor, fragment);
+    var div_1 = sibling(node, 2);
+    let classes;
+    var div_2 = child(div_1);
+    div_2.__click = toggleDropdown;
+    div_2.__keydown = handleKeydown;
+    var div_3 = child(div_2);
+    var node_1 = child(div_3);
+    {
+      var consequent_1 = ($$anchor2) => {
+        var fragment = comment();
+        var node_2 = first_child(fragment);
+        each(node_2, 17, () => get(selectedOptions), index, ($$anchor3, option) => {
+          var span = root_3$5();
+          var span_1 = child(span);
+          var text_1 = child(span_1);
+          var button = sibling(span_1, 2);
+          button.__click = (e) => removeOption(get(option).value, e);
+          template_effect(() => {
+            set_text(text_1, get(option).label);
+            set_attribute(button, "aria-label", `Remove ${get(option).label ?? ""}`);
+          });
+          append($$anchor3, span);
+        });
+        append($$anchor2, fragment);
+      };
+      var alternate = ($$anchor2) => {
+        var fragment_1 = comment();
+        var node_3 = first_child(fragment_1);
+        {
+          var consequent_2 = ($$anchor3) => {
+            var span_2 = root_5$2();
+            var text_2 = child(span_2);
+            template_effect(() => set_text(text_2, get(selectedOptions)[0].label));
+            append($$anchor3, span_2);
+          };
+          if_block(
+            node_3,
+            ($$render) => {
+              if (get(selectedOptions).length > 0 && !get(isOpen)) $$render(consequent_2);
+            },
+            true
+          );
+        }
+        append($$anchor2, fragment_1);
+      };
+      if_block(node_1, ($$render) => {
+        if (multiple()) $$render(consequent_1);
+        else $$render(alternate, false);
+      });
+    }
+    var node_4 = sibling(node_1, 2);
+    {
+      var consequent_3 = ($$anchor2) => {
+        var input = root_6$2();
+        input.__keydown = handleKeydown;
+        input.__click = (e) => e.stopPropagation();
+        bind_this(input, ($$value) => set(searchInputRef, $$value), () => get(searchInputRef));
+        template_effect(() => {
+          set_attribute(input, "placeholder", get(internalValue).length === 0 ? placeholder() : multiple() ? "" : placeholder());
+          input.disabled = disabled();
+        });
+        bind_value(input, () => get(searchQuery), ($$value) => set(searchQuery, $$value));
+        append($$anchor2, input);
+      };
+      var alternate_1 = ($$anchor2) => {
+        var fragment_2 = comment();
+        var node_5 = first_child(fragment_2);
+        {
+          var consequent_4 = ($$anchor3) => {
+            var span_3 = root_8$2();
+            var text_3 = child(span_3);
+            template_effect(() => set_text(text_3, placeholder()));
+            append($$anchor3, span_3);
+          };
+          if_block(
+            node_5,
+            ($$render) => {
+              if (get(internalValue).length === 0) $$render(consequent_4);
+            },
+            true
+          );
+        }
+        append($$anchor2, fragment_2);
+      };
+      if_block(node_4, ($$render) => {
+        if (searchable() && get(isOpen)) $$render(consequent_3);
+        else $$render(alternate_1, false);
+      });
+    }
+    var div_4 = sibling(div_3, 2);
+    var node_6 = child(div_4);
+    {
+      var consequent_5 = ($$anchor2) => {
+        var button_1 = root_9$1();
+        button_1.__click = clearAll;
+        append($$anchor2, button_1);
+      };
+      if_block(node_6, ($$render) => {
+        if (clearable() && get(internalValue).length > 0) $$render(consequent_5);
+      });
+    }
+    var node_7 = sibling(div_2, 2);
+    {
+      var consequent_13 = ($$anchor2) => {
+        var div_5 = root_10$2();
+        var div_6 = child(div_5);
+        var node_8 = child(div_6);
+        each(
+          node_8,
+          17,
+          () => get(filteredOptions),
+          index,
+          ($$anchor3, option, i) => {
+            var div_7 = root_11$2();
+            let classes_1;
+            div_7.__click = () => selectOption(get(option));
+            div_7.__keydown = (e) => {
+              if (e.key === "Enter" || e.key === " ") selectOption(get(option));
+            };
+            var span_4 = child(div_7);
+            var text_4 = child(span_4);
+            var node_9 = sibling(span_4, 2);
+            {
+              var consequent_9 = ($$anchor4) => {
+                var div_8 = root_12$1();
+                var node_10 = child(div_8);
+                {
+                  var consequent_7 = ($$anchor5) => {
+                    var fragment_3 = root_13$1();
+                    var button_2 = first_child(fragment_3);
+                    let classes_2;
+                    button_2.__click = (e) => handleLock(get(option), e);
+                    var svg = child(button_2);
+                    var node_11 = child(svg);
+                    {
+                      var consequent_6 = ($$anchor6) => {
+                        var fragment_4 = root_14$1();
+                        append($$anchor6, fragment_4);
+                      };
+                      var alternate_2 = ($$anchor6) => {
+                        var fragment_5 = root_15();
+                        append($$anchor6, fragment_5);
+                      };
+                      if_block(node_11, ($$render) => {
+                        if (get(option).locked) $$render(consequent_6);
+                        else $$render(alternate_2, false);
+                      });
+                    }
+                    var button_3 = sibling(button_2, 2);
+                    let classes_3;
+                    button_3.__click = (e) => handleDelete(get(option), e);
+                    template_effect(() => {
+                      classes_2 = set_class(button_2, 1, "wpea-select2__option-lock", null, classes_2, { "wpea-select2__option-lock--locked": get(option).locked });
+                      set_attribute(button_2, "aria-label", get(option).locked ? "Unlock" : "Lock");
+                      classes_3 = set_class(button_3, 1, "wpea-select2__option-delete", null, classes_3, {
+                        "wpea-select2__option-delete--disabled": get(option).locked
+                      });
+                      button_3.disabled = get(option).locked;
+                      set_attribute(button_3, "aria-label", `Delete ${get(option).label ?? ""}`);
+                    });
+                    append($$anchor5, fragment_3);
+                  };
+                  var alternate_3 = ($$anchor5) => {
+                    var fragment_6 = comment();
+                    var node_12 = first_child(fragment_6);
+                    {
+                      var consequent_8 = ($$anchor6) => {
+                        var span_5 = root_17$1();
+                        append($$anchor6, span_5);
+                      };
+                      if_block(
+                        node_12,
+                        ($$render) => {
+                          if (get(option).deletable === false) $$render(consequent_8);
+                        },
+                        true
+                      );
+                    }
+                    append($$anchor5, fragment_6);
+                  };
+                  if_block(node_10, ($$render) => {
+                    if (get(option).deletable === true) $$render(consequent_7);
+                    else $$render(alternate_3, false);
+                  });
+                }
+                append($$anchor4, div_8);
+              };
+              var alternate_4 = ($$anchor4) => {
+                var fragment_7 = comment();
+                var node_13 = first_child(fragment_7);
+                {
+                  var consequent_10 = ($$anchor5) => {
+                    var svg_1 = root_19();
+                    append($$anchor5, svg_1);
+                  };
+                  if_block(
+                    node_13,
+                    ($$render) => {
+                      if (get(internalValue).includes(get(option).value)) $$render(consequent_10);
+                    },
+                    true
+                  );
+                }
+                append($$anchor4, fragment_7);
+              };
+              if_block(node_9, ($$render) => {
+                if (manageable()) $$render(consequent_9);
+                else $$render(alternate_4, false);
+              });
+            }
+            template_effect(
+              ($0, $1) => {
+                classes_1 = set_class(div_7, 1, "wpea-select2__option", null, classes_1, $0);
+                set_attribute(div_7, "aria-selected", $1);
+                set_text(text_4, get(option).label);
+              },
+              [
+                () => ({
+                  "wpea-select2__option--selected": get(internalValue).includes(get(option).value),
+                  "wpea-select2__option--highlighted": i === get(highlightedIndex),
+                  "wpea-select2__option--disabled": !get(canAddMore) && !get(internalValue).includes(get(option).value)
+                }),
+                () => get(internalValue).includes(get(option).value)
+              ]
+            );
+            event("mouseenter", div_7, () => set(highlightedIndex, i, true));
+            append($$anchor3, div_7);
+          },
+          ($$anchor3) => {
+            var fragment_8 = comment();
+            var node_14 = first_child(fragment_8);
+            {
+              var consequent_11 = ($$anchor4) => {
+                var div_9 = root_21$1();
+                append($$anchor4, div_9);
+              };
+              if_block(node_14, ($$render) => {
+                if (!get(showCreateOption)) $$render(consequent_11);
+              });
+            }
+            append($$anchor3, fragment_8);
+          }
+        );
+        var node_15 = sibling(node_8, 2);
+        {
+          var consequent_12 = ($$anchor3) => {
+            var div_10 = root_22();
+            let classes_4;
+            div_10.__click = handleCreate;
+            div_10.__keydown = (e) => {
+              if (e.key === "Enter" || e.key === " ") handleCreate();
+            };
+            var text_5 = sibling(child(div_10));
+            template_effect(() => {
+              classes_4 = set_class(div_10, 1, "wpea-select2__option wpea-select2__option--create", null, classes_4, {
+                "wpea-select2__option--highlighted": get(highlightedIndex) === get(filteredOptions).length
+              });
+              set_text(text_5, ` Create "${get(searchQuery) ?? ""}"`);
+            });
+            event("mouseenter", div_10, () => set(highlightedIndex, get(filteredOptions).length, true));
+            append($$anchor3, div_10);
+          };
+          if_block(node_15, ($$render) => {
+            if (get(showCreateOption)) $$render(consequent_12);
+          });
+        }
+        template_effect(() => {
+          set_attribute(div_5, "aria-multiselectable", multiple());
+          set_attribute(div_5, "id", listboxId);
+        });
+        append($$anchor2, div_5);
+      };
+      if_block(node_7, ($$render) => {
+        if (get(isOpen)) $$render(consequent_13);
+      });
+    }
+    bind_this(div_1, ($$value) => containerRef = $$value, () => containerRef);
+    var node_16 = sibling(div_1, 2);
+    {
+      var consequent_14 = ($$anchor2) => {
+        var span_6 = root_23();
+        var text_6 = child(span_6);
+        template_effect(() => set_text(text_6, $$props.help));
+        append($$anchor2, span_6);
+      };
+      if_block(node_16, ($$render) => {
+        if ($$props.help) $$render(consequent_14);
+      });
+    }
+    template_effect(() => {
+      classes = set_class(div_1, 1, `wpea-select2 ${get(colorClass) ?? ""}`, null, classes, {
+        "wpea-select2--open": get(isOpen),
+        "wpea-select2--disabled": disabled(),
+        "wpea-select2--has-value": get(internalValue).length > 0,
+        "wpea-select2--single": !multiple()
+      });
+      set_attribute(div_2, "aria-controls", listboxId);
+      set_attribute(div_2, "aria-expanded", get(isOpen));
+      set_attribute(div_2, "tabindex", disabled() ? -1 : 0);
+    });
+    append($$anchor, div);
     pop();
   }
-  delegate(["change"]);
+  delegate(["click", "keydown"]);
   var root_2$4 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
   var root_3$4 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
   var root_1$5 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <input/> <!></div>`);
@@ -5260,13 +5527,16 @@
                 }
               });
               var node_8 = sibling(node_7, 2);
-              Select(node_8, {
+              AdvancedSelect(node_8, {
                 id: `meta-compare-${index2}`,
                 label: "Compare",
                 onchange: () => updateMetaQuery(index2, "compare", get(query).compare),
                 get options() {
                   return compareOptions;
                 },
+                multiple: false,
+                searchable: false,
+                clearable: false,
                 get value() {
                   return get(query).compare;
                 },
@@ -5275,13 +5545,16 @@
                 }
               });
               var node_9 = sibling(node_8, 2);
-              Select(node_9, {
+              AdvancedSelect(node_9, {
                 id: `meta-type-${index2}`,
                 label: "Type",
                 onchange: () => updateMetaQuery(index2, "type", get(query).type),
                 get options() {
                   return typeOptions;
                 },
+                multiple: false,
+                searchable: false,
+                clearable: false,
                 get value() {
                   return get(query).type;
                 },
@@ -6040,12 +6313,15 @@
                   children: ($$anchor5, $$slotProps2) => {
                     var div_2 = root_7();
                     var node_6 = child(div_2);
-                    Select(node_6, {
+                    AdvancedSelect(node_6, {
                       id: "query-type",
                       label: "Type",
                       get options() {
                         return queryTypeOptions;
                       },
+                      multiple: false,
+                      searchable: false,
+                      clearable: false,
                       get value() {
                         return get(queryType);
                       },
@@ -6056,12 +6332,15 @@
                     var node_7 = sibling(node_6, 2);
                     {
                       var consequent_1 = ($$anchor6) => {
-                        Select($$anchor6, {
+                        AdvancedSelect($$anchor6, {
                           id: "post-type",
                           label: "Post Type",
                           get options() {
                             return get(postTypeOptions);
                           },
+                          multiple: false,
+                          searchable: true,
+                          clearable: false,
                           get value() {
                             return get(postType);
                           },
@@ -6071,12 +6350,15 @@
                         });
                       };
                       var alternate = ($$anchor6) => {
-                        Select($$anchor6, {
+                        AdvancedSelect($$anchor6, {
                           id: "taxonomy",
                           label: "Taxonomy",
                           get options() {
                             return get(taxonomyOptions);
                           },
+                          multiple: false,
+                          searchable: true,
+                          clearable: false,
                           get value() {
                             return get(taxonomy);
                           },
@@ -6101,12 +6383,15 @@
                     var fragment_9 = root_10();
                     var div_3 = first_child(fragment_9);
                     var node_9 = child(div_3);
-                    Select(node_9, {
+                    AdvancedSelect(node_9, {
                       id: "order-by",
                       label: "Order By",
                       get options() {
                         return orderByOptions;
                       },
+                      multiple: false,
+                      searchable: false,
+                      clearable: false,
                       get value() {
                         return get(orderBy);
                       },
@@ -6115,12 +6400,15 @@
                       }
                     });
                     var node_10 = sibling(node_9, 2);
-                    Select(node_10, {
+                    AdvancedSelect(node_10, {
                       id: "order",
                       label: "Order",
                       get options() {
                         return orderOptions;
                       },
+                      multiple: false,
+                      searchable: false,
+                      clearable: false,
                       get value() {
                         return get(order);
                       },

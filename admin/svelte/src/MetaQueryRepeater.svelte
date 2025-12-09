@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { MetaQuery } from './menu-queries-types';
   import Input from './lib/Input.svelte';
-  import Select from './lib/Select.svelte';
+  import AdvancedSelect from './lib/AdvancedSelect.svelte';
   import Button from './lib/Button.svelte';
   import Card from './lib/Card.svelte';
   import Cluster from './lib/Cluster.svelte';
@@ -161,20 +161,26 @@
             placeholder="e.g. some value"
           />
 
-          <Select
+          <AdvancedSelect
             id="meta-compare-{index}"
             label="Compare"
             bind:value={query.compare}
             onchange={() => updateMetaQuery(index, 'compare', query.compare)}
             options={compareOptions}
+            multiple={false}
+            searchable={false}
+            clearable={false}
           />
 
-          <Select
+          <AdvancedSelect
             id="meta-type-{index}"
             label="Type"
             bind:value={query.type}
             onchange={() => updateMetaQuery(index, 'type', query.type)}
             options={typeOptions}
+            multiple={false}
+            searchable={false}
+            clearable={false}
           />
 
           <div style="grid-column: 1 / -1;">
