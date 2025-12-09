@@ -12,6 +12,8 @@ function init() {
   // Create a container for the app
   const container = document.createElement('div');
   container.id = 'ab-menu-conditions-app';
+  // Prevent Bricks Builder's Select2 from processing our custom select elements
+  container.setAttribute('data-select2-id', 'ab-menu-conditions');
   document.body.appendChild(container);
 
   // Mount the app

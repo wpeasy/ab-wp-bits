@@ -123,3 +123,23 @@
   color: var(--wpea-surface--text);
   line-height: 1.5;
 }
+
+/* ==========================================================================
+   Prevent external Select2 from processing our custom elements
+   ========================================================================== */
+
+/* Hide any Select2 containers that might be auto-generated inside our apps */
+#ab-menu-conditions-app .select2-container,
+#ab-menu-queries-app .select2-container,
+#ab-wp-bits-app .select2-container {
+  display: none !important;
+}
+
+/* Ensure our select-like elements don't get processed by external Select2 */
+#ab-menu-conditions-app select,
+#ab-menu-queries-app select,
+#ab-wp-bits-app select {
+  /* Disable Select2's common trigger attribute */
+  opacity: 1 !important;
+  position: static !important;
+}
