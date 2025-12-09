@@ -95,7 +95,7 @@
   </button>
 
   {#if isOpen}
-    <div class="settings-dropdown__menu">
+    <div class="settings-dropdown__menu wpea">
       <div class="settings-dropdown__item">
         <span class="settings-dropdown__label">Compact Mode</span>
         <Switch
