@@ -62,7 +62,7 @@
   let searchInputRef = $state<HTMLInputElement | null>(null);
 
   // Generate unique ID for aria-controls
-  const listboxId = `wpea-select2-listbox-${Math.random().toString(36).slice(2, 9)}`;
+  const listboxId = `wpea-multiselect-listbox-${Math.random().toString(36).slice(2, 9)}`;
 
   // Normalize value to always work with arrays internally
   let internalValue = $derived(
@@ -232,7 +232,7 @@
     }
   });
 
-  let colorClass = $derived(color ? `wpea-select2--${color}` : '');
+  let colorClass = $derived(color ? `wpea-multiselect--${color}` : '');
 </script>
 
 <div class="wpea-field">
@@ -240,15 +240,15 @@
     <label class="wpea-label" for={id}>{label}</label>
   {/if}
   <div
-    class="wpea-select2 {colorClass}"
-    class:wpea-select2--open={isOpen}
-    class:wpea-select2--disabled={disabled}
-    class:wpea-select2--has-value={internalValue.length > 0}
-    class:wpea-select2--single={!multiple}
+    class="wpea-multiselect {colorClass}"
+    class:wpea-multiselect--open={isOpen}
+    class:wpea-multiselect--disabled={disabled}
+    class:wpea-multiselect--has-value={internalValue.length > 0}
+    class:wpea-multiselect--single={!multiple}
     bind:this={containerRef}
   >
     <div
-      class="wpea-select2__control"
+      class="wpea-multiselect__control"
       onclick={toggleDropdown}
       onkeydown={handleKeydown}
       role="combobox"
@@ -257,14 +257,14 @@
       aria-haspopup="listbox"
       tabindex={disabled ? -1 : 0}
     >
-      <div class="wpea-select2__value-container">
+      <div class="wpea-multiselect__value-container">
         {#if multiple}
           {#each selectedOptions as option}
-            <span class="wpea-select2__tag">
-              <span class="wpea-select2__tag-label">{option.label}</span>
+            <span class="wpea-multiselect__tag">
+              <span class="wpea-multiselect__tag-label">{option.label}</span>
               <button
                 type="button"
-                class="wpea-select2__tag-remove"
+                class="wpea-multiselect__tag-remove"
                 onclick={(e) => removeOption(option.value, e)}
                 tabindex="-1"
                 aria-label="Remove {option.label}"
@@ -276,12 +276,12 @@
             </span>
           {/each}
         {:else if selectedOptions.length > 0 && !isOpen}
-          <span class="wpea-select2__single-value">{selectedOptions[0].label}</span>
+          <span class="wpea-multiselect__single-value">{selectedOptions[0].label}</span>
         {/if}
         {#if searchable && isOpen}
           <input
             type="text"
-            class="wpea-select2__input"
+            class="wpea-multiselect__input"
             bind:this={searchInputRef}
             bind:value={searchQuery}
             onkeydown={handleKeydown}
@@ -290,14 +290,14 @@
             {disabled}
           />
         {:else if internalValue.length === 0}
-          <span class="wpea-select2__placeholder">{placeholder}</span>
+          <span class="wpea-multiselect__placeholder">{placeholder}</span>
         {/if}
       </div>
-      <div class="wpea-select2__indicators">
+      <div class="wpea-multiselect__indicators">
         {#if clearable && internalValue.length > 0}
           <button
             type="button"
-            class="wpea-select2__clear"
+            class="wpea-multiselect__clear"
             onclick={clearAll}
             tabindex="-1"
             aria-label="Clear all"
@@ -307,8 +307,8 @@
             </svg>
           </button>
         {/if}
-        <span class="wpea-select2__separator"></span>
-        <span class="wpea-select2__dropdown-indicator">
+        <span class="wpea-multiselect__separator"></span>
+        <span class="wpea-multiselect__dropdown-indicator">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -317,14 +317,14 @@
     </div>
 
     {#if isOpen}
-      <div class="wpea-select2__menu" role="listbox" aria-multiselectable={multiple} id={listboxId}>
-        <div class="wpea-select2__menu-list">
+      <div class="wpea-multiselect__menu" role="listbox" aria-multiselectable={multiple} id={listboxId}>
+        <div class="wpea-multiselect__menu-list">
           {#each filteredOptions as option, i}
             <div
-              class="wpea-select2__option"
-              class:wpea-select2__option--selected={internalValue.includes(option.value)}
-              class:wpea-select2__option--highlighted={i === highlightedIndex}
-              class:wpea-select2__option--disabled={!canAddMore && !internalValue.includes(option.value)}
+              class="wpea-multiselect__option"
+              class:wpea-multiselect__option--selected={internalValue.includes(option.value)}
+              class:wpea-multiselect__option--highlighted={i === highlightedIndex}
+              class:wpea-multiselect__option--disabled={!canAddMore && !internalValue.includes(option.value)}
               role="option"
               tabindex="-1"
               aria-selected={internalValue.includes(option.value)}
@@ -332,15 +332,15 @@
               onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectOption(option); }}
               onmouseenter={() => highlightedIndex = i}
             >
-              <span class="wpea-select2__option-label">{option.label}</span>
+              <span class="wpea-multiselect__option-label">{option.label}</span>
 
               {#if manageable}
-                <div class="wpea-select2__option-actions">
+                <div class="wpea-multiselect__option-actions">
                   {#if option.deletable === true}
                     <button
                       type="button"
-                      class="wpea-select2__option-lock"
-                      class:wpea-select2__option-lock--locked={option.locked}
+                      class="wpea-multiselect__option-lock"
+                      class:wpea-multiselect__option-lock--locked={option.locked}
                       onclick={(e) => handleLock(option, e)}
                       aria-label={option.locked ? "Unlock" : "Lock"}
                     >
@@ -356,8 +356,8 @@
                     </button>
                     <button
                       type="button"
-                      class="wpea-select2__option-delete"
-                      class:wpea-select2__option-delete--disabled={option.locked}
+                      class="wpea-multiselect__option-delete"
+                      class:wpea-multiselect__option-delete--disabled={option.locked}
                       onclick={(e) => handleDelete(option, e)}
                       disabled={option.locked}
                       aria-label="Delete {option.label}"
@@ -367,7 +367,7 @@
                       </svg>
                     </button>
                   {:else if option.deletable === false}
-                    <span class="wpea-select2__option-protected" aria-label="Protected">
+                    <span class="wpea-multiselect__option-protected" aria-label="Protected">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <path d="M4.93 4.93l14.14 14.14"/>
@@ -376,21 +376,21 @@
                   {/if}
                 </div>
               {:else if internalValue.includes(option.value)}
-                <svg class="wpea-select2__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <svg class="wpea-multiselect__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {/if}
             </div>
           {:else}
             {#if !showCreateOption}
-              <div class="wpea-select2__no-options">No options</div>
+              <div class="wpea-multiselect__no-options">No options</div>
             {/if}
           {/each}
 
           {#if showCreateOption}
             <div
-              class="wpea-select2__option wpea-select2__option--create"
-              class:wpea-select2__option--highlighted={highlightedIndex === filteredOptions.length}
+              class="wpea-multiselect__option wpea-multiselect__option--create"
+              class:wpea-multiselect__option--highlighted={highlightedIndex === filteredOptions.length}
               role="option"
               tabindex="-1"
               aria-selected="false"

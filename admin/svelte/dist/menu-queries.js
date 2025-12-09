@@ -4077,12 +4077,12 @@
       }
     };
   }
-  var root_3$7 = /* @__PURE__ */ from_html(`<h3 class="wpea-modal__title"> </h3>`);
+  var root_3$6 = /* @__PURE__ */ from_html(`<h3 class="wpea-modal__title"> </h3>`);
   var root_5$4 = /* @__PURE__ */ from_html(`<div class="wpea-modal__footer"><!></div>`);
-  var root_1$8 = /* @__PURE__ */ from_html(`<div><div class="wpea-modal__backdrop" role="button" tabindex="0" aria-label="Close modal"></div> <div class="wpea-modal__container"><div class="wpea-modal__header"><!> <button class="wpea-modal__close" aria-label="Close">&times;</button></div> <div class="wpea-modal__body wpea-scope"><!></div> <!></div></div>`);
+  var root_1$8 = /* @__PURE__ */ from_html(`<div style="font-family: var(--wpea-font-sans);"><div class="wpea-modal__backdrop" role="button" tabindex="0" aria-label="Close modal"></div> <div class="wpea-modal__container"><div class="wpea-modal__header"><!> <button class="wpea-modal__close" aria-label="Close">&times;</button></div> <div class="wpea-modal__body"><!></div> <!></div></div>`);
   function Modal($$anchor, $$props) {
     push($$props, true);
-    let open = prop($$props, "open", 15, false), size = prop($$props, "size", 3, "standard"), title = prop($$props, "title", 3, ""), className = prop($$props, "class", 3, "");
+    let open = prop($$props, "open", 15, false), size = prop($$props, "size", 3, "standard"), title = prop($$props, "title", 3, "");
     const sizeClass = /* @__PURE__ */ user_derived(() => size() === "large" ? "wpea-modal--large" : size() === "fullscreen" ? "wpea-modal--fullscreen" : "");
     function handleClose() {
       open(false);
@@ -4133,7 +4133,7 @@
             append($$anchor3, fragment_1);
           };
           var alternate = ($$anchor3) => {
-            var h3 = root_3$7();
+            var h3 = root_3$6();
             var text2 = child(h3);
             template_effect(() => set_text(text2, title()));
             append($$anchor3, h3);
@@ -4170,10 +4170,7 @@
             if ($$props.footer) $$render(consequent_2);
           });
         }
-        template_effect(() => {
-          set_class(div, 1, `wpea wpea-full wpea-modal wpea-modal--open ${get(sizeClass) ?? ""} ${className() ?? ""}`);
-          set_style(div, `font-family: var(--wpea-font-sans); z-index: 999999 !important; ${($$props.style || "") ?? ""}`);
-        });
+        template_effect(() => set_class(div, 1, `wpea wpea-full wpea-modal wpea-modal--open ${get(sizeClass) ?? ""}`));
         transition(3, div_2, () => modalSlideUp, () => ({ duration: 300 }));
         transition(3, div, () => fade, () => ({ duration: 200 }));
         append($$anchor2, div);
@@ -4186,11 +4183,11 @@
     pop();
   }
   delegate(["click", "keydown"]);
-  var root$4 = /* @__PURE__ */ from_html(`<div><!></div>`);
+  var root$5 = /* @__PURE__ */ from_html(`<div><!></div>`);
   function Stack($$anchor, $$props) {
     let className = prop($$props, "class", 3, "");
     let sizeClass = /* @__PURE__ */ user_derived(() => $$props.size ? `wpea-stack--${$$props.size}` : "");
-    var div = root$4();
+    var div = root$5();
     var node = child(div);
     {
       var consequent = ($$anchor2) => {
@@ -4209,18 +4206,18 @@
     });
     append($$anchor, div);
   }
-  var root_4$4 = /* @__PURE__ */ from_html(`<div class="wpea-card__title"> </div>`);
+  var root_4$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__title"> </div>`);
   var root_5$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__sub"> </div>`);
-  var root_3$6 = /* @__PURE__ */ from_html(`<!> <!>`, 1);
+  var root_3$5 = /* @__PURE__ */ from_html(`<!> <!>`, 1);
   var root_6$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__actions"><!></div>`);
   var root_1$7 = /* @__PURE__ */ from_html(`<div class="wpea-card__header"><div><!></div> <!></div>`);
-  var root$3 = /* @__PURE__ */ from_html(`<div><!> <!></div>`);
+  var root$4 = /* @__PURE__ */ from_html(`<div><!> <!></div>`);
   function Card($$anchor, $$props) {
     let muted = prop($$props, "muted", 3, false), hover = prop($$props, "hover", 3, false), className = prop($$props, "class", 3, "");
     let mutedClass = /* @__PURE__ */ user_derived(() => muted() ? "wpea-card--muted" : "");
     let hoverClass = /* @__PURE__ */ user_derived(() => hover() ? "wpea-card--hover" : "");
     let hasHeader = /* @__PURE__ */ user_derived(() => $$props.title || $$props.subtitle || $$props.header || $$props.actions);
-    var div = root$3();
+    var div = root$4();
     var node = child(div);
     {
       var consequent_4 = ($$anchor2) => {
@@ -4235,11 +4232,11 @@
             append($$anchor3, fragment);
           };
           var alternate = ($$anchor3) => {
-            var fragment_1 = root_3$6();
+            var fragment_1 = root_3$5();
             var node_3 = first_child(fragment_1);
             {
               var consequent_1 = ($$anchor4) => {
-                var div_3 = root_4$4();
+                var div_3 = root_4$3();
                 var text2 = child(div_3);
                 template_effect(() => set_text(text2, $$props.title));
                 append($$anchor4, div_3);
@@ -4304,23 +4301,23 @@
     append($$anchor, div);
   }
   var root_1$6 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
-  var root_3$5 = /* @__PURE__ */ from_html(`<span class="wpea-select2__tag"><span class="wpea-select2__tag-label"> </span> <button type="button" class="wpea-select2__tag-remove" tabindex="-1"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></span>`);
-  var root_5$2 = /* @__PURE__ */ from_html(`<span class="wpea-select2__single-value"> </span>`);
-  var root_6$2 = /* @__PURE__ */ from_html(`<input type="text" class="wpea-select2__input"/>`);
-  var root_8$2 = /* @__PURE__ */ from_html(`<span class="wpea-select2__placeholder"> </span>`);
-  var root_9$1 = /* @__PURE__ */ from_html(`<button type="button" class="wpea-select2__clear" tabindex="-1" aria-label="Clear all"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button>`);
+  var root_3$4 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__tag"><span class="wpea-multiselect__tag-label"> </span> <button type="button" class="wpea-multiselect__tag-remove" tabindex="-1"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></span>`);
+  var root_5$2 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__single-value"> </span>`);
+  var root_6$2 = /* @__PURE__ */ from_html(`<input type="text" class="wpea-multiselect__input"/>`);
+  var root_8$2 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__placeholder"> </span>`);
+  var root_9$1 = /* @__PURE__ */ from_html(`<button type="button" class="wpea-multiselect__clear" tabindex="-1" aria-label="Clear all"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button>`);
   var root_14$1 = /* @__PURE__ */ from_svg(`<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>`, 1);
   var root_15 = /* @__PURE__ */ from_svg(`<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>`, 1);
   var root_13$1 = /* @__PURE__ */ from_html(`<button type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><!></svg></button> <button type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button>`, 1);
-  var root_17$1 = /* @__PURE__ */ from_html(`<span class="wpea-select2__option-protected" aria-label="Protected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg></span>`);
-  var root_12$1 = /* @__PURE__ */ from_html(`<div class="wpea-select2__option-actions"><!></div>`);
-  var root_19 = /* @__PURE__ */ from_svg(`<svg class="wpea-select2__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
-  var root_11$2 = /* @__PURE__ */ from_html(`<div role="option" tabindex="-1"><span class="wpea-select2__option-label"> </span> <!></div>`);
-  var root_21$1 = /* @__PURE__ */ from_html(`<div class="wpea-select2__no-options">No options</div>`);
+  var root_17$1 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__option-protected" aria-label="Protected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M4.93 4.93l14.14 14.14"></path></svg></span>`);
+  var root_12$1 = /* @__PURE__ */ from_html(`<div class="wpea-multiselect__option-actions"><!></div>`);
+  var root_19 = /* @__PURE__ */ from_svg(`<svg class="wpea-multiselect__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
+  var root_11$2 = /* @__PURE__ */ from_html(`<div role="option" tabindex="-1"><span class="wpea-multiselect__option-label"> </span> <!></div>`);
+  var root_21$1 = /* @__PURE__ */ from_html(`<div class="wpea-multiselect__no-options">No options</div>`);
   var root_22 = /* @__PURE__ */ from_html(`<div role="option" tabindex="-1" aria-selected="false"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-right: 6px;"><path d="M7 2.5V11.5M2.5 7H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg> </div>`);
-  var root_10$2 = /* @__PURE__ */ from_html(`<div class="wpea-select2__menu" role="listbox"><div class="wpea-select2__menu-list"><!> <!></div></div>`);
+  var root_10$2 = /* @__PURE__ */ from_html(`<div class="wpea-multiselect__menu" role="listbox"><div class="wpea-multiselect__menu-list"><!> <!></div></div>`);
   var root_23 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
-  var root$2 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <div><div class="wpea-select2__control" role="combobox" aria-haspopup="listbox"><div class="wpea-select2__value-container"><!> <!></div> <div class="wpea-select2__indicators"><!> <span class="wpea-select2__separator"></span> <span class="wpea-select2__dropdown-indicator"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div></div> <!></div> <!></div>`);
+  var root$3 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <div><div class="wpea-multiselect__control" role="combobox" aria-haspopup="listbox"><div class="wpea-multiselect__value-container"><!> <!></div> <div class="wpea-multiselect__indicators"><!> <span class="wpea-multiselect__separator"></span> <span class="wpea-multiselect__dropdown-indicator"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div></div> <!></div> <!></div>`);
   function AdvancedSelect($$anchor, $$props) {
     push($$props, true);
     let value = prop($$props, "value", 31, () => proxy([])), options = prop($$props, "options", 19, () => []), placeholder = prop($$props, "placeholder", 3, "Select..."), disabled = prop($$props, "disabled", 3, false), searchable = prop($$props, "searchable", 3, true), clearable = prop($$props, "clearable", 3, true), multiple = prop($$props, "multiple", 3, true), creatable = prop($$props, "creatable", 3, false), manageable = prop($$props, "manageable", 3, false);
@@ -4329,7 +4326,7 @@
     let highlightedIndex = /* @__PURE__ */ state(-1);
     let containerRef;
     let searchInputRef = /* @__PURE__ */ state(null);
-    const listboxId = `wpea-select2-listbox-${Math.random().toString(36).slice(2, 9)}`;
+    const listboxId = `wpea-multiselect-listbox-${Math.random().toString(36).slice(2, 9)}`;
     let internalValue = /* @__PURE__ */ user_derived(() => Array.isArray(value()) ? value() : value() ? [value()] : []);
     let filteredOptions = /* @__PURE__ */ user_derived(() => get(searchQuery) ? options().filter((opt) => opt.label.toLowerCase().includes(get(searchQuery).toLowerCase()) && !opt.disabled) : options().filter((opt) => !opt.disabled));
     let selectedOptions = /* @__PURE__ */ user_derived(() => get(internalValue).map((v) => options().find((o) => o.value === v)).filter(Boolean));
@@ -4447,8 +4444,8 @@
         return () => document.removeEventListener("click", handleClickOutside);
       }
     });
-    let colorClass = /* @__PURE__ */ user_derived(() => $$props.color ? `wpea-select2--${$$props.color}` : "");
-    var div = root$2();
+    let colorClass = /* @__PURE__ */ user_derived(() => $$props.color ? `wpea-multiselect--${$$props.color}` : "");
+    var div = root$3();
     var node = child(div);
     {
       var consequent = ($$anchor2) => {
@@ -4476,7 +4473,7 @@
         var fragment = comment();
         var node_2 = first_child(fragment);
         each(node_2, 17, () => get(selectedOptions), index, ($$anchor3, option) => {
-          var span = root_3$5();
+          var span = root_3$4();
           var span_1 = child(span);
           var text_1 = child(span_1);
           var button = sibling(span_1, 2);
@@ -4616,10 +4613,12 @@
                     let classes_3;
                     button_3.__click = (e) => handleDelete(get(option), e);
                     template_effect(() => {
-                      classes_2 = set_class(button_2, 1, "wpea-select2__option-lock", null, classes_2, { "wpea-select2__option-lock--locked": get(option).locked });
+                      classes_2 = set_class(button_2, 1, "wpea-multiselect__option-lock", null, classes_2, {
+                        "wpea-multiselect__option-lock--locked": get(option).locked
+                      });
                       set_attribute(button_2, "aria-label", get(option).locked ? "Unlock" : "Lock");
-                      classes_3 = set_class(button_3, 1, "wpea-select2__option-delete", null, classes_3, {
-                        "wpea-select2__option-delete--disabled": get(option).locked
+                      classes_3 = set_class(button_3, 1, "wpea-multiselect__option-delete", null, classes_3, {
+                        "wpea-multiselect__option-delete--disabled": get(option).locked
                       });
                       button_3.disabled = get(option).locked;
                       set_attribute(button_3, "aria-label", `Delete ${get(option).label ?? ""}`);
@@ -4676,15 +4675,15 @@
             }
             template_effect(
               ($0, $1) => {
-                classes_1 = set_class(div_7, 1, "wpea-select2__option", null, classes_1, $0);
+                classes_1 = set_class(div_7, 1, "wpea-multiselect__option", null, classes_1, $0);
                 set_attribute(div_7, "aria-selected", $1);
                 set_text(text_4, get(option).label);
               },
               [
                 () => ({
-                  "wpea-select2__option--selected": get(internalValue).includes(get(option).value),
-                  "wpea-select2__option--highlighted": i === get(highlightedIndex),
-                  "wpea-select2__option--disabled": !get(canAddMore) && !get(internalValue).includes(get(option).value)
+                  "wpea-multiselect__option--selected": get(internalValue).includes(get(option).value),
+                  "wpea-multiselect__option--highlighted": i === get(highlightedIndex),
+                  "wpea-multiselect__option--disabled": !get(canAddMore) && !get(internalValue).includes(get(option).value)
                 }),
                 () => get(internalValue).includes(get(option).value)
               ]
@@ -4718,8 +4717,8 @@
             };
             var text_5 = sibling(child(div_10));
             template_effect(() => {
-              classes_4 = set_class(div_10, 1, "wpea-select2__option wpea-select2__option--create", null, classes_4, {
-                "wpea-select2__option--highlighted": get(highlightedIndex) === get(filteredOptions).length
+              classes_4 = set_class(div_10, 1, "wpea-multiselect__option wpea-multiselect__option--create", null, classes_4, {
+                "wpea-multiselect__option--highlighted": get(highlightedIndex) === get(filteredOptions).length
               });
               set_text(text_5, ` Create "${get(searchQuery) ?? ""}"`);
             });
@@ -4754,11 +4753,11 @@
       });
     }
     template_effect(() => {
-      classes = set_class(div_1, 1, `wpea-select2 ${get(colorClass) ?? ""}`, null, classes, {
-        "wpea-select2--open": get(isOpen),
-        "wpea-select2--disabled": disabled(),
-        "wpea-select2--has-value": get(internalValue).length > 0,
-        "wpea-select2--single": !multiple()
+      classes = set_class(div_1, 1, `wpea-multiselect ${get(colorClass) ?? ""}`, null, classes, {
+        "wpea-multiselect--open": get(isOpen),
+        "wpea-multiselect--disabled": disabled(),
+        "wpea-multiselect--has-value": get(internalValue).length > 0,
+        "wpea-multiselect--single": !multiple()
       });
       set_attribute(div_2, "aria-controls", listboxId);
       set_attribute(div_2, "aria-expanded", get(isOpen));
@@ -4768,10 +4767,10 @@
     pop();
   }
   delegate(["click", "keydown"]);
-  var root_2$4 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
-  var root_3$4 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
+  var root_2$3 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_3$3 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
   var root_1$5 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <input/> <!></div>`);
-  var root_4$3 = /* @__PURE__ */ from_html(`<input/>`);
+  var root_4$2 = /* @__PURE__ */ from_html(`<input/>`);
   function Input($$anchor, $$props) {
     push($$props, true);
     let value = prop($$props, "value", 15, ""), type = prop($$props, "type", 3, "text"), disabled = prop($$props, "disabled", 3, false), readonly = prop($$props, "readonly", 3, false), required = prop($$props, "required", 3, false), className = prop($$props, "class", 3, "");
@@ -4794,7 +4793,7 @@
         var node_1 = child(div);
         {
           var consequent = ($$anchor3) => {
-            var label_1 = root_2$4();
+            var label_1 = root_2$3();
             var text2 = child(label_1);
             template_effect(() => {
               set_attribute(label_1, "for", $$props.id);
@@ -4812,7 +4811,7 @@
         var node_2 = sibling(input, 2);
         {
           var consequent_1 = ($$anchor3) => {
-            var span = root_3$4();
+            var span = root_3$3();
             var text_1 = child(span);
             template_effect(() => set_text(text_1, $$props.help));
             append($$anchor3, span);
@@ -4836,7 +4835,7 @@
         append($$anchor2, div);
       };
       var alternate = ($$anchor2) => {
-        var input_1 = root_4$3();
+        var input_1 = root_4$2();
         input_1.__input = handleInput;
         input_1.__change = handleChange;
         template_effect(() => {
@@ -4862,12 +4861,12 @@
     pop();
   }
   delegate(["input", "change"]);
-  var root$1 = /* @__PURE__ */ from_html(`<button><!></button>`);
+  var root$2 = /* @__PURE__ */ from_html(`<button><!></button>`);
   function Button($$anchor, $$props) {
     let variant = prop($$props, "variant", 3, "primary"), disabled = prop($$props, "disabled", 3, false), type = prop($$props, "type", 3, "button"), className = prop($$props, "class", 3, "");
     let variantClass = /* @__PURE__ */ user_derived(() => variant() ? `wpea-btn--${variant()}` : "");
     let sizeClass = /* @__PURE__ */ user_derived(() => $$props.size ? `wpea-btn--${$$props.size}` : "");
-    var button = root$1();
+    var button = root$2();
     button.__click = function(...$$args) {
       $$props.onclick?.apply(this, $$args);
     };
@@ -4892,10 +4891,8 @@
     append($$anchor, button);
   }
   delegate(["click"]);
-  var root_2$3 = /* @__PURE__ */ from_html(`<label> </label>`);
-  var root_1$4 = /* @__PURE__ */ from_html(`<div><div class="wpea-control"><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!></div> <span class="wpea-help"> </span></div>`);
-  var root_4$2 = /* @__PURE__ */ from_html(`<label> </label>`);
-  var root_3$3 = /* @__PURE__ */ from_html(`<div><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!></div>`);
+  var root_1$4 = /* @__PURE__ */ from_html(`<label> </label>`);
+  var root$1 = /* @__PURE__ */ from_html(`<div><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!></div>`);
   function Switch($$anchor, $$props) {
     push($$props, true);
     let checked = prop($$props, "checked", 15, false), disabled = prop($$props, "disabled", 3, false), className = prop($$props, "class", 3, "");
@@ -4906,81 +4903,35 @@
     }
     let sizeClass = /* @__PURE__ */ user_derived(() => $$props.size ? `wpea-switch--${$$props.size}` : "");
     let colorClass = /* @__PURE__ */ user_derived(() => $$props.color ? `wpea-switch--${$$props.color}` : "");
-    var fragment = comment();
-    var node = first_child(fragment);
+    var div = root$1();
+    var label_1 = child(div);
+    var input = child(label_1);
+    input.__change = handleChange;
+    var node = sibling(label_1, 2);
     {
-      var consequent_1 = ($$anchor2) => {
-        var div = root_1$4();
-        var div_1 = child(div);
-        var label_1 = child(div_1);
-        var input = child(label_1);
-        input.__change = handleChange;
-        var node_1 = sibling(label_1, 2);
-        {
-          var consequent = ($$anchor3) => {
-            var label_2 = root_2$3();
-            var text2 = child(label_2);
-            template_effect(() => {
-              set_attribute(label_2, "for", $$props.id);
-              set_text(text2, $$props.label);
-            });
-            append($$anchor3, label_2);
-          };
-          if_block(node_1, ($$render) => {
-            if ($$props.label) $$render(consequent);
-          });
-        }
-        var span = sibling(div_1, 2);
-        var text_1 = child(span);
+      var consequent = ($$anchor2) => {
+        var label_2 = root_1$4();
+        var text2 = child(label_2);
         template_effect(() => {
-          set_class(div, 1, `wpea-field ${className() ?? ""}`);
-          set_style(div, $$props.style);
-          set_class(label_1, 1, `wpea-switch ${get(sizeClass) ?? ""} ${get(colorClass) ?? ""}`);
-          set_attribute(label_1, "for", $$props.id);
-          set_attribute(input, "id", $$props.id);
-          input.disabled = disabled();
-          set_checked(input, checked());
-          set_text(text_1, $$props.help);
+          set_attribute(label_2, "for", $$props.id);
+          set_text(text2, $$props.label);
         });
-        append($$anchor2, div);
-      };
-      var alternate = ($$anchor2) => {
-        var div_2 = root_3$3();
-        var label_3 = child(div_2);
-        var input_1 = child(label_3);
-        input_1.__change = handleChange;
-        var node_2 = sibling(label_3, 2);
-        {
-          var consequent_2 = ($$anchor3) => {
-            var label_4 = root_4$2();
-            var text_2 = child(label_4);
-            template_effect(() => {
-              set_attribute(label_4, "for", $$props.id);
-              set_text(text_2, $$props.label);
-            });
-            append($$anchor3, label_4);
-          };
-          if_block(node_2, ($$render) => {
-            if ($$props.label) $$render(consequent_2);
-          });
-        }
-        template_effect(() => {
-          set_class(div_2, 1, `wpea-control ${className() ?? ""}`);
-          set_style(div_2, $$props.style);
-          set_class(label_3, 1, `wpea-switch ${get(sizeClass) ?? ""} ${get(colorClass) ?? ""}`);
-          set_attribute(label_3, "for", $$props.id);
-          set_attribute(input_1, "id", $$props.id);
-          input_1.disabled = disabled();
-          set_checked(input_1, checked());
-        });
-        append($$anchor2, div_2);
+        append($$anchor2, label_2);
       };
       if_block(node, ($$render) => {
-        if ($$props.help) $$render(consequent_1);
-        else $$render(alternate, false);
+        if ($$props.label) $$render(consequent);
       });
     }
-    append($$anchor, fragment);
+    template_effect(() => {
+      set_class(div, 1, `wpea-control ${className() ?? ""}`);
+      set_style(div, $$props.style);
+      set_class(label_1, 1, `wpea-switch ${get(sizeClass) ?? ""} ${get(colorClass) ?? ""}`);
+      set_attribute(label_1, "for", $$props.id);
+      set_attribute(input, "id", $$props.id);
+      input.disabled = disabled();
+      set_checked(input, checked());
+    });
+    append($$anchor, div);
     pop();
   }
   delegate(["change"]);
@@ -5078,27 +5029,26 @@
   }
   delegate(["input", "change"]);
   var root_1$2 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
-  var root_2$1 = /* @__PURE__ */ from_html(`<span class="wpea-select2__tag"><span class="wpea-select2__tag-label"> </span> <button type="button" class="wpea-select2__tag-remove" tabindex="-1"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></span>`);
-  var root_3$1 = /* @__PURE__ */ from_html(`<input type="text" class="wpea-select2__input"/>`);
-  var root_5$1 = /* @__PURE__ */ from_html(`<span class="wpea-select2__placeholder"> </span>`);
-  var root_6$1 = /* @__PURE__ */ from_html(`<button type="button" class="wpea-select2__clear" tabindex="-1" aria-label="Clear all"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button>`);
-  var root_9 = /* @__PURE__ */ from_svg(`<svg class="wpea-select2__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
+  var root_2$1 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__tag"><span class="wpea-multiselect__tag-label"> </span> <button type="button" class="wpea-multiselect__tag-remove" tabindex="-1"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></span>`);
+  var root_3$1 = /* @__PURE__ */ from_html(`<input type="text" class="wpea-multiselect__input"/>`);
+  var root_5$1 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__placeholder"> </span>`);
+  var root_6$1 = /* @__PURE__ */ from_html(`<button type="button" class="wpea-multiselect__clear" tabindex="-1" aria-label="Clear all"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button>`);
+  var root_9 = /* @__PURE__ */ from_svg(`<svg class="wpea-multiselect__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
   var root_8$1 = /* @__PURE__ */ from_html(`<div role="option" tabindex="-1"> <!></div>`);
-  var root_10$1 = /* @__PURE__ */ from_html(`<div class="wpea-select2__no-options">No options</div>`);
-  var root_7$2 = /* @__PURE__ */ from_html(`<div class="wpea-select2__menu" role="listbox" aria-multiselectable="true"><div class="wpea-select2__menu-list"></div></div>`);
+  var root_10$1 = /* @__PURE__ */ from_html(`<div class="wpea-multiselect__no-options">No options</div>`);
+  var root_7$2 = /* @__PURE__ */ from_html(`<div class="wpea-multiselect__menu" role="listbox" aria-multiselectable="true"><div class="wpea-multiselect__menu-list"></div></div>`);
   var root_11$1 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
-  var root = /* @__PURE__ */ from_html(`<div><!> <div><div class="wpea-select2__control" role="combobox" aria-haspopup="listbox"><div class="wpea-select2__value-container"><!> <!></div> <div class="wpea-select2__indicators"><!> <span class="wpea-select2__separator"></span> <span class="wpea-select2__dropdown-indicator"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div></div> <!></div> <!></div>`);
+  var root = /* @__PURE__ */ from_html(`<div><!> <div><div class="wpea-multiselect__control" role="combobox" aria-haspopup="listbox"><div class="wpea-multiselect__value-container"><!> <!></div> <div class="wpea-multiselect__indicators"><!> <span class="wpea-multiselect__separator"></span> <span class="wpea-multiselect__dropdown-indicator"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div></div> <!></div> <!></div>`);
   function MultiSelect($$anchor, $$props) {
     push($$props, true);
-    let value = prop($$props, "value", 31, () => proxy([])), options = prop($$props, "options", 19, () => []), placeholder = prop($$props, "placeholder", 3, "Select..."), disabled = prop($$props, "disabled", 3, false), searchable = prop($$props, "searchable", 3, true), clearable = prop($$props, "clearable", 3, true), excludeValues = prop($$props, "excludeValues", 19, () => []), className = prop($$props, "class", 3, "");
+    let value = prop($$props, "value", 31, () => proxy([])), options = prop($$props, "options", 19, () => []), placeholder = prop($$props, "placeholder", 3, "Select..."), disabled = prop($$props, "disabled", 3, false), searchable = prop($$props, "searchable", 3, true), clearable = prop($$props, "clearable", 3, true), className = prop($$props, "class", 3, "");
     let isOpen = /* @__PURE__ */ state(false);
     let searchQuery = /* @__PURE__ */ state("");
     let highlightedIndex = /* @__PURE__ */ state(-1);
     let containerRef;
     let searchInputRef = /* @__PURE__ */ state(null);
-    const listboxId = `wpea-select2-listbox-${Math.random().toString(36).slice(2, 9)}`;
-    let availableOptions = /* @__PURE__ */ user_derived(() => options().filter((opt) => !excludeValues().includes(opt.value)));
-    let filteredOptions = /* @__PURE__ */ user_derived(() => get(searchQuery) ? get(availableOptions).filter((opt) => opt.label.toLowerCase().includes(get(searchQuery).toLowerCase()) && !opt.disabled) : get(availableOptions).filter((opt) => !opt.disabled));
+    const listboxId = `wpea-multiselect-listbox-${Math.random().toString(36).slice(2, 9)}`;
+    let filteredOptions = /* @__PURE__ */ user_derived(() => get(searchQuery) ? options().filter((opt) => opt.label.toLowerCase().includes(get(searchQuery).toLowerCase()) && !opt.disabled) : options().filter((opt) => !opt.disabled));
     let selectedOptions = /* @__PURE__ */ user_derived(() => value().map((v) => options().find((o) => o.value === v)).filter(Boolean));
     let canAddMore = /* @__PURE__ */ user_derived(() => !$$props.maxItems || value().length < $$props.maxItems);
     function toggleDropdown() {
@@ -5171,7 +5121,7 @@
         return () => document.removeEventListener("click", handleClickOutside);
       }
     });
-    let colorClass = /* @__PURE__ */ user_derived(() => $$props.color ? `wpea-select2--${$$props.color}` : "");
+    let colorClass = /* @__PURE__ */ user_derived(() => $$props.color ? `wpea-multiselect--${$$props.color}` : "");
     var div = root();
     var node = child(div);
     {
@@ -5288,15 +5238,15 @@
             }
             template_effect(
               ($0, $1) => {
-                classes_1 = set_class(div_7, 1, "wpea-select2__option", null, classes_1, $0);
+                classes_1 = set_class(div_7, 1, "wpea-multiselect__option", null, classes_1, $0);
                 set_attribute(div_7, "aria-selected", $1);
                 set_text(text_3, `${get(option).label ?? ""} `);
               },
               [
                 () => ({
-                  "wpea-select2__option--selected": value().includes(get(option).value),
-                  "wpea-select2__option--highlighted": i === get(highlightedIndex),
-                  "wpea-select2__option--disabled": !get(canAddMore) && !value().includes(get(option).value)
+                  "wpea-multiselect__option--selected": value().includes(get(option).value),
+                  "wpea-multiselect__option--highlighted": i === get(highlightedIndex),
+                  "wpea-multiselect__option--disabled": !get(canAddMore) && !value().includes(get(option).value)
                 }),
                 () => value().includes(get(option).value)
               ]
@@ -5332,10 +5282,10 @@
     template_effect(() => {
       set_class(div, 1, `wpea-field ${className() ?? ""}`);
       set_style(div, $$props.style);
-      classes = set_class(div_1, 1, `wpea-select2 ${get(colorClass) ?? ""}`, null, classes, {
-        "wpea-select2--open": get(isOpen),
-        "wpea-select2--disabled": disabled(),
-        "wpea-select2--has-value": value().length > 0
+      classes = set_class(div_1, 1, `wpea-multiselect ${get(colorClass) ?? ""}`, null, classes, {
+        "wpea-multiselect--open": get(isOpen),
+        "wpea-multiselect--disabled": disabled(),
+        "wpea-multiselect--has-value": value().length > 0
       });
       set_attribute(div_2, "aria-controls", listboxId);
       set_attribute(div_2, "aria-expanded", get(isOpen));

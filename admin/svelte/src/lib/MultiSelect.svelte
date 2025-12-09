@@ -20,7 +20,6 @@
     searchable?: boolean;
     clearable?: boolean;
     maxItems?: number;
-    excludeValues?: string[];
     class?: string;
     style?: string;
     onchange?: (value: string[]) => void;
@@ -39,7 +38,6 @@
     searchable = true,
     clearable = true,
     maxItems,
-    excludeValues = [],
     class: className = '',
     style,
     onchange
@@ -52,20 +50,15 @@
   let searchInputRef = $state<HTMLInputElement | null>(null);
 
   // Generate unique ID for aria-controls
-  const listboxId = `wpea-select2-listbox-${Math.random().toString(36).slice(2, 9)}`;
-
-  // Filter out excluded values from available options
-  let availableOptions = $derived(
-    options.filter(opt => !excludeValues.includes(opt.value))
-  );
+  const listboxId = `wpea-multiselect-listbox-${Math.random().toString(36).slice(2, 9)}`;
 
   let filteredOptions = $derived(
     searchQuery
-      ? availableOptions.filter(opt =>
+      ? options.filter(opt =>
           opt.label.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !opt.disabled
         )
-      : availableOptions.filter(opt => !opt.disabled)
+      : options.filter(opt => !opt.disabled)
   );
 
   let selectedOptions = $derived(
@@ -152,7 +145,7 @@
     }
   });
 
-  let colorClass = $derived(color ? `wpea-select2--${color}` : '');
+  let colorClass = $derived(color ? `wpea-multiselect--${color}` : '');
 </script>
 
 <div class="wpea-field {className}" {style}>
@@ -160,14 +153,14 @@
     <label class="wpea-label" for={id}>{label}</label>
   {/if}
   <div
-    class="wpea-select2 {colorClass}"
-    class:wpea-select2--open={isOpen}
-    class:wpea-select2--disabled={disabled}
-    class:wpea-select2--has-value={value.length > 0}
+    class="wpea-multiselect {colorClass}"
+    class:wpea-multiselect--open={isOpen}
+    class:wpea-multiselect--disabled={disabled}
+    class:wpea-multiselect--has-value={value.length > 0}
     bind:this={containerRef}
   >
     <div
-      class="wpea-select2__control"
+      class="wpea-multiselect__control"
       onclick={toggleDropdown}
       onkeydown={handleKeydown}
       role="combobox"
@@ -176,13 +169,13 @@
       aria-haspopup="listbox"
       tabindex={disabled ? -1 : 0}
     >
-      <div class="wpea-select2__value-container">
+      <div class="wpea-multiselect__value-container">
         {#each selectedOptions as option}
-          <span class="wpea-select2__tag">
-            <span class="wpea-select2__tag-label">{option.label}</span>
+          <span class="wpea-multiselect__tag">
+            <span class="wpea-multiselect__tag-label">{option.label}</span>
             <button
               type="button"
-              class="wpea-select2__tag-remove"
+              class="wpea-multiselect__tag-remove"
               onclick={(e) => removeOption(option.value, e)}
               tabindex="-1"
               aria-label="Remove {option.label}"
@@ -196,7 +189,7 @@
         {#if searchable && isOpen}
           <input
             type="text"
-            class="wpea-select2__input"
+            class="wpea-multiselect__input"
             bind:this={searchInputRef}
             bind:value={searchQuery}
             onkeydown={handleKeydown}
@@ -205,14 +198,14 @@
             {disabled}
           />
         {:else if value.length === 0}
-          <span class="wpea-select2__placeholder">{placeholder}</span>
+          <span class="wpea-multiselect__placeholder">{placeholder}</span>
         {/if}
       </div>
-      <div class="wpea-select2__indicators">
+      <div class="wpea-multiselect__indicators">
         {#if clearable && value.length > 0}
           <button
             type="button"
-            class="wpea-select2__clear"
+            class="wpea-multiselect__clear"
             onclick={clearAll}
             tabindex="-1"
             aria-label="Clear all"
@@ -222,8 +215,8 @@
             </svg>
           </button>
         {/if}
-        <span class="wpea-select2__separator"></span>
-        <span class="wpea-select2__dropdown-indicator">
+        <span class="wpea-multiselect__separator"></span>
+        <span class="wpea-multiselect__dropdown-indicator">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -232,14 +225,14 @@
     </div>
 
     {#if isOpen}
-      <div class="wpea-select2__menu" role="listbox" aria-multiselectable="true" id={listboxId}>
-        <div class="wpea-select2__menu-list">
+      <div class="wpea-multiselect__menu" role="listbox" aria-multiselectable="true" id={listboxId}>
+        <div class="wpea-multiselect__menu-list">
           {#each filteredOptions as option, i}
             <div
-              class="wpea-select2__option"
-              class:wpea-select2__option--selected={value.includes(option.value)}
-              class:wpea-select2__option--highlighted={i === highlightedIndex}
-              class:wpea-select2__option--disabled={!canAddMore && !value.includes(option.value)}
+              class="wpea-multiselect__option"
+              class:wpea-multiselect__option--selected={value.includes(option.value)}
+              class:wpea-multiselect__option--highlighted={i === highlightedIndex}
+              class:wpea-multiselect__option--disabled={!canAddMore && !value.includes(option.value)}
               role="option"
               tabindex="-1"
               aria-selected={value.includes(option.value)}
@@ -249,13 +242,13 @@
             >
               {option.label}
               {#if value.includes(option.value)}
-                <svg class="wpea-select2__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <svg class="wpea-multiselect__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {/if}
             </div>
           {:else}
-            <div class="wpea-select2__no-options">No options</div>
+            <div class="wpea-multiselect__no-options">No options</div>
           {/each}
         </div>
       </div>
