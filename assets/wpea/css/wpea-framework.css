@@ -669,6 +669,91 @@
     color: var(--wpea-surface--text) !important;
   }
 
+  /* Number input spinner styling */
+  .wpea-input[type="number"] {
+    -moz-appearance: textfield;
+    padding-right: calc(var(--wpea-space--sm) + 24px);
+    position: relative;
+  }
+
+  /* Webkit spinner buttons */
+  .wpea-input[type="number"]::-webkit-outer-spin-button,
+  .wpea-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: transparent;
+    border-left: 1px solid var(--wpea-surface--border);
+    cursor: pointer;
+    opacity: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Custom number input with up/down arrows wrapper */
+  .wpea-number-wrapper {
+    position: relative;
+    display: inline-flex;
+    width: 100%;
+  }
+
+  .wpea-number-wrapper .wpea-input[type="number"] {
+    padding-right: calc(var(--wpea-space--sm) + 32px);
+  }
+
+  .wpea-number-wrapper__controls {
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    bottom: 1px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--wpea-surface--border);
+    border-radius: 0 calc(var(--wpea-radius--sm) - 1px) calc(var(--wpea-radius--sm) - 1px) 0;
+    overflow: hidden;
+  }
+
+  .wpea-number-wrapper__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    padding: 0;
+    background: var(--wpea-surface--muted);
+    border: none;
+    color: var(--wpea-surface--text-muted);
+    cursor: pointer;
+    transition: background var(--wpea-anim-duration--fast), color var(--wpea-anim-duration--fast);
+  }
+
+  .wpea-number-wrapper__btn:hover {
+    background: var(--wpea-color--primary-t-20);
+    color: var(--wpea-color--primary);
+  }
+
+  .wpea-number-wrapper__btn:active {
+    background: var(--wpea-color--primary-t-30);
+  }
+
+  .wpea-number-wrapper__btn + .wpea-number-wrapper__btn {
+    border-top: 1px solid var(--wpea-surface--border);
+  }
+
+  .wpea-number-wrapper__btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Focus state for number wrapper */
+  .wpea-number-wrapper:focus-within .wpea-number-wrapper__controls {
+    border-left-color: var(--wpea-color--primary);
+  }
+
   /* Input sizes */
   .wpea-input--xs  { padding-block: calc(var(--wpea-space--xs) * .5); padding-inline: calc(var(--wpea-space--sm) * .7); font-size: var(--wpea-text--xs); }
   .wpea-input--s   { padding-block: calc(var(--wpea-space--xs) * .7); padding-inline: var(--wpea-space--sm); font-size: var(--wpea-text--sm); }
@@ -1692,19 +1777,33 @@
 .wpea .wpea-input--2xl,
 .wpea input.wpea-input--2xl { padding-block: calc(var(--wpea-space--sm) * 1.4); padding-inline: calc(var(--wpea-space--md) * 1.4); font-size: var(--wpea-text--2xl); }
 
-/* Select dropdown arrow (keeps our appearance across WP) */
-.wpea .wpea-select {
-  background-image:
-    linear-gradient(45deg, transparent 49%, currentColor 50%),
-    linear-gradient(135deg, currentColor 50%, transparent 51%),
-    linear-gradient(to right, transparent, transparent);
-  background-position:
-    calc(100% - .9rem) center,
-    calc(100% - .6rem) center,
-    100% 0;
-  background-size: .45rem .45rem, .45rem .45rem, 2.5rem 100%;
+/* Custom Select dropdown arrow - matches AdvancedSelect chevron style */
+.wpea .wpea-select,
+.wpea select.wpea-select {
+  padding-inline-end: calc(var(--wpea-space--md) + 20px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3.5 5.25L7 8.75L10.5 5.25' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  padding-inline-end: 2.4rem;
+  background-position: right var(--wpea-space--sm) center;
+  background-size: 14px;
+  cursor: pointer;
+}
+
+.wpea .wpea-select:hover:not(:disabled),
+.wpea select.wpea-select:hover:not(:disabled) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3.5 5.25L7 8.75L10.5 5.25' stroke='%23374151' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--wpea-space--sm) center;
+  background-size: 14px;
+}
+
+.wpea .wpea-select:focus,
+.wpea .wpea-select:focus-visible,
+.wpea select.wpea-select:focus,
+.wpea select.wpea-select:focus-visible {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3.5 5.25L7 8.75L10.5 5.25' stroke='%232563eb' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--wpea-space--sm) center;
+  background-size: 14px;
 }
 
 /* =========================

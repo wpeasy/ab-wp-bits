@@ -42,7 +42,10 @@
       "Bash(ext=\"svelte\")",
       "Bash(fi)",
       "Bash(echo:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(for comp in Accordion Alert AdvancedSelect Badge Button Card Cluster DoubleOptInButton Input Modal MultiSelect NumberInput Panel Popover Radio Range Select Stack Switch Table Tabs Textarea Toast Toggle3State VerticalTabs)",
+      "Bash(do curl -s \"https://raw.githubusercontent.com/wpeasy/wpeasy-admin-framework/master/svelte-app/src/lib/$comp.svelte\" -o \"$comp.svelte\")",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []

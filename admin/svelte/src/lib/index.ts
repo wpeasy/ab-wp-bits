@@ -11,6 +11,7 @@ export { default as FilterableList } from './FilterableList.svelte';
 export { default as Input } from './Input.svelte';
 export { default as Modal } from './Modal.svelte';
 export { default as MultiSelect } from './MultiSelect.svelte';
+export { default as NumberInput } from './NumberInput.svelte';
 export { default as Panel } from './Panel.svelte';
 export { default as Popover } from './Popover.svelte';
 export { default as Radio } from './Radio.svelte';
