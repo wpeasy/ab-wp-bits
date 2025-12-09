@@ -1,7 +1,7 @@
 <script lang="ts">
   import Switch from './Switch.svelte';
   import Toggle3State from './Toggle3State.svelte';
-  import { appState, type ThemeMode } from '../globalState.svelte';
+  import { appState, updateAppState, type ThemeMode } from '../globalState.svelte';
 
   // Local component state only
   let isOpen = $state(false);
@@ -25,11 +25,11 @@
   });
 
   function handleCompactChange(value: boolean) {
-    appState.compactMode = value;
+    updateAppState('compactMode', value);
   }
 
   function handleThemeChange(value: string) {
-    appState.themeMode = value as ThemeMode;
+    updateAppState('themeMode', value as ThemeMode);
   }
 
   const themeOptions = [
