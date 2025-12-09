@@ -2,7 +2,8 @@
   import type { Module } from './types';
   import ModuleManager from './ModuleManager.svelte';
   import ModuleSettings from './ModuleSettings.svelte';
-  import Tabs from './lib/Tabs.svelte';
+  import VerticalTabs from './lib/VerticalTabs.svelte';
+  import SettingsDropdown from './lib/SettingsDropdown.svelte';
 
   // Get initial data from WordPress
   const initialModules: Module[] = window.abWpBitsData.modules;
@@ -11,6 +12,22 @@
   let modules = $state<Module[]>(initialModules);
   let activeTab = $state('modules');
   let activeModuleSubTab = $state<'settings' | 'instructions'>('settings');
+
+  // Settings state
+  let compactMode = $state(false);
+  let themeMode = $state<'light' | 'dark' | 'auto'>('auto');
+
+  // Apply theme mode
+  $effect(() => {
+    const root = document.documentElement;
+    if (themeMode === 'light') {
+      root.style.setProperty('color-scheme', 'light only');
+    } else if (themeMode === 'dark') {
+      root.style.setProperty('color-scheme', 'dark only');
+    } else {
+      root.style.setProperty('color-scheme', 'light dark');
+    }
+  });
 
   // Compute enabled modules for tabs (sorted alphabetically)
   let enabledModules = $derived(
@@ -43,8 +60,14 @@
   );
 </script>
 
-<div class="ab-wp-bits-admin">
-  <Tabs {tabs} bind:activeTab orientation="vertical">
+<div class="ab-wp-bits-admin" class:ab-wp-bits-admin--compact={compactMode}>
+  <VerticalTabs {tabs} bind:activeTab>
+    {#snippet actions()}
+      <SettingsDropdown
+        bind:compactMode
+        bind:themeMode
+      />
+    {/snippet}
     {#snippet content()}
       {#if activeTab === 'modules'}
         <ModuleManager bind:modules onNavigate={handleNavigate} />
@@ -55,7 +78,7 @@
         />
       {/if}
     {/snippet}
-  </Tabs>
+  </VerticalTabs>
 </div>
 
 <style>
@@ -63,5 +86,17 @@
     font-family: var(--wpea-font-sans);
     background: var(--wpea-surface--bg);
     min-height: 400px;
+  }
+
+  .ab-wp-bits-admin--compact {
+    font-size: 0.9em;
+  }
+
+  .ab-wp-bits-admin--compact :global(.wpea-vtabs__tab) {
+    padding: var(--wpea-space--xs) var(--wpea-space--sm);
+  }
+
+  .ab-wp-bits-admin--compact :global(.wpea-card) {
+    padding: var(--wpea-space--sm);
   }
 </style>
