@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { ConditionsConfig, Capability } from './menu-conditions-types';
   import ConditionsModal from './ConditionsModal.svelte';
   import type { ToastItem } from './lib/Toast.svelte';
@@ -13,8 +14,8 @@
   let capabilities = $state<Capability[]>([]);
   let toasts = $state<ToastItem[]>([]);
 
-  // Fetch capabilities on mount
-  $effect(() => {
+  // Initialize on mount
+  onMount(() => {
     fetchCapabilities();
     attachButtonListeners();
 

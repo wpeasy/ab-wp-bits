@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { ConditionsConfig, RoleEvaluationResult, UserData } from './menu-conditions-types';
   import Card from './lib/Card.svelte';
   import Select from './lib/Select.svelte';
@@ -23,7 +24,7 @@
   let userResult = $state<{ visible: boolean; message: string } | null>(null);
 
   // Fetch users on mount
-  $effect(() => {
+  onMount(() => {
     fetchUsers();
   });
 
