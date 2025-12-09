@@ -2,120 +2,6 @@
   "use strict";
   var __vite_style__ = document.createElement("style");
   __vite_style__.textContent = `
-  .multiselect.svelte-6qr8eg {
-    position: relative;
-  }
-
-  .multiselect__tags.svelte-6qr8eg {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-    padding: 0.5rem;
-    background: var(--wpea-input--bg);
-    border: 1px solid var(--wpea-input--border);
-    border-radius: var(--wpea-radius--sm);
-    min-height: 2.5rem;
-    cursor: text;
-    transition: box-shadow var(--wpea-anim-duration--fast), border-color var(--wpea-anim-duration--fast);
-  }
-
-  .multiselect__tags.svelte-6qr8eg:focus-within {
-    border-color: var(--wpea-input--border-focus);
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--wpea-color--primary), transparent 80%);
-  }
-
-  .multiselect__tag.svelte-6qr8eg {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.125rem;
-    padding: 0.0625rem 0.25rem;
-    background: var(--wpea-color--primary);
-    color: white;
-    border-radius: 3px;
-    font-size: 0.6875rem;
-    line-height: 1.2;
-  }
-
-  .multiselect__tag-remove.svelte-6qr8eg {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 0.75rem;
-    height: 0.75rem;
-    padding: 0;
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 0.875rem;
-    line-height: 1;
-    cursor: pointer;
-    opacity: 0.8;
-  }
-
-  .multiselect__tag-remove.svelte-6qr8eg:hover {
-    opacity: 1;
-  }
-
-  .multiselect__single-value.svelte-6qr8eg {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.0625rem 0.25rem;
-    font-size: 0.875rem;
-    color: var(--wpea-surface--text);
-  }
-
-  .multiselect__input.svelte-6qr8eg {
-    flex: 1;
-    min-width: 120px;
-    border: none;
-    background: transparent;
-    outline: none;
-    font-family: inherit;
-    font-size: inherit;
-    color: var(--wpea-surface--text);
-  }
-
-  .multiselect__input.svelte-6qr8eg::placeholder {
-    color: var(--wpea-input--placeholder);
-  }
-
-  .multiselect__dropdown.svelte-6qr8eg {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    margin-top: 0.25rem;
-    max-height: 200px;
-    overflow-y: auto;
-    background: var(--wpea-input--bg);
-    border: 1px solid var(--wpea-input--border);
-    border-radius: var(--wpea-radius--sm);
-    box-shadow: var(--wpea-shadow--lg);
-    z-index: 1000;
-  }
-
-  .multiselect__option.svelte-6qr8eg {
-    display: block;
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    background: transparent;
-    border: none;
-    text-align: left;
-    font-family: inherit;
-    font-size: inherit;
-    color: var(--wpea-surface--text);
-    cursor: pointer;
-  }
-
-  .multiselect__option.svelte-6qr8eg:hover {
-    background: color-mix(in oklab, var(--wpea-color--primary), transparent 90%);
-  }
-
-  .multiselect__option.svelte-6qr8eg:focus {
-    outline: 2px solid var(--wpea-color--primary);
-    outline-offset: -2px;
-  }
-
   .wpea-grid-2.svelte-qhqlmy {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -2853,6 +2739,40 @@
       return clone;
     };
   }
+  // @__NO_SIDE_EFFECTS__
+  function from_namespace(content, flags2, ns = "svg") {
+    var has_start = !content.startsWith("<!>");
+    var wrapped = `<${ns}>${has_start ? content : "<!>" + content}</${ns}>`;
+    var node;
+    return () => {
+      if (!node) {
+        var fragment = (
+          /** @type {DocumentFragment} */
+          create_fragment_from_html(wrapped)
+        );
+        var root2 = (
+          /** @type {Element} */
+          /* @__PURE__ */ get_first_child(fragment)
+        );
+        {
+          node = /** @type {Element} */
+          /* @__PURE__ */ get_first_child(root2);
+        }
+      }
+      var clone = (
+        /** @type {TemplateNode} */
+        node.cloneNode(true)
+      );
+      {
+        assign_nodes(clone, clone);
+      }
+      return clone;
+    };
+  }
+  // @__NO_SIDE_EFFECTS__
+  function from_svg(content, flags2) {
+    return /* @__PURE__ */ from_namespace(content, flags2, "svg");
+  }
   function text(value = "") {
     {
       var t = create_text(value + "");
@@ -3777,8 +3697,30 @@
       t: () => get_t()
     };
   }
+  const whitespace = [..." 	\n\r\f \v\uFEFF"];
   function to_class(value, hash, directives) {
     var classname = value == null ? "" : "" + value;
+    if (hash) {
+      classname = classname ? classname + " " + hash : hash;
+    }
+    if (directives) {
+      for (var key in directives) {
+        if (directives[key]) {
+          classname = classname ? classname + " " + key : key;
+        } else if (classname.length) {
+          var len = key.length;
+          var a = 0;
+          while ((a = classname.indexOf(key, a)) >= 0) {
+            var b = a + len;
+            if ((a === 0 || whitespace.includes(classname[a - 1])) && (b === classname.length || whitespace.includes(classname[b]))) {
+              classname = (a === 0 ? "" : classname.substring(0, a)) + classname.substring(b + 1);
+            } else {
+              a = b;
+            }
+          }
+        }
+      }
+    }
     return classname === "" ? null : classname;
   }
   function to_style(value, styles) {
@@ -3787,7 +3729,7 @@
   function set_class(dom, is_html, value, hash, prev_classes, next_classes) {
     var prev = dom.__className;
     if (prev !== value || prev === void 0) {
-      var next_class_name = to_class(value);
+      var next_class_name = to_class(value, hash, next_classes);
       {
         if (next_class_name == null) {
           dom.removeAttribute("class");
@@ -3796,6 +3738,13 @@
         }
       }
       dom.__className = value;
+    } else if (next_classes && prev_classes !== next_classes) {
+      for (var key in next_classes) {
+        var is_present = !!next_classes[key];
+        if (prev_classes == null || is_present !== !!prev_classes[key]) {
+          dom.classList.toggle(key, is_present);
+        }
+      }
     }
     return next_classes;
   }
@@ -4402,11 +4351,11 @@
     });
     append($$anchor, div);
   }
-  var root_2$4 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_2$5 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
   var root_5$2 = /* @__PURE__ */ from_html(`<option> </option>`);
   var root_6$2 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
   var root_1$6 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <select><!></select> <!></div>`);
-  var root_10$1 = /* @__PURE__ */ from_html(`<option> </option>`);
+  var root_10$2 = /* @__PURE__ */ from_html(`<option> </option>`);
   var root_7$3 = /* @__PURE__ */ from_html(`<select><!></select>`);
   function Select($$anchor, $$props) {
     push($$props, true);
@@ -4424,7 +4373,7 @@
         var node_1 = child(div);
         {
           var consequent = ($$anchor3) => {
-            var label_1 = root_2$4();
+            var label_1 = root_2$5();
             var text2 = child(label_1);
             template_effect(() => {
               set_attribute(label_1, "for", $$props.id);
@@ -4510,7 +4459,7 @@
             var fragment_4 = comment();
             var node_8 = first_child(fragment_4);
             each(node_8, 17, options, index, ($$anchor4, option) => {
-              var option_2 = root_10$1();
+              var option_2 = root_10$2();
               var text_3 = child(option_2);
               var option_2_value = {};
               template_effect(() => {
@@ -4552,7 +4501,7 @@
     pop();
   }
   delegate(["change"]);
-  var root_2$3 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_2$4 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
   var root_3$4 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
   var root_1$5 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <input/> <!></div>`);
   var root_4$3 = /* @__PURE__ */ from_html(`<input/>`);
@@ -4578,7 +4527,7 @@
         var node_1 = child(div);
         {
           var consequent = ($$anchor3) => {
-            var label_1 = root_2$3();
+            var label_1 = root_2$4();
             var text2 = child(label_1);
             template_effect(() => {
               set_attribute(label_1, "for", $$props.id);
@@ -4676,7 +4625,7 @@
     append($$anchor, button);
   }
   delegate(["click"]);
-  var root_2$2 = /* @__PURE__ */ from_html(`<label> </label>`);
+  var root_2$3 = /* @__PURE__ */ from_html(`<label> </label>`);
   var root_1$4 = /* @__PURE__ */ from_html(`<div><div class="wpea-control"><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!></div> <span class="wpea-help"> </span></div>`);
   var root_4$2 = /* @__PURE__ */ from_html(`<label> </label>`);
   var root_3$3 = /* @__PURE__ */ from_html(`<div><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!></div>`);
@@ -4702,7 +4651,7 @@
         var node_1 = sibling(label_1, 2);
         {
           var consequent = ($$anchor3) => {
-            var label_2 = root_2$2();
+            var label_2 = root_2$3();
             var text2 = child(label_2);
             template_effect(() => {
               set_attribute(label_2, "for", $$props.id);
@@ -4768,7 +4717,7 @@
     pop();
   }
   delegate(["change"]);
-  var root_2$1 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_2$2 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
   var root_3$2 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
   var root_1$3 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <textarea></textarea> <!></div>`);
   var root_4$1 = /* @__PURE__ */ from_html(`<textarea></textarea>`);
@@ -4793,7 +4742,7 @@
         var node_1 = child(div);
         {
           var consequent = ($$anchor3) => {
-            var label_1 = root_2$1();
+            var label_1 = root_2$2();
             var text2 = child(label_1);
             template_effect(() => {
               set_attribute(label_1, "for", $$props.id);
@@ -4862,62 +4811,100 @@
   }
   delegate(["input", "change"]);
   var root_1$2 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
-  var root_3$1 = /* @__PURE__ */ from_html(`<span class="multiselect__tag svelte-6qr8eg"> <button type="button" class="multiselect__tag-remove svelte-6qr8eg">×</button></span>`);
-  var root_5$1 = /* @__PURE__ */ from_html(`<span class="multiselect__single-value svelte-6qr8eg"> </span>`);
-  var root_7$2 = /* @__PURE__ */ from_html(`<button type="button" class="multiselect__option svelte-6qr8eg"> </button>`);
-  var root_6$1 = /* @__PURE__ */ from_html(`<div class="multiselect__dropdown svelte-6qr8eg"></div>`);
-  var root_8$1 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
-  var root = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <div class="multiselect svelte-6qr8eg"><div class="multiselect__tags svelte-6qr8eg" role="button" tabindex="0"><!> <input type="text" class="multiselect__input svelte-6qr8eg"/></div> <!></div> <!></div>`);
+  var root_2$1 = /* @__PURE__ */ from_html(`<span class="wpea-select2__tag"><span class="wpea-select2__tag-label"> </span> <button type="button" class="wpea-select2__tag-remove" tabindex="-1"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></span>`);
+  var root_3$1 = /* @__PURE__ */ from_html(`<input type="text" class="wpea-select2__input"/>`);
+  var root_5$1 = /* @__PURE__ */ from_html(`<span class="wpea-select2__placeholder"> </span>`);
+  var root_6$1 = /* @__PURE__ */ from_html(`<button type="button" class="wpea-select2__clear" tabindex="-1" aria-label="Clear all"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button>`);
+  var root_9 = /* @__PURE__ */ from_svg(`<svg class="wpea-select2__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
+  var root_8$1 = /* @__PURE__ */ from_html(`<div role="option" tabindex="-1"> <!></div>`);
+  var root_10$1 = /* @__PURE__ */ from_html(`<div class="wpea-select2__no-options">No options</div>`);
+  var root_7$2 = /* @__PURE__ */ from_html(`<div class="wpea-select2__menu" role="listbox" aria-multiselectable="true"><div class="wpea-select2__menu-list"></div></div>`);
+  var root_11$1 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
+  var root = /* @__PURE__ */ from_html(`<div><!> <div><div class="wpea-select2__control" role="combobox" aria-haspopup="listbox"><div class="wpea-select2__value-container"><!> <!></div> <div class="wpea-select2__indicators"><!> <span class="wpea-select2__separator"></span> <span class="wpea-select2__dropdown-indicator"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></div></div> <!></div> <!></div>`);
   function MultiSelect($$anchor, $$props) {
     push($$props, true);
-    let value = prop($$props, "value", 31, () => proxy([])), options = prop($$props, "options", 19, () => []), placeholder = prop($$props, "placeholder", 3, "Search..."), disabled = prop($$props, "disabled", 3, false), multiple = prop($$props, "multiple", 3, true), excludeValues = prop($$props, "excludeValues", 19, () => []);
-    let searchTerm = /* @__PURE__ */ state("");
+    let value = prop($$props, "value", 31, () => proxy([])), options = prop($$props, "options", 19, () => []), placeholder = prop($$props, "placeholder", 3, "Select..."), disabled = prop($$props, "disabled", 3, false), searchable = prop($$props, "searchable", 3, true), clearable = prop($$props, "clearable", 3, true), excludeValues = prop($$props, "excludeValues", 19, () => []), className = prop($$props, "class", 3, "");
     let isOpen = /* @__PURE__ */ state(false);
-    let dropdownRef = null;
-    let valueArray = /* @__PURE__ */ user_derived(() => multiple() ? Array.isArray(value()) ? value() : [value()] : value() ? [value()] : []);
-    let filteredOptions = /* @__PURE__ */ user_derived(() => (options() || []).filter((option) => {
-      const isSelected = multiple() ? get(valueArray).includes(option.value) : false;
-      const isExcluded = excludeValues().includes(option.value);
-      const matchesSearch = option.label.toLowerCase().includes(get(searchTerm).toLowerCase());
-      return !isSelected && !isExcluded && matchesSearch;
-    }));
-    let selectedOptions = /* @__PURE__ */ user_derived(() => get(valueArray).map((val) => (options() || []).find((opt) => opt.value === val)).filter(Boolean));
-    let currentLabel = /* @__PURE__ */ user_derived(() => !multiple() && value() ? (options() || []).find((opt) => opt.value === value())?.label || "" : "");
-    function toggleOption(optionValue) {
-      if (multiple()) {
-        const arr = Array.isArray(value()) ? value() : [];
-        if (arr.includes(optionValue)) {
-          value(arr.filter((v) => v !== optionValue));
-        } else {
-          value([...arr, optionValue]);
-        }
-      } else {
-        value(optionValue);
-        set(isOpen, false);
+    let searchQuery = /* @__PURE__ */ state("");
+    let highlightedIndex = /* @__PURE__ */ state(-1);
+    let containerRef;
+    let searchInputRef = /* @__PURE__ */ state(null);
+    const listboxId = `wpea-select2-listbox-${Math.random().toString(36).slice(2, 9)}`;
+    let availableOptions = /* @__PURE__ */ user_derived(() => options().filter((opt) => !excludeValues().includes(opt.value)));
+    let filteredOptions = /* @__PURE__ */ user_derived(() => get(searchQuery) ? get(availableOptions).filter((opt) => opt.label.toLowerCase().includes(get(searchQuery).toLowerCase()) && !opt.disabled) : get(availableOptions).filter((opt) => !opt.disabled));
+    let selectedOptions = /* @__PURE__ */ user_derived(() => value().map((v) => options().find((o) => o.value === v)).filter(Boolean));
+    let canAddMore = /* @__PURE__ */ user_derived(() => !$$props.maxItems || value().length < $$props.maxItems);
+    function toggleDropdown() {
+      if (disabled()) return;
+      set(isOpen, !get(isOpen));
+      if (get(isOpen)) {
+        set(searchQuery, "");
+        set(highlightedIndex, -1);
+        setTimeout(() => get(searchInputRef)?.focus(), 10);
       }
-      set(searchTerm, "");
+    }
+    function selectOption(option) {
+      if (!get(canAddMore) && !value().includes(option.value)) return;
+      if (value().includes(option.value)) {
+        value(value().filter((v) => v !== option.value));
+      } else {
+        value([...value(), option.value]);
+      }
+      set(searchQuery, "");
       $$props.onchange?.(value());
     }
-    function removeOption(optionValue) {
-      if (multiple()) {
-        const arr = Array.isArray(value()) ? value() : [];
-        value(arr.filter((v) => v !== optionValue));
-        $$props.onchange?.(value());
+    function removeOption(optionValue, event2) {
+      event2?.stopPropagation();
+      value(value().filter((v) => v !== optionValue));
+      $$props.onchange?.(value());
+    }
+    function clearAll(event2) {
+      event2.stopPropagation();
+      value([]);
+      $$props.onchange?.(value());
+    }
+    function handleKeydown(event2) {
+      switch (event2.key) {
+        case "Escape":
+          set(isOpen, false);
+          break;
+        case "ArrowDown":
+          event2.preventDefault();
+          if (!get(isOpen)) {
+            set(isOpen, true);
+          } else {
+            set(highlightedIndex, Math.min(get(highlightedIndex) + 1, get(filteredOptions).length - 1), true);
+          }
+          break;
+        case "ArrowUp":
+          event2.preventDefault();
+          set(highlightedIndex, Math.max(get(highlightedIndex) - 1, 0), true);
+          break;
+        case "Enter":
+          event2.preventDefault();
+          if (get(highlightedIndex) >= 0 && get(filteredOptions)[get(highlightedIndex)]) {
+            selectOption(get(filteredOptions)[get(highlightedIndex)]);
+          }
+          break;
+        case "Backspace":
+          if (get(searchQuery) === "" && value().length > 0) {
+            removeOption(value()[value().length - 1]);
+          }
+          break;
       }
     }
     function handleClickOutside(event2) {
-      if (dropdownRef && !dropdownRef.contains(event2.target)) {
+      if (containerRef && !containerRef.contains(event2.target)) {
         set(isOpen, false);
       }
     }
     user_effect(() => {
       if (get(isOpen)) {
         document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
       }
-      return () => {
-        document.removeEventListener("click", handleClickOutside);
-      };
     });
+    let colorClass = /* @__PURE__ */ user_derived(() => $$props.color ? `wpea-select2--${$$props.color}` : "");
     var div = root();
     var node = child(div);
     {
@@ -4935,91 +4922,158 @@
       });
     }
     var div_1 = sibling(node, 2);
+    let classes;
     var div_2 = child(div_1);
-    div_2.__click = () => !disabled() && set(isOpen, true);
-    div_2.__keydown = (e) => (e.key === "Enter" || e.key === " ") && !disabled() && set(isOpen, true);
-    var node_1 = child(div_2);
+    div_2.__click = toggleDropdown;
+    div_2.__keydown = handleKeydown;
+    var div_3 = child(div_2);
+    var node_1 = child(div_3);
+    each(node_1, 17, () => get(selectedOptions), index, ($$anchor2, option) => {
+      var span = root_2$1();
+      var span_1 = child(span);
+      var text_1 = child(span_1);
+      var button = sibling(span_1, 2);
+      button.__click = (e) => removeOption(get(option).value, e);
+      template_effect(() => {
+        set_text(text_1, get(option).label);
+        set_attribute(button, "aria-label", `Remove ${get(option).label ?? ""}`);
+      });
+      append($$anchor2, span);
+    });
+    var node_2 = sibling(node_1, 2);
     {
       var consequent_1 = ($$anchor2) => {
-        var fragment = comment();
-        var node_2 = first_child(fragment);
-        each(node_2, 17, () => get(selectedOptions), index, ($$anchor3, option) => {
-          var span = root_3$1();
-          var text_1 = child(span);
-          var button = sibling(text_1);
-          button.__click = () => removeOption(get(option).value);
-          template_effect(() => {
-            set_text(text_1, `${get(option).label ?? ""} `);
-            button.disabled = disabled();
-            set_attribute(button, "aria-label", `Remove ${get(option).label ?? ""}`);
-          });
-          append($$anchor3, span);
+        var input = root_3$1();
+        input.__keydown = handleKeydown;
+        input.__click = (e) => e.stopPropagation();
+        bind_this(input, ($$value) => set(searchInputRef, $$value), () => get(searchInputRef));
+        template_effect(() => {
+          set_attribute(input, "placeholder", value().length === 0 ? placeholder() : "");
+          input.disabled = disabled();
         });
-        append($$anchor2, fragment);
+        bind_value(input, () => get(searchQuery), ($$value) => set(searchQuery, $$value));
+        append($$anchor2, input);
       };
       var alternate = ($$anchor2) => {
-        var fragment_1 = comment();
-        var node_3 = first_child(fragment_1);
+        var fragment = comment();
+        var node_3 = first_child(fragment);
         {
           var consequent_2 = ($$anchor3) => {
-            var span_1 = root_5$1();
-            var text_2 = child(span_1);
-            template_effect(() => set_text(text_2, get(currentLabel)));
-            append($$anchor3, span_1);
+            var span_2 = root_5$1();
+            var text_2 = child(span_2);
+            template_effect(() => set_text(text_2, placeholder()));
+            append($$anchor3, span_2);
           };
           if_block(
             node_3,
             ($$render) => {
-              if (get(currentLabel)) $$render(consequent_2);
+              if (value().length === 0) $$render(consequent_2);
             },
             true
           );
         }
-        append($$anchor2, fragment_1);
+        append($$anchor2, fragment);
       };
-      if_block(node_1, ($$render) => {
-        if (multiple()) $$render(consequent_1);
+      if_block(node_2, ($$render) => {
+        if (searchable() && get(isOpen)) $$render(consequent_1);
         else $$render(alternate, false);
       });
     }
-    var input = sibling(node_1, 2);
-    var node_4 = sibling(div_2, 2);
+    var div_4 = sibling(div_3, 2);
+    var node_4 = child(div_4);
     {
       var consequent_3 = ($$anchor2) => {
-        var div_3 = root_6$1();
-        each(div_3, 21, () => get(filteredOptions), index, ($$anchor3, option) => {
-          var button_1 = root_7$2();
-          button_1.__click = () => toggleOption(get(option).value);
-          var text_3 = child(button_1);
-          template_effect(() => set_text(text_3, get(option).label));
-          append($$anchor3, button_1);
-        });
-        append($$anchor2, div_3);
+        var button_1 = root_6$1();
+        button_1.__click = clearAll;
+        append($$anchor2, button_1);
       };
       if_block(node_4, ($$render) => {
-        if (get(isOpen) && get(filteredOptions).length > 0) $$render(consequent_3);
+        if (clearable() && value().length > 0) $$render(consequent_3);
       });
     }
-    bind_this(div_1, ($$value) => dropdownRef = $$value, () => dropdownRef);
-    var node_5 = sibling(div_1, 2);
+    var node_5 = sibling(div_2, 2);
     {
-      var consequent_4 = ($$anchor2) => {
-        var span_2 = root_8$1();
-        var text_4 = child(span_2);
-        template_effect(() => set_text(text_4, $$props.help));
-        append($$anchor2, span_2);
+      var consequent_5 = ($$anchor2) => {
+        var div_5 = root_7$2();
+        var div_6 = child(div_5);
+        each(
+          div_6,
+          21,
+          () => get(filteredOptions),
+          index,
+          ($$anchor3, option, i) => {
+            var div_7 = root_8$1();
+            let classes_1;
+            div_7.__click = () => selectOption(get(option));
+            div_7.__keydown = (e) => {
+              if (e.key === "Enter" || e.key === " ") selectOption(get(option));
+            };
+            var text_3 = child(div_7);
+            var node_6 = sibling(text_3);
+            {
+              var consequent_4 = ($$anchor4) => {
+                var svg = root_9();
+                append($$anchor4, svg);
+              };
+              if_block(node_6, ($$render) => {
+                if (value().includes(get(option).value)) $$render(consequent_4);
+              });
+            }
+            template_effect(
+              ($0, $1) => {
+                classes_1 = set_class(div_7, 1, "wpea-select2__option", null, classes_1, $0);
+                set_attribute(div_7, "aria-selected", $1);
+                set_text(text_3, `${get(option).label ?? ""} `);
+              },
+              [
+                () => ({
+                  "wpea-select2__option--selected": value().includes(get(option).value),
+                  "wpea-select2__option--highlighted": i === get(highlightedIndex),
+                  "wpea-select2__option--disabled": !get(canAddMore) && !value().includes(get(option).value)
+                }),
+                () => value().includes(get(option).value)
+              ]
+            );
+            event("mouseenter", div_7, () => set(highlightedIndex, i, true));
+            append($$anchor3, div_7);
+          },
+          ($$anchor3) => {
+            var div_8 = root_10$1();
+            append($$anchor3, div_8);
+          }
+        );
+        template_effect(() => set_attribute(div_5, "id", listboxId));
+        append($$anchor2, div_5);
       };
       if_block(node_5, ($$render) => {
-        if ($$props.help) $$render(consequent_4);
+        if (get(isOpen)) $$render(consequent_5);
+      });
+    }
+    bind_this(div_1, ($$value) => containerRef = $$value, () => containerRef);
+    var node_7 = sibling(div_1, 2);
+    {
+      var consequent_6 = ($$anchor2) => {
+        var span_3 = root_11$1();
+        var text_4 = child(span_3);
+        template_effect(() => set_text(text_4, $$props.help));
+        append($$anchor2, span_3);
+      };
+      if_block(node_7, ($$render) => {
+        if ($$props.help) $$render(consequent_6);
       });
     }
     template_effect(() => {
-      set_attribute(input, "placeholder", !multiple() && get(currentLabel) ? "" : placeholder());
-      input.disabled = disabled();
-      set_attribute(input, "id", $$props.id);
+      set_class(div, 1, `wpea-field ${className() ?? ""}`);
+      set_style(div, $$props.style);
+      classes = set_class(div_1, 1, `wpea-select2 ${get(colorClass) ?? ""}`, null, classes, {
+        "wpea-select2--open": get(isOpen),
+        "wpea-select2--disabled": disabled(),
+        "wpea-select2--has-value": value().length > 0
+      });
+      set_attribute(div_2, "aria-controls", listboxId);
+      set_attribute(div_2, "aria-expanded", get(isOpen));
+      set_attribute(div_2, "tabindex", disabled() ? -1 : 0);
     });
-    event("focus", input, () => set(isOpen, true));
-    bind_value(input, () => get(searchTerm), ($$value) => set(searchTerm, $$value));
     append($$anchor, div);
     pop();
   }
