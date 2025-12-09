@@ -58,14 +58,14 @@ final class Dashboard {
         // Enqueue WPEA framework CSS
         wp_enqueue_style(
             'ab-wp-bits-wpea-resets',
-            AB_WP_BITS_PLUGIN_URL . 'assets/wpea/wpea/wpea-wp-resets.css',
+            AB_WP_BITS_PLUGIN_URL . 'assets/wpea/css/wpea-wp-resets.css',
             [],
             AB_WP_BITS_VERSION
         );
 
         wp_enqueue_style(
             'ab-wp-bits-wpea-framework',
-            AB_WP_BITS_PLUGIN_URL . 'assets/wpea/wpea/wpea-framework.css',
+            AB_WP_BITS_PLUGIN_URL . 'assets/wpea/css/wpea-framework.css',
             ['ab-wp-bits-wpea-resets'],
             AB_WP_BITS_VERSION
         );

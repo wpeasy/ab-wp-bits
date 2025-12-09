@@ -80,8 +80,10 @@ _No frontend functionality at this stage._
    Never use `@layer` in the admin interface.
 2. Use nested CSS selectors when appropriate.
 3. Prefer **Container Queries** over traditional media queries.
-4. Download all files (except hidden files starting with ".") from https://github.com/wpeasy/wpeasy-admin-framework and place them in assets/wpea
-   - Use this framework as the basis for all Admin CSS for UI's etc.
+4. WPEA Framework location: https://github.com/wpeasy/wpeasy-admin-framework (branch: master)
+   - CSS files are in `assets/wpea/css/`
+   - Svelte components are in `assets/wpea/svelte-lib/` (reference library, actual components copied to `admin/svelte/src/lib/`)
+   - Use this framework as the basis for all Admin CSS and Svelte components.
 5. **WPEA Class Usage:**
    - Use `.wpea-scope` for components that need access to WPEA variables/typography without layout constraints
    - Use `.wpea` only for full-page layouts (sets `min-height: 100vh`, `display: flex`, etc.)

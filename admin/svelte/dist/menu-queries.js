@@ -218,6 +218,11 @@
   var array_prototype = Array.prototype;
   var get_prototype_of = Object.getPrototypeOf;
   var is_extensible = Object.isExtensible;
+  function is_function(thing) {
+    return typeof thing === "function";
+  }
+  const noop = () => {
+  };
   function run_all(arr) {
     for (var i = 0; i < arr.length; i++) {
       arr[i]();
@@ -322,6 +327,7 @@
   const PROPS_IS_UPDATED = 1 << 2;
   const PROPS_IS_BINDABLE = 1 << 3;
   const PROPS_IS_LAZY_INITIAL = 1 << 4;
+  const TRANSITION_GLOBAL = 1 << 2;
   const TEMPLATE_FRAGMENT = 1;
   const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
   const UNINITIALIZED = Symbol();
@@ -2183,8 +2189,8 @@
     set_signal_status(effect2, DESTROYED);
     var transitions = effect2.nodes && effect2.nodes.t;
     if (transitions !== null) {
-      for (const transition of transitions) {
-        transition.stop();
+      for (const transition2 of transitions) {
+        transition2.stop();
       }
     }
     execute_effect_teardown(effect2);
@@ -2227,8 +2233,8 @@
     var remaining = transitions.length;
     if (remaining > 0) {
       var check = () => --remaining || fn();
-      for (var transition of transitions) {
-        transition.out(check);
+      for (var transition2 of transitions) {
+        transition2.out(check);
       }
     } else {
       fn();
@@ -2239,9 +2245,9 @@
     effect2.f ^= INERT;
     var t = effect2.nodes && effect2.nodes.t;
     if (t !== null) {
-      for (const transition of t) {
-        if (transition.is_global || local) {
-          transitions.push(transition);
+      for (const transition2 of t) {
+        if (transition2.is_global || local) {
+          transitions.push(transition2);
         }
       }
     }
@@ -2275,9 +2281,9 @@
     }
     var t = effect2.nodes && effect2.nodes.t;
     if (t !== null) {
-      for (const transition of t) {
-        if (transition.is_global || local) {
-          transition.in();
+      for (const transition2 of t) {
+        if (transition2.is_global || local) {
+          transition2.in();
         }
       }
     }
@@ -2871,6 +2877,7 @@
       dom
     );
   }
+  let should_intro = true;
   function set_text(text2, value) {
     var str = value == null ? "" : typeof value === "object" ? value + "" : value;
     if (str !== (text2.__t ??= text2.nodeValue)) {
@@ -2925,7 +2932,9 @@
           if (events) {
             props.$$events = events;
           }
+          should_intro = intro;
           component = Component(anchor_node2, props) || {};
+          should_intro = true;
           if (context) {
             pop();
           }
@@ -2995,9 +3004,9 @@
      * @param {TemplateNode} anchor
      * @param {boolean} transition
      */
-    constructor(anchor, transition = true) {
+    constructor(anchor, transition2 = true) {
       this.anchor = anchor;
-      this.#transition = transition;
+      this.#transition = transition2;
     }
     #commit = () => {
       var batch = (
@@ -3525,9 +3534,255 @@
       branches.ensure(snippet2, snippet2 && ((anchor) => snippet2(anchor, ...args)));
     }, EFFECT_TRANSPARENT);
   }
+  const now = () => performance.now();
+  const raf = {
+    // don't access requestAnimationFrame eagerly outside method
+    // this allows basic testing of user code without JSDOM
+    // bunder will eval and remove ternary when the user's app is built
+    tick: (
+      /** @param {any} _ */
+      (_) => requestAnimationFrame(_)
+    ),
+    now: () => now(),
+    tasks: /* @__PURE__ */ new Set()
+  };
+  function run_tasks() {
+    const now2 = raf.now();
+    raf.tasks.forEach((task) => {
+      if (!task.c(now2)) {
+        raf.tasks.delete(task);
+        task.f();
+      }
+    });
+    if (raf.tasks.size !== 0) {
+      raf.tick(run_tasks);
+    }
+  }
+  function loop(callback) {
+    let task;
+    if (raf.tasks.size === 0) {
+      raf.tick(run_tasks);
+    }
+    return {
+      promise: new Promise((fulfill) => {
+        raf.tasks.add(task = { c: callback, f: fulfill });
+      }),
+      abort() {
+        raf.tasks.delete(task);
+      }
+    };
+  }
+  function dispatch_event(element, type) {
+    without_reactive_context(() => {
+      element.dispatchEvent(new CustomEvent(type));
+    });
+  }
+  function css_property_to_camelcase(style) {
+    if (style === "float") return "cssFloat";
+    if (style === "offset") return "cssOffset";
+    if (style.startsWith("--")) return style;
+    const parts = style.split("-");
+    if (parts.length === 1) return parts[0];
+    return parts[0] + parts.slice(1).map(
+      /** @param {any} word */
+      (word) => word[0].toUpperCase() + word.slice(1)
+    ).join("");
+  }
+  function css_to_keyframe(css) {
+    const keyframe = {};
+    const parts = css.split(";");
+    for (const part of parts) {
+      const [property, value] = part.split(":");
+      if (!property || value === void 0) break;
+      const formatted_property = css_property_to_camelcase(property.trim());
+      keyframe[formatted_property] = value.trim();
+    }
+    return keyframe;
+  }
+  const linear$1 = (t) => t;
+  function transition(flags2, element, get_fn, get_params) {
+    var is_global = (flags2 & TRANSITION_GLOBAL) !== 0;
+    var direction = "both";
+    var current_options;
+    var inert = element.inert;
+    var overflow = element.style.overflow;
+    var intro;
+    var outro;
+    function get_options() {
+      return without_reactive_context(() => {
+        return current_options ??= get_fn()(element, get_params?.() ?? /** @type {P} */
+        {}, {
+          direction
+        });
+      });
+    }
+    var transition2 = {
+      is_global,
+      in() {
+        element.inert = inert;
+        dispatch_event(element, "introstart");
+        intro = animate(element, get_options(), outro, 1, () => {
+          dispatch_event(element, "introend");
+          intro?.abort();
+          intro = current_options = void 0;
+          element.style.overflow = overflow;
+        });
+      },
+      out(fn) {
+        element.inert = true;
+        dispatch_event(element, "outrostart");
+        outro = animate(element, get_options(), intro, 0, () => {
+          dispatch_event(element, "outroend");
+          fn?.();
+        });
+      },
+      stop: () => {
+        intro?.abort();
+        outro?.abort();
+      }
+    };
+    var e = (
+      /** @type {Effect & { nodes: EffectNodes }} */
+      active_effect
+    );
+    (e.nodes.t ??= []).push(transition2);
+    if (should_intro) {
+      var run = is_global;
+      if (!run) {
+        var block2 = (
+          /** @type {Effect | null} */
+          e.parent
+        );
+        while (block2 && (block2.f & EFFECT_TRANSPARENT) !== 0) {
+          while (block2 = block2.parent) {
+            if ((block2.f & BLOCK_EFFECT) !== 0) break;
+          }
+        }
+        run = !block2 || (block2.f & EFFECT_RAN) !== 0;
+      }
+      if (run) {
+        effect(() => {
+          untrack(() => transition2.in());
+        });
+      }
+    }
+  }
+  function animate(element, options, counterpart, t2, on_finish) {
+    var is_intro = t2 === 1;
+    if (is_function(options)) {
+      var a;
+      var aborted = false;
+      queue_micro_task(() => {
+        if (aborted) return;
+        var o = options({ direction: is_intro ? "in" : "out" });
+        a = animate(element, o, counterpart, t2, on_finish);
+      });
+      return {
+        abort: () => {
+          aborted = true;
+          a?.abort();
+        },
+        deactivate: () => a.deactivate(),
+        reset: () => a.reset(),
+        t: () => a.t()
+      };
+    }
+    counterpart?.deactivate();
+    if (!options?.duration) {
+      on_finish();
+      return {
+        abort: noop,
+        deactivate: noop,
+        reset: noop,
+        t: () => t2
+      };
+    }
+    const { delay = 0, css, tick: tick2, easing = linear$1 } = options;
+    var keyframes = [];
+    if (is_intro && counterpart === void 0) {
+      if (tick2) {
+        tick2(0, 1);
+      }
+      if (css) {
+        var styles = css_to_keyframe(css(0, 1));
+        keyframes.push(styles, styles);
+      }
+    }
+    var get_t = () => 1 - t2;
+    var animation = element.animate(keyframes, { duration: delay, fill: "forwards" });
+    animation.onfinish = () => {
+      animation.cancel();
+      var t1 = counterpart?.t() ?? 1 - t2;
+      counterpart?.abort();
+      var delta = t2 - t1;
+      var duration = (
+        /** @type {number} */
+        options.duration * Math.abs(delta)
+      );
+      var keyframes2 = [];
+      if (duration > 0) {
+        var needs_overflow_hidden = false;
+        if (css) {
+          var n = Math.ceil(duration / (1e3 / 60));
+          for (var i = 0; i <= n; i += 1) {
+            var t = t1 + delta * easing(i / n);
+            var styles2 = css_to_keyframe(css(t, 1 - t));
+            keyframes2.push(styles2);
+            needs_overflow_hidden ||= styles2.overflow === "hidden";
+          }
+        }
+        if (needs_overflow_hidden) {
+          element.style.overflow = "hidden";
+        }
+        get_t = () => {
+          var time = (
+            /** @type {number} */
+            /** @type {globalThis.Animation} */
+            animation.currentTime
+          );
+          return t1 + delta * easing(time / duration);
+        };
+        if (tick2) {
+          loop(() => {
+            if (animation.playState !== "running") return false;
+            var t3 = get_t();
+            tick2(t3, 1 - t3);
+            return true;
+          });
+        }
+      }
+      animation = element.animate(keyframes2, { duration, fill: "forwards" });
+      animation.onfinish = () => {
+        get_t = () => t2;
+        tick2?.(t2, 1 - t2);
+        on_finish();
+      };
+    };
+    return {
+      abort: () => {
+        if (animation) {
+          animation.cancel();
+          animation.effect = null;
+          animation.onfinish = noop;
+        }
+      },
+      deactivate: () => {
+        on_finish = noop;
+      },
+      reset: () => {
+        if (t2 === 0) {
+          tick2?.(1, 0);
+        }
+      },
+      t: () => get_t()
+    };
+  }
   function to_class(value, hash, directives) {
     var classname = value == null ? "" : "" + value;
     return classname === "" ? null : classname;
+  }
+  function to_style(value, styles) {
+    return value == null ? null : String(value);
   }
   function set_class(dom, is_html, value, hash, prev_classes, next_classes) {
     var prev = dom.__className;
@@ -3543,6 +3798,21 @@
       dom.__className = value;
     }
     return next_classes;
+  }
+  function set_style(dom, value, prev_styles, next_styles) {
+    var prev = dom.__style;
+    if (prev !== value) {
+      var next_style_attr = to_style(value);
+      {
+        if (next_style_attr == null) {
+          dom.removeAttribute("style");
+        } else {
+          dom.style.cssText = next_style_attr;
+        }
+      }
+      dom.__style = value;
+    }
+    return next_styles;
   }
   function select_option(select, value, mounting = false) {
     if (select.multiple) {
@@ -3872,12 +4142,46 @@
   if (typeof window !== "undefined") {
     ((window.__svelte ??= {}).v ??= /* @__PURE__ */ new Set()).add(PUBLIC_VERSION);
   }
-  var root_3$5 = /* @__PURE__ */ from_html(`<h3 class="wpea-modal__title"> </h3>`);
+  const linear = (x) => x;
+  function fade(node, { delay = 0, duration = 400, easing = linear } = {}) {
+    const o = +getComputedStyle(node).opacity;
+    return {
+      delay,
+      duration,
+      easing,
+      css: (t) => `opacity: ${t * o}`
+    };
+  }
+  function cubicOut(t) {
+    const f = t - 1;
+    return f * f * f + 1;
+  }
+  function modalSlideUp(node, {
+    duration = 300,
+    easing = cubicOut,
+    y = 20,
+    scale = 0.95
+  } = {}) {
+    return {
+      duration,
+      easing,
+      css: (t) => {
+        const yPos = (1 - t) * y;
+        const scaleValue = scale + t * (1 - scale);
+        const opacity = t;
+        return `
+        transform: translateY(${yPos}px) scale(${scaleValue});
+        opacity: ${opacity};
+      `;
+      }
+    };
+  }
+  var root_3$6 = /* @__PURE__ */ from_html(`<h3 class="wpea-modal__title"> </h3>`);
   var root_5$4 = /* @__PURE__ */ from_html(`<div class="wpea-modal__footer"><!></div>`);
-  var root_1$8 = /* @__PURE__ */ from_html(`<div style="color-scheme: dark only; z-index: 999999 !important;"><div class="wpea-modal__backdrop" role="button" tabindex="0" aria-label="Close modal"></div> <div class="wpea-modal__container"><div class="wpea-modal__header"><!> <button class="wpea-modal__close" aria-label="Close">&times;</button></div> <div class="wpea-modal__body wpea-scope"><!></div> <!></div></div>`);
+  var root_1$8 = /* @__PURE__ */ from_html(`<div><div class="wpea-modal__backdrop" role="button" tabindex="0" aria-label="Close modal"></div> <div class="wpea-modal__container"><div class="wpea-modal__header"><!> <button class="wpea-modal__close" aria-label="Close">&times;</button></div> <div class="wpea-modal__body wpea-scope"><!></div> <!></div></div>`);
   function Modal($$anchor, $$props) {
     push($$props, true);
-    let open = prop($$props, "open", 15, false), size = prop($$props, "size", 3, "standard"), title = prop($$props, "title", 3, "");
+    let open = prop($$props, "open", 15, false), size = prop($$props, "size", 3, "standard"), title = prop($$props, "title", 3, ""), className = prop($$props, "class", 3, "");
     const sizeClass = /* @__PURE__ */ user_derived(() => size() === "large" ? "wpea-modal--large" : size() === "fullscreen" ? "wpea-modal--fullscreen" : "");
     function handleClose() {
       open(false);
@@ -3928,7 +4232,7 @@
             append($$anchor3, fragment_1);
           };
           var alternate = ($$anchor3) => {
-            var h3 = root_3$5();
+            var h3 = root_3$6();
             var text2 = child(h3);
             template_effect(() => set_text(text2, title()));
             append($$anchor3, h3);
@@ -3965,7 +4269,12 @@
             if ($$props.footer) $$render(consequent_2);
           });
         }
-        template_effect(() => set_class(div, 1, `wpea-modal wpea-modal--open ${get(sizeClass) ?? ""}`));
+        template_effect(() => {
+          set_class(div, 1, `wpea wpea-full wpea-modal wpea-modal--open ${get(sizeClass) ?? ""} ${className() ?? ""}`);
+          set_style(div, `font-family: var(--wpea-font-sans); z-index: 999999 !important; ${($$props.style || "") ?? ""}`);
+        });
+        transition(3, div_2, () => modalSlideUp, () => ({ duration: 300 }));
+        transition(3, div, () => fade, () => ({ duration: 200 }));
         append($$anchor2, div);
       };
       if_block(node, ($$render) => {
@@ -3976,10 +4285,11 @@
     pop();
   }
   delegate(["click", "keydown"]);
-  var root$4 = /* @__PURE__ */ from_html(`<div><!></div>`);
+  var root$3 = /* @__PURE__ */ from_html(`<div><!></div>`);
   function Stack($$anchor, $$props) {
+    let className = prop($$props, "class", 3, "");
     let sizeClass = /* @__PURE__ */ user_derived(() => $$props.size ? `wpea-stack--${$$props.size}` : "");
-    var div = root$4();
+    var div = root$3();
     var node = child(div);
     {
       var consequent = ($$anchor2) => {
@@ -3992,21 +4302,24 @@
         if ($$props.children) $$render(consequent);
       });
     }
-    template_effect(() => set_class(div, 1, `wpea-stack ${get(sizeClass) ?? ""}`));
+    template_effect(() => {
+      set_class(div, 1, `wpea-stack ${get(sizeClass) ?? ""} ${className() ?? ""}`);
+      set_style(div, $$props.style);
+    });
     append($$anchor, div);
   }
-  var root_4$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__title"> </div>`);
+  var root_4$4 = /* @__PURE__ */ from_html(`<div class="wpea-card__title"> </div>`);
   var root_5$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__sub"> </div>`);
-  var root_3$4 = /* @__PURE__ */ from_html(`<!> <!>`, 1);
+  var root_3$5 = /* @__PURE__ */ from_html(`<!> <!>`, 1);
   var root_6$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__actions"><!></div>`);
   var root_1$7 = /* @__PURE__ */ from_html(`<div class="wpea-card__header"><div><!></div> <!></div>`);
-  var root$3 = /* @__PURE__ */ from_html(`<div><!> <!></div>`);
+  var root$2 = /* @__PURE__ */ from_html(`<div><!> <!></div>`);
   function Card($$anchor, $$props) {
-    let muted = prop($$props, "muted", 3, false), hover = prop($$props, "hover", 3, false);
+    let muted = prop($$props, "muted", 3, false), hover = prop($$props, "hover", 3, false), className = prop($$props, "class", 3, "");
     let mutedClass = /* @__PURE__ */ user_derived(() => muted() ? "wpea-card--muted" : "");
     let hoverClass = /* @__PURE__ */ user_derived(() => hover() ? "wpea-card--hover" : "");
     let hasHeader = /* @__PURE__ */ user_derived(() => $$props.title || $$props.subtitle || $$props.header || $$props.actions);
-    var div = root$3();
+    var div = root$2();
     var node = child(div);
     {
       var consequent_4 = ($$anchor2) => {
@@ -4021,11 +4334,11 @@
             append($$anchor3, fragment);
           };
           var alternate = ($$anchor3) => {
-            var fragment_1 = root_3$4();
+            var fragment_1 = root_3$5();
             var node_3 = first_child(fragment_1);
             {
               var consequent_1 = ($$anchor4) => {
-                var div_3 = root_4$3();
+                var div_3 = root_4$4();
                 var text2 = child(div_3);
                 template_effect(() => set_text(text2, $$props.title));
                 append($$anchor4, div_3);
@@ -4083,18 +4396,21 @@
         if ($$props.children) $$render(consequent_5);
       });
     }
-    template_effect(() => set_class(div, 1, `wpea-card ${get(mutedClass) ?? ""} ${get(hoverClass) ?? ""}`));
+    template_effect(() => {
+      set_class(div, 1, `wpea-card ${get(mutedClass) ?? ""} ${get(hoverClass) ?? ""} ${className() ?? ""}`);
+      set_style(div, $$props.style);
+    });
     append($$anchor, div);
   }
-  var root_2$3 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_2$4 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
   var root_5$2 = /* @__PURE__ */ from_html(`<option> </option>`);
   var root_6$2 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
-  var root_1$6 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <select class="wpea-select"><!></select> <!></div>`);
+  var root_1$6 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <select><!></select> <!></div>`);
   var root_10$1 = /* @__PURE__ */ from_html(`<option> </option>`);
-  var root_7$3 = /* @__PURE__ */ from_html(`<select class="wpea-select"><!></select>`);
+  var root_7$3 = /* @__PURE__ */ from_html(`<select><!></select>`);
   function Select($$anchor, $$props) {
     push($$props, true);
-    let value = prop($$props, "value", 15, ""), disabled = prop($$props, "disabled", 3, false), required = prop($$props, "required", 3, false), options = prop($$props, "options", 19, () => []);
+    let value = prop($$props, "value", 15, ""), disabled = prop($$props, "disabled", 3, false), required = prop($$props, "required", 3, false), className = prop($$props, "class", 3, ""), options = prop($$props, "options", 19, () => []);
     function handleChange(event2) {
       const target = event2.target;
       value(target.value);
@@ -4108,7 +4424,7 @@
         var node_1 = child(div);
         {
           var consequent = ($$anchor3) => {
-            var label_1 = root_2$3();
+            var label_1 = root_2$4();
             var text2 = child(label_1);
             template_effect(() => {
               set_attribute(label_1, "for", $$props.id);
@@ -4167,6 +4483,8 @@
           });
         }
         template_effect(() => {
+          set_class(select, 1, `wpea-select ${className() ?? ""}`);
+          set_style(select, $$props.style);
           set_attribute(select, "id", $$props.id);
           set_attribute(select, "name", $$props.name);
           select.disabled = disabled();
@@ -4213,6 +4531,8 @@
         var select_1_value;
         init_select(select_1);
         template_effect(() => {
+          set_class(select_1, 1, `wpea-select ${className() ?? ""}`);
+          set_style(select_1, $$props.style);
           set_attribute(select_1, "id", $$props.id);
           set_attribute(select_1, "name", $$props.name);
           select_1.disabled = disabled();
@@ -4232,13 +4552,13 @@
     pop();
   }
   delegate(["change"]);
-  var root_2$2 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
-  var root_3$3 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
+  var root_2$3 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_3$4 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
   var root_1$5 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <input/> <!></div>`);
-  var root_4$2 = /* @__PURE__ */ from_html(`<input/>`);
+  var root_4$3 = /* @__PURE__ */ from_html(`<input/>`);
   function Input($$anchor, $$props) {
     push($$props, true);
-    let value = prop($$props, "value", 15, ""), type = prop($$props, "type", 3, "text"), disabled = prop($$props, "disabled", 3, false), readonly = prop($$props, "readonly", 3, false), required = prop($$props, "required", 3, false);
+    let value = prop($$props, "value", 15, ""), type = prop($$props, "type", 3, "text"), disabled = prop($$props, "disabled", 3, false), readonly = prop($$props, "readonly", 3, false), required = prop($$props, "required", 3, false), className = prop($$props, "class", 3, "");
     function handleInput(event2) {
       const target = event2.target;
       value(target.value);
@@ -4258,7 +4578,7 @@
         var node_1 = child(div);
         {
           var consequent = ($$anchor3) => {
-            var label_1 = root_2$2();
+            var label_1 = root_2$3();
             var text2 = child(label_1);
             template_effect(() => {
               set_attribute(label_1, "for", $$props.id);
@@ -4276,7 +4596,7 @@
         var node_2 = sibling(input, 2);
         {
           var consequent_1 = ($$anchor3) => {
-            var span = root_3$3();
+            var span = root_3$4();
             var text_1 = child(span);
             template_effect(() => set_text(text_1, $$props.help));
             append($$anchor3, span);
@@ -4286,7 +4606,8 @@
           });
         }
         template_effect(() => {
-          set_class(input, 1, `wpea-input ${get(sizeClass) ?? ""}`);
+          set_class(input, 1, `wpea-input ${get(sizeClass) ?? ""} ${className() ?? ""}`);
+          set_style(input, $$props.style);
           set_attribute(input, "type", type());
           set_attribute(input, "id", $$props.id);
           set_attribute(input, "name", $$props.name);
@@ -4299,11 +4620,12 @@
         append($$anchor2, div);
       };
       var alternate = ($$anchor2) => {
-        var input_1 = root_4$2();
+        var input_1 = root_4$3();
         input_1.__input = handleInput;
         input_1.__change = handleChange;
         template_effect(() => {
-          set_class(input_1, 1, `wpea-input ${get(sizeClass) ?? ""}`);
+          set_class(input_1, 1, `wpea-input ${get(sizeClass) ?? ""} ${className() ?? ""}`);
+          set_style(input_1, $$props.style);
           set_attribute(input_1, "type", type());
           set_attribute(input_1, "id", $$props.id);
           set_attribute(input_1, "name", $$props.name);
@@ -4324,12 +4646,12 @@
     pop();
   }
   delegate(["input", "change"]);
-  var root$2 = /* @__PURE__ */ from_html(`<button><!></button>`);
+  var root$1 = /* @__PURE__ */ from_html(`<button><!></button>`);
   function Button($$anchor, $$props) {
-    let variant = prop($$props, "variant", 3, "primary"), disabled = prop($$props, "disabled", 3, false), type = prop($$props, "type", 3, "button");
+    let variant = prop($$props, "variant", 3, "primary"), disabled = prop($$props, "disabled", 3, false), type = prop($$props, "type", 3, "button"), className = prop($$props, "class", 3, "");
     let variantClass = /* @__PURE__ */ user_derived(() => variant() ? `wpea-btn--${variant()}` : "");
     let sizeClass = /* @__PURE__ */ user_derived(() => $$props.size ? `wpea-btn--${$$props.size}` : "");
-    var button = root$2();
+    var button = root$1();
     button.__click = function(...$$args) {
       $$props.onclick?.apply(this, $$args);
     };
@@ -4346,18 +4668,21 @@
       });
     }
     template_effect(() => {
-      set_class(button, 1, `wpea-btn ${get(variantClass) ?? ""} ${get(sizeClass) ?? ""}`);
+      set_class(button, 1, `wpea-btn ${get(variantClass) ?? ""} ${get(sizeClass) ?? ""} ${className() ?? ""}`);
+      set_style(button, $$props.style);
       set_attribute(button, "type", type());
       button.disabled = disabled();
     });
     append($$anchor, button);
   }
   delegate(["click"]);
-  var root_1$4 = /* @__PURE__ */ from_html(`<label> </label>`);
-  var root$1 = /* @__PURE__ */ from_html(`<div class="wpea-control"><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!></div>`);
+  var root_2$2 = /* @__PURE__ */ from_html(`<label> </label>`);
+  var root_1$4 = /* @__PURE__ */ from_html(`<div><div class="wpea-control"><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!></div> <span class="wpea-help"> </span></div>`);
+  var root_4$2 = /* @__PURE__ */ from_html(`<label> </label>`);
+  var root_3$3 = /* @__PURE__ */ from_html(`<div><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!></div>`);
   function Switch($$anchor, $$props) {
     push($$props, true);
-    let checked = prop($$props, "checked", 15, false), disabled = prop($$props, "disabled", 3, false);
+    let checked = prop($$props, "checked", 15, false), disabled = prop($$props, "disabled", 3, false), className = prop($$props, "class", 3, "");
     function handleChange(event2) {
       const target = event2.target;
       checked(target.checked);
@@ -4365,43 +4690,91 @@
     }
     let sizeClass = /* @__PURE__ */ user_derived(() => $$props.size ? `wpea-switch--${$$props.size}` : "");
     let colorClass = /* @__PURE__ */ user_derived(() => $$props.color ? `wpea-switch--${$$props.color}` : "");
-    var div = root$1();
-    var label_1 = child(div);
-    var input = child(label_1);
-    input.__change = handleChange;
-    var node = sibling(label_1, 2);
+    var fragment = comment();
+    var node = first_child(fragment);
     {
-      var consequent = ($$anchor2) => {
-        var label_2 = root_1$4();
-        var text2 = child(label_2);
+      var consequent_1 = ($$anchor2) => {
+        var div = root_1$4();
+        var div_1 = child(div);
+        var label_1 = child(div_1);
+        var input = child(label_1);
+        input.__change = handleChange;
+        var node_1 = sibling(label_1, 2);
+        {
+          var consequent = ($$anchor3) => {
+            var label_2 = root_2$2();
+            var text2 = child(label_2);
+            template_effect(() => {
+              set_attribute(label_2, "for", $$props.id);
+              set_text(text2, $$props.label);
+            });
+            append($$anchor3, label_2);
+          };
+          if_block(node_1, ($$render) => {
+            if ($$props.label) $$render(consequent);
+          });
+        }
+        var span = sibling(div_1, 2);
+        var text_1 = child(span);
         template_effect(() => {
-          set_attribute(label_2, "for", $$props.id);
-          set_text(text2, $$props.label);
+          set_class(div, 1, `wpea-field ${className() ?? ""}`);
+          set_style(div, $$props.style);
+          set_class(label_1, 1, `wpea-switch ${get(sizeClass) ?? ""} ${get(colorClass) ?? ""}`);
+          set_attribute(label_1, "for", $$props.id);
+          set_attribute(input, "id", $$props.id);
+          input.disabled = disabled();
+          set_checked(input, checked());
+          set_text(text_1, $$props.help);
         });
-        append($$anchor2, label_2);
+        append($$anchor2, div);
+      };
+      var alternate = ($$anchor2) => {
+        var div_2 = root_3$3();
+        var label_3 = child(div_2);
+        var input_1 = child(label_3);
+        input_1.__change = handleChange;
+        var node_2 = sibling(label_3, 2);
+        {
+          var consequent_2 = ($$anchor3) => {
+            var label_4 = root_4$2();
+            var text_2 = child(label_4);
+            template_effect(() => {
+              set_attribute(label_4, "for", $$props.id);
+              set_text(text_2, $$props.label);
+            });
+            append($$anchor3, label_4);
+          };
+          if_block(node_2, ($$render) => {
+            if ($$props.label) $$render(consequent_2);
+          });
+        }
+        template_effect(() => {
+          set_class(div_2, 1, `wpea-control ${className() ?? ""}`);
+          set_style(div_2, $$props.style);
+          set_class(label_3, 1, `wpea-switch ${get(sizeClass) ?? ""} ${get(colorClass) ?? ""}`);
+          set_attribute(label_3, "for", $$props.id);
+          set_attribute(input_1, "id", $$props.id);
+          input_1.disabled = disabled();
+          set_checked(input_1, checked());
+        });
+        append($$anchor2, div_2);
       };
       if_block(node, ($$render) => {
-        if ($$props.label) $$render(consequent);
+        if ($$props.help) $$render(consequent_1);
+        else $$render(alternate, false);
       });
     }
-    template_effect(() => {
-      set_class(label_1, 1, `wpea-switch ${get(sizeClass) ?? ""} ${get(colorClass) ?? ""}`);
-      set_attribute(label_1, "for", $$props.id);
-      set_attribute(input, "id", $$props.id);
-      input.disabled = disabled();
-      set_checked(input, checked());
-    });
-    append($$anchor, div);
+    append($$anchor, fragment);
     pop();
   }
   delegate(["change"]);
   var root_2$1 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
   var root_3$2 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
-  var root_1$3 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <textarea class="wpea-textarea"></textarea> <!></div>`);
-  var root_4$1 = /* @__PURE__ */ from_html(`<textarea class="wpea-textarea"></textarea>`);
+  var root_1$3 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <textarea></textarea> <!></div>`);
+  var root_4$1 = /* @__PURE__ */ from_html(`<textarea></textarea>`);
   function Textarea($$anchor, $$props) {
     push($$props, true);
-    let value = prop($$props, "value", 15, ""), disabled = prop($$props, "disabled", 3, false), readonly = prop($$props, "readonly", 3, false), required = prop($$props, "required", 3, false), rows = prop($$props, "rows", 3, 4);
+    let value = prop($$props, "value", 15, ""), disabled = prop($$props, "disabled", 3, false), readonly = prop($$props, "readonly", 3, false), required = prop($$props, "required", 3, false), rows = prop($$props, "rows", 3, 4), className = prop($$props, "class", 3, "");
     function handleInput(event2) {
       const target = event2.target;
       value(target.value);
@@ -4448,6 +4821,8 @@
           });
         }
         template_effect(() => {
+          set_class(textarea, 1, `wpea-textarea ${className() ?? ""}`);
+          set_style(textarea, $$props.style);
           set_attribute(textarea, "id", $$props.id);
           set_attribute(textarea, "name", $$props.name);
           set_attribute(textarea, "placeholder", $$props.placeholder);
@@ -4464,6 +4839,8 @@
         textarea_1.__input = handleInput;
         textarea_1.__change = handleChange;
         template_effect(() => {
+          set_class(textarea_1, 1, `wpea-textarea ${className() ?? ""}`);
+          set_style(textarea_1, $$props.style);
           set_attribute(textarea_1, "id", $$props.id);
           set_attribute(textarea_1, "name", $$props.name);
           set_attribute(textarea_1, "placeholder", $$props.placeholder);
@@ -5925,7 +6302,8 @@
                   });
                 }
                 append($$anchor4, fragment_3);
-              }
+              },
+              $$slots: { default: true }
             });
           };
           var alternate_6 = ($$anchor3) => {
@@ -5955,7 +6333,8 @@
                       },
                       $$slots: { default: true }
                     });
-                  }
+                  },
+                  $$slots: { default: true }
                 });
               };
               var alternate_5 = ($$anchor4) => {
@@ -6030,7 +6409,8 @@
                       },
                       $$slots: { default: true }
                     });
-                  }
+                  },
+                  $$slots: { default: true }
                 });
               };
               if_block(

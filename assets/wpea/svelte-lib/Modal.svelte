@@ -7,8 +7,6 @@
     open?: boolean;
     size?: 'standard' | 'large' | 'fullscreen';
     title?: string;
-    class?: string;
-    style?: string;
     onClose?: () => void;
     header?: Snippet;
     children?: Snippet;
@@ -19,8 +17,6 @@
     open = $bindable(false),
     size = 'standard',
     title = '',
-    class: className = '',
-    style,
     onClose,
     header,
     children,
@@ -72,8 +68,8 @@
 
 {#if open}
   <div
-    class="wpea wpea-full wpea-modal wpea-modal--open {sizeClass} {className}"
-    style="font-family: var(--wpea-font-sans); z-index: 999999 !important; {style || ''}"
+    class="wpea wpea-full wpea-modal wpea-modal--open {sizeClass}"
+    style="font-family: var(--wpea-font-sans);"
     transition:fade={{ duration: 200 }}
   >
     <div
@@ -97,7 +93,7 @@
         <button class="wpea-modal__close" onclick={handleClose} aria-label="Close">&times;</button>
       </div>
 
-      <div class="wpea-modal__body wpea-scope">
+      <div class="wpea-modal__body">
         {#if children}
           {@render children()}
         {/if}
