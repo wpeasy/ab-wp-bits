@@ -19,11 +19,18 @@
   let {
     tabs = [],
     variant,
-    activeTab = $bindable(tabs[0]?.id || ''),
+    activeTab = $bindable(''),
     class: className = '',
     style,
     onTabChange
   }: Props = $props();
+
+  // If no activeTab is set, default to first tab
+  $effect(() => {
+    if (!activeTab && tabs.length > 0) {
+      activeTab = tabs[0].id;
+    }
+  });
 
   function selectTab(tabId: string) {
     activeTab = tabId;
