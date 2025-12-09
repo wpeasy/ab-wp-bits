@@ -3,7 +3,7 @@
   import Card from './lib/Card.svelte';
   import Button from './lib/Button.svelte';
   import Toggle3State from './lib/Toggle3State.svelte';
-  import MultiSelect from './lib/MultiSelect.svelte';
+  import AdvancedSelect from './lib/AdvancedSelect.svelte';
 
   interface Props {
     conditions: Condition[];
@@ -35,10 +35,12 @@
     onUpdate(conditions);
   }
 
-  function handleCapabilityChange(index: number, capability: string | number | (string | number)[]) {
+  function handleCapabilityChange(index: number, capability: string | string[]) {
+    // AdvancedSelect with multiple={false} returns a string
+    const capValue = Array.isArray(capability) ? capability[0] || '' : capability;
     conditions[index] = {
       ...conditions[index],
-      capability: String(capability)
+      capability: capValue
     };
     onUpdate(conditions);
   }
@@ -55,12 +57,14 @@
     relation = newRelation as 'AND' | 'OR';
   }
 
-  // Get all selected capabilities except the current one
-  function getExcludedCapabilities(currentIndex: number): string[] {
-    return conditions
+  // Get filtered capabilities (excluding already selected ones)
+  function getFilteredCapabilities(currentIndex: number): Capability[] {
+    const excludedValues = conditions
       .filter((_, i) => i !== currentIndex)
       .map(c => c.capability)
       .filter(Boolean);
+
+    return capabilities.filter(cap => !excludedValues.includes(cap.value));
   }
 </script>
 
@@ -87,14 +91,15 @@
             </div>
 
             <div class="condition-capability">
-              <MultiSelect
+              <AdvancedSelect
                 id="capability-{index}"
                 label=""
                 placeholder={condition.capability ? "Search capabilities..." : "Select a capability..."}
                 value={condition.capability}
-                options={capabilities}
+                options={getFilteredCapabilities(index)}
                 multiple={false}
-                excludeValues={getExcludedCapabilities(index)}
+                searchable={true}
+                clearable={false}
                 onchange={(value) => handleCapabilityChange(index, value)}
               />
             </div>
