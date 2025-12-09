@@ -2,6 +2,40 @@
 
 All notable changes to Alan Blair's WP Bits will be documented in this file.
 
+## [0.0.7-beta] - 2025-12-09
+
+### Added
+- **Settings Dropdown**: New settings gear icon in admin panel header with:
+  - Compact Mode toggle for reduced spacing/typography
+  - Theme toggle (Light/Dark/Auto) with icon-only buttons and popovers
+- **Global State**: Settings persist to localStorage and sync across app instances
+- **Dark Mode Support**: Full dark mode support for all admin components including modals
+
+### Fixed
+- **Customizer Modals**: Fixed modals not opening in Customize → Menus after framework update
+- **Input Focus States**: Fixed input fields not respecting dark mode in focused/selected state
+- **Card Borders**: Ensured card borders are visible in dark mode
+- **Toggle3State Popovers**: Fixed popovers persisting after click (now hover-only)
+- **Query Builder Modal**: Changed from fullscreen to large size to restore proper border styling
+
+### Changed
+- **VerticalTabs**: Restructured to support actions area in header (for settings dropdown)
+- **Modal Component**: Now reads settings from localStorage for theme/compact mode support in separate bundles
+
+### Technical Notes
+- Global state uses `ab-wp-bits-settings` localStorage key
+- Cross-app state sharing via `window.wpeaAppState` and custom events
+- Modal reads localStorage directly to avoid bundling issues with globalState import
+
+## [0.0.6-beta] - 2025-12-08
+
+### Fixed
+- **Select2 Isolation**: Added isolation for external Select2 conflicts (WIP)
+- **Add Condition Error**: Fixed error by replacing MultiSelect with AdvancedSelect
+- **Select Styling**: Replaced native Select with AdvancedSelect for better styling
+- **WPEA Framework**: Updated to latest version
+- **Select/Number Input**: Fixed dropdown and number input visibility issues
+
 ## [0.0.5-beta] - 2025-12-08
 
 ### Added

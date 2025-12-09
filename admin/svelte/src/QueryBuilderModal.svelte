@@ -715,7 +715,7 @@
   let canSave = $derived(rawWPQuery.length > 0);
 </script>
 
-<Modal bind:open size="fullscreen" title="Query Builder">
+<Modal bind:open size="large" title="Query Builder">
   {#snippet children()}
     <!-- Tab Navigation -->
     <div class="wpea-tabs">

@@ -53,24 +53,41 @@
     console.log('Attaching listeners to', buttons.length, 'buttons');
 
     buttons.forEach(button => {
+      // Prevent duplicate listeners by checking for a marker
+      if (button.hasAttribute('data-listener-attached')) {
+        return;
+      }
+      button.setAttribute('data-listener-attached', 'true');
       button.addEventListener('click', handleButtonClick);
     });
   }
 
   async function handleButtonClick(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    console.log('Button clicked!', event);
+
     const button = event.currentTarget as HTMLButtonElement;
     const menuItemId = parseInt(button.dataset.menuItemId || '0', 10);
 
+    console.log('Menu item ID:', menuItemId);
+
     // Fetch fresh conditions from server instead of using cached button data
     try {
+      console.log('Fetching conditions from:', `${apiUrl}/menu-conditions/item/${menuItemId}`);
       const response = await fetch(`${apiUrl}/menu-conditions/item/${menuItemId}`, {
         headers: { 'X-WP-Nonce': nonce }
       });
+      console.log('Fetch response:', response);
       const data = await response.json();
+      console.log('Fetch data:', data);
 
       if (data.success) {
+        console.log('Opening modal with conditions:', data.conditions);
         openModal(menuItemId, data.conditions);
       } else {
+        console.error('Fetch returned failure:', data);
         addToast('Failed to load conditions', 'danger');
       }
     } catch (error) {
@@ -80,6 +97,7 @@
   }
 
   function openModal(menuItemId: number, conditions: any) {
+    console.log('openModal called with:', menuItemId, conditions);
     currentMenuItemId = menuItemId;
 
     // Parse conditions
@@ -96,6 +114,7 @@
     }
 
     modalOpen = true;
+    console.log('modalOpen set to:', modalOpen);
   }
 
   function closeModal() {

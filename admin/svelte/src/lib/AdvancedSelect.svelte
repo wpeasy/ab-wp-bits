@@ -412,3 +412,12 @@
     <span class="wpea-help">{help}</span>
   {/if}
 </div>
+
+<style>
+  /* Ensure input inherits color-scheme for proper dark mode support */
+  :global(.wpea-multiselect__input) {
+    color-scheme: inherit;
+    background: transparent !important;
+    color: inherit !important;
+  }
+</style>

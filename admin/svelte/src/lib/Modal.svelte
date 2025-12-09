@@ -29,6 +29,36 @@
     ''
   );
 
+  // Read settings from localStorage (same key as globalState.svelte.ts)
+  function getSettings() {
+    try {
+      const stored = localStorage.getItem('ab-wp-bits-settings');
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      // Ignore errors
+    }
+    return { compactMode: false, themeMode: 'auto' };
+  }
+
+  // Get settings when modal opens
+  let settings = $state(getSettings());
+
+  // Refresh settings when modal opens
+  $effect(() => {
+    if (open) {
+      settings = getSettings();
+    }
+  });
+
+  // Compute color-scheme value based on theme mode
+  let colorScheme = $derived(
+    settings.themeMode === 'light' ? 'light only' :
+    settings.themeMode === 'dark' ? 'dark only' :
+    'light dark'
+  );
+
   function handleClose() {
     open = false;
     onClose?.();
@@ -69,7 +99,8 @@
 {#if open}
   <div
     class="wpea wpea-full wpea-modal wpea-modal--open {sizeClass}"
-    style="font-family: var(--wpea-font-sans);"
+    class:ab-wp-bits-admin--compact={settings.compactMode}
+    style="font-family: var(--wpea-font-sans); color-scheme: {colorScheme}; position: fixed; inset: 0; z-index: 999999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5);"
     transition:fade={{ duration: 200 }}
   >
     <div
@@ -107,3 +138,21 @@
     </div>
   </div>
 {/if}
+
+<style>
+  /* Compact mode - reduce spacing and typography */
+  :global(.ab-wp-bits-admin--compact) {
+    --wpea-space--xs: 0.2rem;
+    --wpea-space--sm: 0.35rem;
+    --wpea-space--md: 0.6rem;
+    --wpea-space--lg: 0.9rem;
+    --wpea-space--xl: 1.2rem;
+    --wpea-text--xs: 0.7rem;
+    --wpea-text--sm: 0.775rem;
+    --wpea-text--md: 0.85rem;
+    --wpea-text--lg: 0.95rem;
+    --wpea-text--xl: 1.1rem;
+    font-size: var(--wpea-text--md);
+    line-height: 1.4;
+  }
+</style>

@@ -56,3 +56,10 @@
     {@render children()}
   {/if}
 </div>
+
+<style>
+  /* Ensure card border is visible in dark mode */
+  :global(.wpea-card) {
+    border: 1px solid var(--wpea-surface--border, rgba(255, 255, 255, 0.16));
+  }
+</style>

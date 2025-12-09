@@ -59,7 +59,7 @@
 <div class="{containerClass} {className}" {style} role="group" aria-label={ariaLabel}>
   {#each options as option}
     {#if showPopover && iconOnly}
-      <div class="wpea-popover">
+      <div class="wpea-popover wpea-popover--hover-only">
         <button
           type="button"
           class="wpea-toggle-3state__btn"
@@ -97,3 +97,17 @@
     {/if}
   {/each}
 </div>
+
+<style>
+  /* Override focus-within behavior for hover-only popovers */
+  :global(.wpea-popover--hover-only:focus-within .wpea-popover__content) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Show only on hover (not focus) */
+  :global(.wpea-popover--hover-only:hover .wpea-popover__content) {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+</style>

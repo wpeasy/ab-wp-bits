@@ -2,6 +2,34 @@
   "use strict";
   var __vite_style__ = document.createElement("style");
   __vite_style__.textContent = `
+  /* Compact mode - reduce spacing and typography */
+  .ab-wp-bits-admin--compact {
+    --wpea-space--xs: 0.2rem;
+    --wpea-space--sm: 0.35rem;
+    --wpea-space--md: 0.6rem;
+    --wpea-space--lg: 0.9rem;
+    --wpea-space--xl: 1.2rem;
+    --wpea-text--xs: 0.7rem;
+    --wpea-text--sm: 0.775rem;
+    --wpea-text--md: 0.85rem;
+    --wpea-text--lg: 0.95rem;
+    --wpea-text--xl: 1.1rem;
+    font-size: var(--wpea-text--md);
+    line-height: 1.4;
+  }
+
+  /* Ensure card border is visible in dark mode */
+  .wpea-card {
+    border: 1px solid var(--wpea-surface--border, rgba(255, 255, 255, 0.16));
+  }
+
+  /* Ensure input inherits color-scheme for proper dark mode support */
+  .wpea-multiselect__input {
+    color-scheme: inherit;
+    background: transparent !important;
+    color: inherit !important;
+  }
+
   .wpea-grid-2.svelte-qhqlmy {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -4079,11 +4107,28 @@
   }
   var root_3$6 = /* @__PURE__ */ from_html(`<h3 class="wpea-modal__title"> </h3>`);
   var root_5$4 = /* @__PURE__ */ from_html(`<div class="wpea-modal__footer"><!></div>`);
-  var root_1$8 = /* @__PURE__ */ from_html(`<div style="font-family: var(--wpea-font-sans);"><div class="wpea-modal__backdrop" role="button" tabindex="0" aria-label="Close modal"></div> <div class="wpea-modal__container"><div class="wpea-modal__header"><!> <button class="wpea-modal__close" aria-label="Close">&times;</button></div> <div class="wpea-modal__body"><!></div> <!></div></div>`);
+  var root_1$8 = /* @__PURE__ */ from_html(`<div><div class="wpea-modal__backdrop" role="button" tabindex="0" aria-label="Close modal"></div> <div class="wpea-modal__container"><div class="wpea-modal__header"><!> <button class="wpea-modal__close" aria-label="Close">&times;</button></div> <div class="wpea-modal__body"><!></div> <!></div></div>`);
   function Modal($$anchor, $$props) {
     push($$props, true);
     let open = prop($$props, "open", 15, false), size = prop($$props, "size", 3, "standard"), title = prop($$props, "title", 3, "");
     const sizeClass = /* @__PURE__ */ user_derived(() => size() === "large" ? "wpea-modal--large" : size() === "fullscreen" ? "wpea-modal--fullscreen" : "");
+    function getSettings() {
+      try {
+        const stored = localStorage.getItem("ab-wp-bits-settings");
+        if (stored) {
+          return JSON.parse(stored);
+        }
+      } catch (e) {
+      }
+      return { compactMode: false, themeMode: "auto" };
+    }
+    let settings = /* @__PURE__ */ state(proxy(getSettings()));
+    user_effect(() => {
+      if (open()) {
+        set(settings, getSettings(), true);
+      }
+    });
+    let colorScheme = /* @__PURE__ */ user_derived(() => get(settings).themeMode === "light" ? "light only" : get(settings).themeMode === "dark" ? "dark only" : "light dark");
     function handleClose() {
       open(false);
       $$props.onClose?.();
@@ -4119,6 +4164,7 @@
     {
       var consequent_3 = ($$anchor2) => {
         var div = root_1$8();
+        let classes;
         var div_1 = child(div);
         div_1.__click = handleBackdropClick;
         div_1.__keydown = handleBackdropKeydown;
@@ -4170,7 +4216,10 @@
             if ($$props.footer) $$render(consequent_2);
           });
         }
-        template_effect(() => set_class(div, 1, `wpea wpea-full wpea-modal wpea-modal--open ${get(sizeClass) ?? ""}`));
+        template_effect(() => {
+          classes = set_class(div, 1, `wpea wpea-full wpea-modal wpea-modal--open ${get(sizeClass) ?? ""}`, null, classes, { "ab-wp-bits-admin--compact": get(settings).compactMode });
+          set_style(div, `font-family: var(--wpea-font-sans); color-scheme: ${get(colorScheme) ?? ""}; position: fixed; inset: 0; z-index: 999999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5);`);
+        });
         transition(3, div_2, () => modalSlideUp, () => ({ duration: 300 }));
         transition(3, div, () => fade, () => ({ duration: 200 }));
         append($$anchor2, div);
@@ -6780,7 +6829,7 @@
         append($$anchor2, div_9);
       };
       Modal($$anchor, {
-        size: "fullscreen",
+        size: "large",
         title: "Query Builder",
         get open() {
           return open();

@@ -14,16 +14,16 @@
   let activeTab = $state('modules');
   let activeModuleSubTab = $state<'settings' | 'instructions'>('settings');
 
-  // Apply theme mode from global state
+  // Compute color-scheme value based on theme mode
+  let colorScheme = $derived(
+    appState.themeMode === 'light' ? 'light only' :
+    appState.themeMode === 'dark' ? 'dark only' :
+    'light dark'
+  );
+
+  // Apply theme mode to document root for global inheritance
   $effect(() => {
-    const root = document.documentElement;
-    if (appState.themeMode === 'light') {
-      root.style.setProperty('color-scheme', 'light only');
-    } else if (appState.themeMode === 'dark') {
-      root.style.setProperty('color-scheme', 'dark only');
-    } else {
-      root.style.setProperty('color-scheme', 'light dark');
-    }
+    document.documentElement.style.setProperty('color-scheme', colorScheme);
   });
 
   // Compute enabled modules for tabs (sorted alphabetically)
@@ -57,7 +57,7 @@
   );
 </script>
 
-<div class="ab-wp-bits-admin" class:ab-wp-bits-admin--compact={appState.compactMode}>
+<div class="ab-wp-bits-admin wpea" class:ab-wp-bits-admin--compact={appState.compactMode} style="color-scheme: {colorScheme};">
   <VerticalTabs {tabs} bind:activeTab>
     {#snippet actions()}
       <SettingsDropdown />
