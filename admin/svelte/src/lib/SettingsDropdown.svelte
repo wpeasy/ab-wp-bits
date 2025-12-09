@@ -1,23 +1,9 @@
 <script lang="ts">
   import Switch from './Switch.svelte';
   import Toggle3State from './Toggle3State.svelte';
+  import { appState, type ThemeMode } from '../globalState.svelte';
 
-  type ThemeMode = 'light' | 'dark' | 'auto';
-
-  type Props = {
-    compactMode?: boolean;
-    themeMode?: ThemeMode;
-    onCompactModeChange?: (value: boolean) => void;
-    onThemeModeChange?: (value: ThemeMode) => void;
-  };
-
-  let {
-    compactMode = $bindable(false),
-    themeMode = $bindable<ThemeMode>('auto'),
-    onCompactModeChange,
-    onThemeModeChange
-  }: Props = $props();
-
+  // Local component state only
   let isOpen = $state(false);
   let dropdownRef: HTMLDivElement;
 
@@ -39,13 +25,11 @@
   });
 
   function handleCompactChange(value: boolean) {
-    compactMode = value;
-    onCompactModeChange?.(value);
+    appState.compactMode = value;
   }
 
   function handleThemeChange(value: string) {
-    themeMode = value as ThemeMode;
-    onThemeModeChange?.(value as ThemeMode);
+    appState.themeMode = value as ThemeMode;
   }
 
   const themeOptions = [
@@ -115,7 +99,7 @@
       <div class="settings-dropdown__item">
         <span class="settings-dropdown__label">Compact Mode</span>
         <Switch
-          checked={compactMode}
+          checked={appState.compactMode}
           onchange={handleCompactChange}
           size="sm"
         />
@@ -126,7 +110,7 @@
       <div class="settings-dropdown__item settings-dropdown__item--theme">
         <span class="settings-dropdown__label">Theme</span>
         <Toggle3State
-          value={themeMode}
+          value={appState.themeMode}
           options={themeOptions}
           onChange={handleThemeChange}
           iconOnly={true}

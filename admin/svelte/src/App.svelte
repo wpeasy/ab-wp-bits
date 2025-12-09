@@ -4,25 +4,22 @@
   import ModuleSettings from './ModuleSettings.svelte';
   import VerticalTabs from './lib/VerticalTabs.svelte';
   import SettingsDropdown from './lib/SettingsDropdown.svelte';
+  import { appState } from './globalState.svelte';
 
   // Get initial data from WordPress
   const initialModules: Module[] = window.abWpBitsData.modules;
 
-  // State
+  // Local UI state
   let modules = $state<Module[]>(initialModules);
   let activeTab = $state('modules');
   let activeModuleSubTab = $state<'settings' | 'instructions'>('settings');
 
-  // Settings state
-  let compactMode = $state(false);
-  let themeMode = $state<'light' | 'dark' | 'auto'>('auto');
-
-  // Apply theme mode
+  // Apply theme mode from global state
   $effect(() => {
     const root = document.documentElement;
-    if (themeMode === 'light') {
+    if (appState.themeMode === 'light') {
       root.style.setProperty('color-scheme', 'light only');
-    } else if (themeMode === 'dark') {
+    } else if (appState.themeMode === 'dark') {
       root.style.setProperty('color-scheme', 'dark only');
     } else {
       root.style.setProperty('color-scheme', 'light dark');
@@ -60,13 +57,10 @@
   );
 </script>
 
-<div class="ab-wp-bits-admin" class:ab-wp-bits-admin--compact={compactMode}>
+<div class="ab-wp-bits-admin" class:ab-wp-bits-admin--compact={appState.compactMode}>
   <VerticalTabs {tabs} bind:activeTab>
     {#snippet actions()}
-      <SettingsDropdown
-        bind:compactMode
-        bind:themeMode
-      />
+      <SettingsDropdown />
     {/snippet}
     {#snippet content()}
       {#if activeTab === 'modules'}
