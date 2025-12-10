@@ -8,6 +8,7 @@
     size?: Size;
     color?: ColorVariant;
     label?: string;
+    help?: string;
     class?: string;
     style?: string;
     onchange?: (checked: boolean) => void;
@@ -20,6 +21,7 @@
     size,
     color,
     label,
+    help,
     class: className = '',
     style,
     onchange
@@ -48,5 +50,8 @@
   </label>
   {#if label}
     <label for={id}>{label}</label>
+  {/if}
+  {#if help}
+    <span class="wpea-help">{help}</span>
   {/if}
 </div>

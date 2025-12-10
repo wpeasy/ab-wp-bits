@@ -132,3 +132,4 @@ _No frontend functionality at this stage._
   - CSS Editor fallback to textarea
 - Extensive error handling and validation throughout.
 
+- always check to see is a Svelte component exists in th eLib before create a custom implementation.

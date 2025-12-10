@@ -50,7 +50,12 @@
       "Bash(git -C \"C:\\Users\\Alan.Blair\\Local Sites\\bricks-playground\\app\\public\\wp-content\\plugins\\ab-wp-bits\" status)",
       "Bash(git -C \"C:\\Users\\Alan.Blair\\Local Sites\\bricks-playground\\app\\public\\wp-content\\plugins\\ab-wp-bits\" diff --stat)",
       "Bash(git -C \"C:\\Users\\Alan.Blair\\Local Sites\\bricks-playground\\app\\public\\wp-content\\plugins\\ab-wp-bits\" log --oneline -5)",
-      "Bash(git -C \"C:\\Users\\Alan.Blair\\Local Sites\\bricks-playground\\app\\public\\wp-content\\plugins\\ab-wp-bits\" add -A)"
+      "Bash(git -C \"C:\\Users\\Alan.Blair\\Local Sites\\bricks-playground\\app\\public\\wp-content\\plugins\\ab-wp-bits\" add -A)",
+      "Bash(git -C \"C:\\Users\\Alan.Blair\\Local Sites\\bricks-playground\\app\\public\\wp-content\\plugins\\ab-wp-bits\" commit -m \"$(cat <<''EOF''\nRelease v0.0.7-beta: Settings dropdown, dark mode fixes, Customizer modal fix\n\n- Add settings dropdown with Compact Mode and Theme toggle (light/dark/auto)\n- Add localStorage persistence for settings across app instances\n- Fix Customizer modals not opening after framework update\n- Fix input fields not respecting dark mode in focused state\n- Fix card borders visibility in dark mode\n- Fix Toggle3State popovers persisting after click (now hover-only)\n- Change Query Builder modal from fullscreen to large size\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C \"C:\\Users\\Alan.Blair\\Local Sites\\bricks-playground\\app\\public\\wp-content\\plugins\\ab-wp-bits\" push)",
+      "mcp__ide__getDiagnostics",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"C:\\Users\\Alan.Blair\\Local Sites\\bricks-playground\\app\\public\\wp-content\\plugins\\ab-wp-bits\\create-plugin-zip.ps1\")",
+      "Bash(git -C \"C:\\Users\\Alan.Blair\\Local Sites\\bricks-playground\\app\\public\\wp-content\\plugins\\ab-wp-bits\" commit -m \"$(cat <<''EOF''\nRelease v0.0.8-beta: WPEA framework update, TypeScript fixes, taxonomy dropdown fix\n\n- Update WPEA CSS and Svelte components from latest framework\n- Fix TypeScript type errors in QueryBuilderModal\n- Add help prop to Switch component\n- Fix VerticalTabs content rendering after framework update\n- Fix Include/Exclude Taxonomies dropdown (fetch terms for all query types)\n- Add shadow variable aliases for framework compatibility\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

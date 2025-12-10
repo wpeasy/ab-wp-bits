@@ -38,7 +38,7 @@
           {@render header()}
         {:else}
           {#if title}
-            <div class="wpea-card__title">{title}</div>
+            <h3 class="wpea-card__title">{title}</h3>
           {/if}
           {#if subtitle}
             <div class="wpea-card__sub">{subtitle}</div>

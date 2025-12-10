@@ -8,72 +8,213 @@ body:has(.wpea){
   background: var(--wpea-surface--bg);
 }
 
+/* ---------------------------------------------------------
+   TYPOGRAPHY RESETS
+   Reset all typography elements to zero margin/padding
+   --------------------------------------------------------- */
+
 .wpea h1, .wpea h2, .wpea h3, .wpea h4, .wpea h5, .wpea h6 {
   margin: 0;
+  padding: 0;
   font-family: var(--wpea-font-sans);
   font-weight: 700;
   line-height: 1.2;
-  color: var(--wpea-surface--text);
 }
 
+.wpea h1 { color: var(--wpea-color--heading1); }
+.wpea h2 { color: var(--wpea-color--heading2); }
+.wpea h3 { color: var(--wpea-color--heading3); }
+.wpea h4 { color: var(--wpea-color--heading4); }
+.wpea h5 { color: var(--wpea-color--heading5); }
+.wpea h6 { color: var(--wpea-color--heading); }
+
 .wpea p {
-  margin: 0 0 var(--wpea-space--sm) 0;
+  margin: 0;
+  padding: 0;
   line-height: 1.6;
 }
 
-.wpea p:last-child {
-  margin-bottom: 0;
-}
-
 .wpea ul, .wpea ol {
-  margin: 0 0 var(--wpea-space--sm) 0;
-  padding-inline-start: var(--wpea-space--lg);
-}
-
-.wpea ul:last-child, .wpea ol:last-child {
-  margin-bottom: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .wpea li {
-  margin-bottom: calc(var(--wpea-space--xs) * 0.5);
+  margin: 0;
+  padding: 0;
   line-height: 1.6;
 }
 
 .wpea dl {
-  margin: 0 0 var(--wpea-space--sm) 0;
+  margin: 0;
+  padding: 0;
 }
 
 .wpea dt {
+  margin: 0;
+  padding: 0;
   font-weight: 600;
-  margin-bottom: calc(var(--wpea-space--xs) * 0.5);
 }
 
 .wpea dd {
-  margin: 0 0 var(--wpea-space--sm) var(--wpea-space--lg);
-}
-
-.wpea dd:last-child {
-  margin-bottom: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .wpea blockquote {
-  margin: 0 0 var(--wpea-space--sm) 0;
+  margin: 0;
+  padding: 0;
+}
+
+.wpea pre {
+  margin: 0;
+  padding: 0;
+}
+
+.wpea code {
+  padding: 0;
+}
+
+.wpea hr {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.wpea table {
+  margin: 0;
+  padding: 0;
+  border-collapse: collapse;
+}
+
+.wpea figure {
+  margin: 0;
+  padding: 0;
+}
+
+.wpea figcaption {
+  margin: 0;
+  padding: 0;
+}
+
+.wpea address {
+  margin: 0;
+  padding: 0;
+  font-style: normal;
+}
+
+/* ---------------------------------------------------------
+   RICH TEXT CONTAINER
+   Re-apply sensible margins for flowing prose content
+   --------------------------------------------------------- */
+
+.wpea-rich-text > p:not(:last-child) {
+  margin-bottom: var(--wpea-space--sm);
+}
+
+.wpea-rich-text > ul,
+.wpea-rich-text > ol {
+  margin-bottom: var(--wpea-space--sm);
+  padding-inline-start: var(--wpea-space--lg);
+  list-style: revert;
+}
+
+.wpea-rich-text > ul:last-child,
+.wpea-rich-text > ol:last-child {
+  margin-bottom: 0;
+}
+
+.wpea-rich-text li {
+  margin-bottom: calc(var(--wpea-space--xs) * 0.5);
+}
+
+.wpea-rich-text > dl:not(:last-child) {
+  margin-bottom: var(--wpea-space--sm);
+}
+
+.wpea-rich-text dt {
+  margin-bottom: calc(var(--wpea-space--xs) * 0.5);
+}
+
+.wpea-rich-text dd {
+  margin-inline-start: var(--wpea-space--lg);
+  margin-bottom: var(--wpea-space--sm);
+}
+
+.wpea-rich-text dd:last-child {
+  margin-bottom: 0;
+}
+
+.wpea-rich-text > blockquote {
+  margin-bottom: var(--wpea-space--sm);
   padding-inline-start: var(--wpea-space--md);
   border-inline-start: 3px solid var(--wpea-surface--border);
   color: var(--wpea-surface--text-muted);
 }
 
-.wpea pre, .wpea code {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 0.9em;
+.wpea-rich-text > blockquote:last-child {
+  margin-bottom: 0;
 }
 
-.wpea pre {
-  margin: 0 0 var(--wpea-space--sm) 0;
+.wpea-rich-text > pre {
+  margin-bottom: var(--wpea-space--sm);
   padding: var(--wpea-space--sm);
   background: var(--wpea-surface--muted);
   border-radius: var(--wpea-radius--sm);
   overflow-x: auto;
+}
+
+.wpea-rich-text > pre:last-child {
+  margin-bottom: 0;
+}
+
+.wpea-rich-text > hr {
+  margin: var(--wpea-space--md) 0;
+  border-block-start: 1px solid var(--wpea-surface--divider);
+}
+
+.wpea-rich-text > table:not(:last-child) {
+  margin-bottom: var(--wpea-space--sm);
+}
+
+.wpea-rich-text > figure:not(:last-child) {
+  margin-bottom: var(--wpea-space--sm);
+}
+
+.wpea-rich-text figcaption {
+  margin-top: var(--wpea-space--xs);
+  color: var(--wpea-surface--text-muted);
+  font-size: var(--wpea-text--sm);
+}
+
+.wpea-rich-text > h1,
+.wpea-rich-text > h2,
+.wpea-rich-text > h3,
+.wpea-rich-text > h4,
+.wpea-rich-text > h5,
+.wpea-rich-text > h6 {
+  margin-top: var(--wpea-space--lg);
+  margin-bottom: var(--wpea-space--sm);
+}
+
+.wpea-rich-text > h1:first-child,
+.wpea-rich-text > h2:first-child,
+.wpea-rich-text > h3:first-child,
+.wpea-rich-text > h4:first-child,
+.wpea-rich-text > h5:first-child,
+.wpea-rich-text > h6:first-child {
+  margin-top: 0;
+}
+
+/* ---------------------------------------------------------
+   INLINE ELEMENT STYLING
+   These don't need margin resets, just base styling
+   --------------------------------------------------------- */
+
+.wpea pre, .wpea code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.9em;
 }
 
 .wpea code {
@@ -85,17 +226,6 @@ body:has(.wpea){
 .wpea pre code {
   padding: 0;
   background: none;
-}
-
-.wpea hr {
-  margin: var(--wpea-space--md) 0;
-  border: 0;
-  border-block-start: 1px solid var(--wpea-surface--divider);
-}
-
-.wpea table {
-  margin: 0 0 var(--wpea-space--sm) 0;
-  border-collapse: collapse;
 }
 
 .wpea strong, .wpea b {
@@ -117,7 +247,10 @@ body:has(.wpea){
   text-decoration: underline;
 }
 
-/* Reset WordPress admin form elements */
+/* ---------------------------------------------------------
+   FORM ELEMENT RESETS
+   --------------------------------------------------------- */
+
 .wpea input[type="text"],
 .wpea input[type="email"],
 .wpea input[type="url"],
@@ -140,7 +273,10 @@ body:has(.wpea){
   font-family: var(--wpea-font-sans);
 }
 
-/* Reset WordPress admin notice/message margins */
+/* ---------------------------------------------------------
+   WORDPRESS ADMIN SPECIFIC RESETS
+   --------------------------------------------------------- */
+
 .wpea .notice, .wpea .message {
-  margin: 0 0 var(--wpea-space--sm) 0;
+  margin: 0;
 }

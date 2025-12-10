@@ -5,6 +5,7 @@
   import Card from './lib/Card.svelte';
   import AdvancedSelect from './lib/AdvancedSelect.svelte';
   import Input from './lib/Input.svelte';
+  import NumberInput from './lib/NumberInput.svelte';
   import Button from './lib/Button.svelte';
   import Switch from './lib/Switch.svelte';
   import Textarea from './lib/Textarea.svelte';
@@ -37,12 +38,12 @@
   let showLabelOnEmpty = $state(false);
   let emptyLabel = $state('');
   let showDefaultMenuItem = $state(false);
-  let includePosts = $state<(string | number)[]>([]);
-  let excludePosts = $state<(string | number)[]>([]);
-  let includeTerms = $state<(string | number)[]>([]);
-  let excludeTerms = $state<(string | number)[]>([]);
-  let includeTaxonomies = $state<(string | number)[]>([]);
-  let excludeTaxonomies = $state<(string | number)[]>([]);
+  let includePosts = $state<string[]>([]);
+  let excludePosts = $state<string[]>([]);
+  let includeTerms = $state<string[]>([]);
+  let excludeTerms = $state<string[]>([]);
+  let includeTaxonomies = $state<string[]>([]);
+  let excludeTaxonomies = $state<string[]>([]);
   let metaQueries = $state<MetaQuery[]>([]);
   let metaQueryRelation = $state<'AND' | 'OR'>('AND');
 
@@ -90,12 +91,12 @@
           showLabelOnEmpty = initialConfig.showLabelOnEmpty ?? false;
           emptyLabel = initialConfig.emptyLabel || '';
           showDefaultMenuItem = initialConfig.showDefaultMenuItem ?? false;
-          includePosts = initialConfig.includePosts || [];
-          excludePosts = initialConfig.excludePosts || [];
-          includeTerms = initialConfig.includeTerms || [];
-          excludeTerms = initialConfig.excludeTerms || [];
-          includeTaxonomies = initialConfig.includeTaxonomies || [];
-          excludeTaxonomies = initialConfig.excludeTaxonomies || [];
+          includePosts = (initialConfig.includePosts || []).map(String);
+          excludePosts = (initialConfig.excludePosts || []).map(String);
+          includeTerms = (initialConfig.includeTerms || []).map(String);
+          excludeTerms = (initialConfig.excludeTerms || []).map(String);
+          includeTaxonomies = (initialConfig.includeTaxonomies || []).map(String);
+          excludeTaxonomies = (initialConfig.excludeTaxonomies || []).map(String);
           metaQueries = initialConfig.metaQueries || [];
           metaQueryRelation = initialConfig.metaQueryRelation || 'AND';
           rawWPQuery = '';
@@ -164,8 +165,8 @@
           childOf = 0;
         }
 
-        includeTerms = args.include || [];
-        excludeTerms = args.exclude || [];
+        includeTerms = (args.include || []).map(String);
+        excludeTerms = (args.exclude || []).map(String);
       } else {
         queryType = 'post';
         postType = args.post_type || 'post';
@@ -177,8 +178,8 @@
           childOf = 0;
         }
 
-        includePosts = args.post__in || [];
-        excludePosts = args.post__not_in || [];
+        includePosts = (args.post__in || []).map(String);
+        excludePosts = (args.post__not_in || []).map(String);
 
         // Parse tax_query
         if (args.tax_query && Array.isArray(args.tax_query)) {
@@ -186,11 +187,11 @@
           const excludeQuery = args.tax_query.find((q: any) => q.operator === 'NOT IN');
 
           if (includeQuery) {
-            includeTaxonomies = includeQuery.terms || [];
+            includeTaxonomies = (includeQuery.terms || []).map(String);
             if (includeQuery.taxonomy) taxonomy = includeQuery.taxonomy;
           }
           if (excludeQuery) {
-            excludeTaxonomies = excludeQuery.terms || [];
+            excludeTaxonomies = (excludeQuery.terms || []).map(String);
           }
         }
 
@@ -303,9 +304,9 @@
     }
   });
 
-  // Fetch terms when taxonomy changes
+  // Fetch terms when taxonomy changes (needed for both query types)
   $effect(() => {
-    if (queryType === 'taxonomy' && taxonomy) {
+    if (taxonomy) {
       fetchTerms();
     }
   });
@@ -597,12 +598,12 @@
       showLabelOnEmpty,
       emptyLabel,
       showDefaultMenuItem,
-      includePosts: includePosts.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
-      excludePosts: excludePosts.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
-      includeTerms: includeTerms.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
-      excludeTerms: excludeTerms.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
-      includeTaxonomies: includeTaxonomies.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
-      excludeTaxonomies: excludeTaxonomies.map(id => typeof id === 'number' ? id : parseInt(id as string, 10)).filter(id => !isNaN(id)),
+      includePosts: includePosts.map(id => parseInt(id, 10)).filter(id => !isNaN(id)),
+      excludePosts: excludePosts.map(id => parseInt(id, 10)).filter(id => !isNaN(id)),
+      includeTerms: includeTerms.map(id => parseInt(id, 10)).filter(id => !isNaN(id)),
+      excludeTerms: excludeTerms.map(id => parseInt(id, 10)).filter(id => !isNaN(id)),
+      includeTaxonomies: includeTaxonomies.map(id => parseInt(id, 10)).filter(id => !isNaN(id)),
+      excludeTaxonomies: excludeTaxonomies.map(id => parseInt(id, 10)).filter(id => !isNaN(id)),
       metaQueries,
       metaQueryRelation,
       rawWPQuery: rawWPQuery || undefined
@@ -833,18 +834,16 @@
             clearable={false}
           />
 
-          <Input
+          <NumberInput
             id="post-count"
             label="Post Count"
-            type="number"
             bind:value={postCount}
             help="Use -1 for unlimited"
           />
 
-          <Input
+          <NumberInput
             id="child-of"
             label="Child Of"
-            type="number"
             bind:value={childOf}
             help="Show only children of this ID"
           />
@@ -1031,60 +1030,6 @@
     grid-template-columns: repeat(3, 1fr);
     gap: var(--wpea-space--md);
     align-items: start;
-  }
-
-  /* Force dark mode colors on inputs within modal */
-  :global(.wpea-modal--open .wpea-input),
-  :global(.wpea-modal--open .wpea-select),
-  :global(.wpea-modal--open .wpea-textarea) {
-    background-color: var(--wpea-input--bg-dark);
-    border-color: var(--wpea-input--border-dark);
-    color: var(--wpea-color--text-dark);
-  }
-
-  :global(.wpea-modal--open .wpea-input:hover),
-  :global(.wpea-modal--open .wpea-select:hover),
-  :global(.wpea-modal--open .wpea-textarea:hover) {
-    background-color: var(--wpea-input--bg-hover-dark);
-    border-color: var(--wpea-input--border-hover-dark);
-  }
-
-  :global(.wpea-modal--open .wpea-input:focus),
-  :global(.wpea-modal--open .wpea-select:focus),
-  :global(.wpea-modal--open .wpea-textarea:focus) {
-    background-color: var(--wpea-input--bg-focus-dark);
-    border-color: var(--wpea-input--border-focus-dark);
-  }
-
-  :global(.wpea-modal--open .wpea-input::placeholder) {
-    color: var(--wpea-input--placeholder-dark);
-  }
-
-  /* Fix select arrow visibility in dark mode */
-  :global(.wpea-modal--open .wpea-select) {
-    background-color: var(--wpea-input--bg-dark);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5e5e5' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 12px;
-    padding-right: 2rem;
-  }
-
-  :global(.wpea-modal--open .wpea-select:hover) {
-    background-color: var(--wpea-input--bg-dark) !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ba9902' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 0.5rem center !important;
-    background-size: 12px !important;
-    border-color: var(--wpea-color--primary) !important;
-  }
-
-  :global(.wpea-modal--open .wpea-select:focus) {
-    background-color: var(--wpea-input--bg-focus-dark) !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5e5e5' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 0.5rem center !important;
-    background-size: 12px !important;
   }
 
   @container (max-width: 768px) {

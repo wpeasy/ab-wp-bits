@@ -2,6 +2,24 @@
 
 All notable changes to Alan Blair's WP Bits will be documented in this file.
 
+## [0.0.8-beta] - 2025-12-10
+
+### Fixed
+- **WPEA Library Update**: Updated CSS and Svelte components from latest framework
+- **TypeScript Errors**: Fixed type mismatches in QueryBuilderModal:
+  - Changed `SelectOption.value` from `string | number` to `string`
+  - Added `danger` variant to `ButtonVariant` type
+  - Replaced `Input type="number"` with `NumberInput` component
+  - Fixed array type conversions for include/exclude fields
+- **Switch Component**: Added `help` prop support with display
+- **VerticalTabs**: Fixed content not rendering after framework update
+- **Settings Dropdown Position**: Moved to top-right of content area
+- **Include/Exclude Taxonomies**: Fixed empty dropdown by fetching terms for all query types
+
+### Changed
+- **Shadow Variables**: Added `--wpea-shadow--sm` and `--wpea-shadow--lg` aliases in framework CSS
+- **Dark Mode CSS**: Removed outdated dark mode CSS from QueryBuilderModal (now handled by `light-dark()` function)
+
 ## [0.0.7-beta] - 2025-12-09
 
 ### Added

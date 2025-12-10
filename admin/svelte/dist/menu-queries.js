@@ -1,125 +1,7 @@
 (function() {
   "use strict";
   var __vite_style__ = document.createElement("style");
-  __vite_style__.textContent = `
-  /* Compact mode - reduce spacing and typography */
-  .ab-wp-bits-admin--compact {
-    --wpea-space--xs: 0.2rem;
-    --wpea-space--sm: 0.35rem;
-    --wpea-space--md: 0.6rem;
-    --wpea-space--lg: 0.9rem;
-    --wpea-space--xl: 1.2rem;
-    --wpea-text--xs: 0.7rem;
-    --wpea-text--sm: 0.775rem;
-    --wpea-text--md: 0.85rem;
-    --wpea-text--lg: 0.95rem;
-    --wpea-text--xl: 1.1rem;
-    font-size: var(--wpea-text--md);
-    line-height: 1.4;
-  }
-
-  /* Ensure card border is visible in dark mode */
-  .wpea-card {
-    border: 1px solid var(--wpea-surface--border, rgba(255, 255, 255, 0.16));
-  }
-
-  /* Ensure input inherits color-scheme for proper dark mode support */
-  .wpea-multiselect__input {
-    color-scheme: inherit;
-    background: transparent !important;
-    color: inherit !important;
-  }
-
-  .wpea-grid-2.svelte-qhqlmy {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--wpea-space--md);
-  }
-
-  /* Override fullscreen modal to be 90% viewport with max width */
-  .wpea-modal--fullscreen .wpea-modal__container {
-    width: 90vw !important;
-    height: 90vh !important;
-    max-width: 800px !important;
-    max-height: 90vh !important;
-    border-radius: var(--wpea-radius--lg) !important;
-  }
-
-  .wpea-grid-2.svelte-15s92sb {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--wpea-space--md);
-    align-items: start;
-  }
-
-  .wpea-grid-3.svelte-15s92sb {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--wpea-space--md);
-    align-items: start;
-  }
-
-  /* Force dark mode colors on inputs within modal */
-  .wpea-modal--open .wpea-input,
-  .wpea-modal--open .wpea-select,
-  .wpea-modal--open .wpea-textarea {
-    background-color: var(--wpea-input--bg-dark);
-    border-color: var(--wpea-input--border-dark);
-    color: var(--wpea-color--text-dark);
-  }
-
-  .wpea-modal--open .wpea-input:hover,
-  .wpea-modal--open .wpea-select:hover,
-  .wpea-modal--open .wpea-textarea:hover {
-    background-color: var(--wpea-input--bg-hover-dark);
-    border-color: var(--wpea-input--border-hover-dark);
-  }
-
-  .wpea-modal--open .wpea-input:focus,
-  .wpea-modal--open .wpea-select:focus,
-  .wpea-modal--open .wpea-textarea:focus {
-    background-color: var(--wpea-input--bg-focus-dark);
-    border-color: var(--wpea-input--border-focus-dark);
-  }
-
-  .wpea-modal--open .wpea-input::placeholder {
-    color: var(--wpea-input--placeholder-dark);
-  }
-
-  /* Fix select arrow visibility in dark mode */
-  .wpea-modal--open .wpea-select {
-    background-color: var(--wpea-input--bg-dark);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5e5e5' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 12px;
-    padding-right: 2rem;
-  }
-
-  .wpea-modal--open .wpea-select:hover {
-    background-color: var(--wpea-input--bg-dark) !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ba9902' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 0.5rem center !important;
-    background-size: 12px !important;
-    border-color: var(--wpea-color--primary) !important;
-  }
-
-  .wpea-modal--open .wpea-select:focus {
-    background-color: var(--wpea-input--bg-focus-dark) !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5e5e5' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 0.5rem center !important;
-    background-size: 12px !important;
-  }
-
-  @container (max-width: 768px) {
-    .wpea-grid-2.svelte-15s92sb,
-    .wpea-grid-3.svelte-15s92sb {
-      grid-template-columns: 1fr;
-    }
-  }
-/*$vite$:1*/`;
+  __vite_style__.textContent = "\n  /* Compact mode - reduce spacing and typography */\n  .ab-wp-bits-admin--compact {\n    --wpea-space--xs: 0.2rem;\n    --wpea-space--sm: 0.35rem;\n    --wpea-space--md: 0.6rem;\n    --wpea-space--lg: 0.9rem;\n    --wpea-space--xl: 1.2rem;\n    --wpea-text--xs: 0.7rem;\n    --wpea-text--sm: 0.775rem;\n    --wpea-text--md: 0.85rem;\n    --wpea-text--lg: 0.95rem;\n    --wpea-text--xl: 1.1rem;\n    font-size: var(--wpea-text--md);\n    line-height: 1.4;\n  }\n\n  /* Ensure card border is visible in dark mode */\n  .wpea-card {\n    border: 1px solid var(--wpea-surface--border, rgba(255, 255, 255, 0.16));\n  }\n\n  /* Ensure input inherits color-scheme for proper dark mode support */\n  .wpea-multiselect__input {\n    color-scheme: inherit;\n    background: transparent !important;\n    color: inherit !important;\n  }\n\n  .wpea-grid-2.svelte-qhqlmy {\n    display: grid;\n    grid-template-columns: repeat(2, 1fr);\n    gap: var(--wpea-space--md);\n  }\n\n  /* Override fullscreen modal to be 90% viewport with max width */\n  .wpea-modal--fullscreen .wpea-modal__container {\n    width: 90vw !important;\n    height: 90vh !important;\n    max-width: 800px !important;\n    max-height: 90vh !important;\n    border-radius: var(--wpea-radius--lg) !important;\n  }\n\n  .wpea-grid-2.svelte-15s92sb {\n    display: grid;\n    grid-template-columns: repeat(2, 1fr);\n    gap: var(--wpea-space--md);\n    align-items: start;\n  }\n\n  .wpea-grid-3.svelte-15s92sb {\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    gap: var(--wpea-space--md);\n    align-items: start;\n  }\n\n  @container (max-width: 768px) {\n    .wpea-grid-2.svelte-15s92sb,\n    .wpea-grid-3.svelte-15s92sb {\n      grid-template-columns: 1fr;\n    }\n  }\n/*$vite$:1*/";
   document.head.appendChild(__vite_style__);
   const DEV = false;
   var is_array = Array.isArray;
@@ -4105,9 +3987,9 @@
       }
     };
   }
-  var root_3$6 = /* @__PURE__ */ from_html(`<h3 class="wpea-modal__title"> </h3>`);
+  var root_3$7 = /* @__PURE__ */ from_html(`<h3 class="wpea-modal__title"> </h3>`);
   var root_5$4 = /* @__PURE__ */ from_html(`<div class="wpea-modal__footer"><!></div>`);
-  var root_1$8 = /* @__PURE__ */ from_html(`<div><div class="wpea-modal__backdrop" role="button" tabindex="0" aria-label="Close modal"></div> <div class="wpea-modal__container"><div class="wpea-modal__header"><!> <button class="wpea-modal__close" aria-label="Close">&times;</button></div> <div class="wpea-modal__body"><!></div> <!></div></div>`);
+  var root_1$9 = /* @__PURE__ */ from_html(`<div><div class="wpea-modal__backdrop" role="button" tabindex="0" aria-label="Close modal"></div> <div class="wpea-modal__container"><div class="wpea-modal__header"><!> <button class="wpea-modal__close" aria-label="Close">&times;</button></div> <div class="wpea-modal__body"><!></div> <!></div></div>`);
   function Modal($$anchor, $$props) {
     push($$props, true);
     let open = prop($$props, "open", 15, false), size = prop($$props, "size", 3, "standard"), title = prop($$props, "title", 3, "");
@@ -4163,7 +4045,7 @@
     var node = first_child(fragment);
     {
       var consequent_3 = ($$anchor2) => {
-        var div = root_1$8();
+        var div = root_1$9();
         let classes;
         var div_1 = child(div);
         div_1.__click = handleBackdropClick;
@@ -4179,7 +4061,7 @@
             append($$anchor3, fragment_1);
           };
           var alternate = ($$anchor3) => {
-            var h3 = root_3$6();
+            var h3 = root_3$7();
             var text2 = child(h3);
             template_effect(() => set_text(text2, title()));
             append($$anchor3, h3);
@@ -4255,11 +4137,11 @@
     });
     append($$anchor, div);
   }
-  var root_4$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__title"> </div>`);
+  var root_4$4 = /* @__PURE__ */ from_html(`<div class="wpea-card__title"> </div>`);
   var root_5$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__sub"> </div>`);
-  var root_3$5 = /* @__PURE__ */ from_html(`<!> <!>`, 1);
+  var root_3$6 = /* @__PURE__ */ from_html(`<!> <!>`, 1);
   var root_6$3 = /* @__PURE__ */ from_html(`<div class="wpea-card__actions"><!></div>`);
-  var root_1$7 = /* @__PURE__ */ from_html(`<div class="wpea-card__header"><div><!></div> <!></div>`);
+  var root_1$8 = /* @__PURE__ */ from_html(`<div class="wpea-card__header"><div><!></div> <!></div>`);
   var root$4 = /* @__PURE__ */ from_html(`<div><!> <!></div>`);
   function Card($$anchor, $$props) {
     let muted = prop($$props, "muted", 3, false), hover = prop($$props, "hover", 3, false), className = prop($$props, "class", 3, "");
@@ -4270,7 +4152,7 @@
     var node = child(div);
     {
       var consequent_4 = ($$anchor2) => {
-        var div_1 = root_1$7();
+        var div_1 = root_1$8();
         var div_2 = child(div_1);
         var node_1 = child(div_2);
         {
@@ -4281,11 +4163,11 @@
             append($$anchor3, fragment);
           };
           var alternate = ($$anchor3) => {
-            var fragment_1 = root_3$5();
+            var fragment_1 = root_3$6();
             var node_3 = first_child(fragment_1);
             {
               var consequent_1 = ($$anchor4) => {
-                var div_3 = root_4$3();
+                var div_3 = root_4$4();
                 var text2 = child(div_3);
                 template_effect(() => set_text(text2, $$props.title));
                 append($$anchor4, div_3);
@@ -4349,8 +4231,8 @@
     });
     append($$anchor, div);
   }
-  var root_1$6 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
-  var root_3$4 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__tag"><span class="wpea-multiselect__tag-label"> </span> <button type="button" class="wpea-multiselect__tag-remove" tabindex="-1"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></span>`);
+  var root_1$7 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_3$5 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__tag"><span class="wpea-multiselect__tag-label"> </span> <button type="button" class="wpea-multiselect__tag-remove" tabindex="-1"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></span>`);
   var root_5$2 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__single-value"> </span>`);
   var root_6$2 = /* @__PURE__ */ from_html(`<input type="text" class="wpea-multiselect__input"/>`);
   var root_8$2 = /* @__PURE__ */ from_html(`<span class="wpea-multiselect__placeholder"> </span>`);
@@ -4498,7 +4380,7 @@
     var node = child(div);
     {
       var consequent = ($$anchor2) => {
-        var label_1 = root_1$6();
+        var label_1 = root_1$7();
         var text2 = child(label_1);
         template_effect(() => {
           set_attribute(label_1, "for", $$props.id);
@@ -4522,7 +4404,7 @@
         var fragment = comment();
         var node_2 = first_child(fragment);
         each(node_2, 17, () => get(selectedOptions), index, ($$anchor3, option) => {
-          var span = root_3$4();
+          var span = root_3$5();
           var span_1 = child(span);
           var text_1 = child(span_1);
           var button = sibling(span_1, 2);
@@ -4816,10 +4698,10 @@
     pop();
   }
   delegate(["click", "keydown"]);
-  var root_2$3 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
-  var root_3$3 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
-  var root_1$5 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <input/> <!></div>`);
-  var root_4$2 = /* @__PURE__ */ from_html(`<input/>`);
+  var root_2$5 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_3$4 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
+  var root_1$6 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <input/> <!></div>`);
+  var root_4$3 = /* @__PURE__ */ from_html(`<input/>`);
   function Input($$anchor, $$props) {
     push($$props, true);
     let value = prop($$props, "value", 15, ""), type = prop($$props, "type", 3, "text"), disabled = prop($$props, "disabled", 3, false), readonly = prop($$props, "readonly", 3, false), required = prop($$props, "required", 3, false), className = prop($$props, "class", 3, "");
@@ -4838,11 +4720,11 @@
     var node = first_child(fragment);
     {
       var consequent_2 = ($$anchor2) => {
-        var div = root_1$5();
+        var div = root_1$6();
         var node_1 = child(div);
         {
           var consequent = ($$anchor3) => {
-            var label_1 = root_2$3();
+            var label_1 = root_2$5();
             var text2 = child(label_1);
             template_effect(() => {
               set_attribute(label_1, "for", $$props.id);
@@ -4860,7 +4742,7 @@
         var node_2 = sibling(input, 2);
         {
           var consequent_1 = ($$anchor3) => {
-            var span = root_3$3();
+            var span = root_3$4();
             var text_1 = child(span);
             template_effect(() => set_text(text_1, $$props.help));
             append($$anchor3, span);
@@ -4884,7 +4766,7 @@
         append($$anchor2, div);
       };
       var alternate = ($$anchor2) => {
-        var input_1 = root_4$2();
+        var input_1 = root_4$3();
         input_1.__input = handleInput;
         input_1.__change = handleChange;
         template_effect(() => {
@@ -4910,6 +4792,150 @@
     pop();
   }
   delegate(["input", "change"]);
+  var root_2$4 = /* @__PURE__ */ from_html(`<label class="wpea-label"> </label>`);
+  var root_3$3 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
+  var root_1$5 = /* @__PURE__ */ from_html(`<div class="wpea-field"><!> <div class="wpea-number-wrapper"><input type="number"/> <div class="wpea-number-wrapper__controls"><button type="button" class="wpea-number-wrapper__btn" aria-label="Increase value" tabindex="-1"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8L6 4L10 8"></path></svg></button> <button type="button" class="wpea-number-wrapper__btn" aria-label="Decrease value" tabindex="-1"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4L6 8L10 4"></path></svg></button></div></div> <!></div>`);
+  var root_4$2 = /* @__PURE__ */ from_html(`<div class="wpea-number-wrapper"><input type="number"/> <div class="wpea-number-wrapper__controls"><button type="button" class="wpea-number-wrapper__btn" aria-label="Increase value" tabindex="-1"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8L6 4L10 8"></path></svg></button> <button type="button" class="wpea-number-wrapper__btn" aria-label="Decrease value" tabindex="-1"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4L6 8L10 4"></path></svg></button></div></div>`);
+  function NumberInput($$anchor, $$props) {
+    push($$props, true);
+    let value = prop($$props, "value", 15, 0), disabled = prop($$props, "disabled", 3, false), readonly = prop($$props, "readonly", 3, false), required = prop($$props, "required", 3, false), step = prop($$props, "step", 3, 1), className = prop($$props, "class", 3, "");
+    let inputRef = /* @__PURE__ */ state(null);
+    function handleInput(event2) {
+      const target = event2.target;
+      value(parseFloat(target.value) || 0);
+      $$props.oninput?.(value());
+    }
+    function handleChange(event2) {
+      const target = event2.target;
+      value(parseFloat(target.value) || 0);
+      $$props.onchange?.(value());
+    }
+    function increment2() {
+      if (disabled() || readonly()) return;
+      let newValue = value() + step();
+      if ($$props.max !== void 0 && newValue > $$props.max) newValue = $$props.max;
+      value(newValue);
+      $$props.oninput?.(value());
+      $$props.onchange?.(value());
+    }
+    function decrement() {
+      if (disabled() || readonly()) return;
+      let newValue = value() - step();
+      if ($$props.min !== void 0 && newValue < $$props.min) newValue = $$props.min;
+      value(newValue);
+      $$props.oninput?.(value());
+      $$props.onchange?.(value());
+    }
+    function handleKeydown(event2) {
+      if (event2.key === "ArrowUp") {
+        event2.preventDefault();
+        increment2();
+      } else if (event2.key === "ArrowDown") {
+        event2.preventDefault();
+        decrement();
+      }
+    }
+    let sizeClass = /* @__PURE__ */ user_derived(() => $$props.size ? `wpea-input--${$$props.size}` : "");
+    var fragment = comment();
+    var node = first_child(fragment);
+    {
+      var consequent_2 = ($$anchor2) => {
+        var div = root_1$5();
+        var node_1 = child(div);
+        {
+          var consequent = ($$anchor3) => {
+            var label_1 = root_2$4();
+            var text2 = child(label_1);
+            template_effect(() => {
+              set_attribute(label_1, "for", $$props.id);
+              set_text(text2, $$props.label);
+            });
+            append($$anchor3, label_1);
+          };
+          if_block(node_1, ($$render) => {
+            if ($$props.label) $$render(consequent);
+          });
+        }
+        var div_1 = sibling(node_1, 2);
+        var input = child(div_1);
+        input.__input = handleInput;
+        input.__change = handleChange;
+        input.__keydown = handleKeydown;
+        bind_this(input, ($$value) => set(inputRef, $$value), () => get(inputRef));
+        var div_2 = sibling(input, 2);
+        var button = child(div_2);
+        button.__click = increment2;
+        var button_1 = sibling(button, 2);
+        button_1.__click = decrement;
+        var node_2 = sibling(div_1, 2);
+        {
+          var consequent_1 = ($$anchor3) => {
+            var span = root_3$3();
+            var text_1 = child(span);
+            template_effect(() => set_text(text_1, $$props.help));
+            append($$anchor3, span);
+          };
+          if_block(node_2, ($$render) => {
+            if ($$props.help) $$render(consequent_1);
+          });
+        }
+        template_effect(() => {
+          set_class(input, 1, `wpea-input ${get(sizeClass) ?? ""} ${className() ?? ""}`);
+          set_style(input, $$props.style);
+          set_attribute(input, "id", $$props.id);
+          set_attribute(input, "name", $$props.name);
+          set_attribute(input, "placeholder", $$props.placeholder);
+          input.disabled = disabled();
+          input.readOnly = readonly();
+          input.required = required();
+          set_attribute(input, "min", $$props.min);
+          set_attribute(input, "max", $$props.max);
+          set_attribute(input, "step", step());
+          set_value(input, value());
+          button.disabled = disabled() || readonly() || $$props.max !== void 0 && value() >= $$props.max;
+          button_1.disabled = disabled() || readonly() || $$props.min !== void 0 && value() <= $$props.min;
+        });
+        append($$anchor2, div);
+      };
+      var alternate = ($$anchor2) => {
+        var div_3 = root_4$2();
+        var input_1 = child(div_3);
+        input_1.__input = handleInput;
+        input_1.__change = handleChange;
+        input_1.__keydown = handleKeydown;
+        bind_this(input_1, ($$value) => set(inputRef, $$value), () => get(inputRef));
+        var div_4 = sibling(input_1, 2);
+        var button_2 = child(div_4);
+        button_2.__click = increment2;
+        var button_3 = sibling(button_2, 2);
+        button_3.__click = decrement;
+        template_effect(() => {
+          set_class(input_1, 1, `wpea-input ${get(sizeClass) ?? ""} ${className() ?? ""}`);
+          set_style(input_1, $$props.style);
+          set_attribute(input_1, "id", $$props.id);
+          set_attribute(input_1, "name", $$props.name);
+          set_attribute(input_1, "placeholder", $$props.placeholder);
+          input_1.disabled = disabled();
+          input_1.readOnly = readonly();
+          input_1.required = required();
+          set_attribute(input_1, "min", $$props.min);
+          set_attribute(input_1, "max", $$props.max);
+          set_attribute(input_1, "step", step());
+          set_value(input_1, value());
+          button_2.disabled = disabled() || readonly() || $$props.max !== void 0 && value() >= $$props.max;
+          button_3.disabled = disabled() || readonly() || $$props.min !== void 0 && value() <= $$props.min;
+        });
+        append($$anchor2, div_3);
+      };
+      if_block(node, ($$render) => {
+        if ($$props.label || $$props.help) $$render(consequent_2);
+        else $$render(alternate, false);
+      });
+    }
+    append($$anchor, fragment);
+    pop();
+  }
+  delegate(["input", "change", "keydown", "click"]);
   var root$2 = /* @__PURE__ */ from_html(`<button><!></button>`);
   function Button($$anchor, $$props) {
     let variant = prop($$props, "variant", 3, "primary"), disabled = prop($$props, "disabled", 3, false), type = prop($$props, "type", 3, "button"), className = prop($$props, "class", 3, "");
@@ -4941,7 +4967,8 @@
   }
   delegate(["click"]);
   var root_1$4 = /* @__PURE__ */ from_html(`<label> </label>`);
-  var root$1 = /* @__PURE__ */ from_html(`<div><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!></div>`);
+  var root_2$3 = /* @__PURE__ */ from_html(`<span class="wpea-help"> </span>`);
+  var root$1 = /* @__PURE__ */ from_html(`<div><label><input type="checkbox"/> <span class="wpea-switch__slider"></span></label> <!> <!></div>`);
   function Switch($$anchor, $$props) {
     push($$props, true);
     let checked = prop($$props, "checked", 15, false), disabled = prop($$props, "disabled", 3, false), className = prop($$props, "class", 3, "");
@@ -4969,6 +4996,18 @@
       };
       if_block(node, ($$render) => {
         if ($$props.label) $$render(consequent);
+      });
+    }
+    var node_1 = sibling(node, 2);
+    {
+      var consequent_1 = ($$anchor2) => {
+        var span = root_2$3();
+        var text_1 = child(span);
+        template_effect(() => set_text(text_1, $$props.help));
+        append($$anchor2, span);
+      };
+      if_block(node_1, ($$render) => {
+        if ($$props.help) $$render(consequent_1);
       });
     }
     template_effect(() => {
@@ -5683,12 +5722,12 @@
             set(showLabelOnEmpty, initialConfig().showLabelOnEmpty ?? false, true);
             set(emptyLabel, initialConfig().emptyLabel || "", true);
             set(showDefaultMenuItem, initialConfig().showDefaultMenuItem ?? false, true);
-            set(includePosts, initialConfig().includePosts || [], true);
-            set(excludePosts, initialConfig().excludePosts || [], true);
-            set(includeTerms, initialConfig().includeTerms || [], true);
-            set(excludeTerms, initialConfig().excludeTerms || [], true);
-            set(includeTaxonomies, initialConfig().includeTaxonomies || [], true);
-            set(excludeTaxonomies, initialConfig().excludeTaxonomies || [], true);
+            set(includePosts, (initialConfig().includePosts || []).map(String), true);
+            set(excludePosts, (initialConfig().excludePosts || []).map(String), true);
+            set(includeTerms, (initialConfig().includeTerms || []).map(String), true);
+            set(excludeTerms, (initialConfig().excludeTerms || []).map(String), true);
+            set(includeTaxonomies, (initialConfig().includeTaxonomies || []).map(String), true);
+            set(excludeTaxonomies, (initialConfig().excludeTaxonomies || []).map(String), true);
             set(metaQueries, initialConfig().metaQueries || [], true);
             set(metaQueryRelation, initialConfig().metaQueryRelation || "AND", true);
             set(rawWPQuery, "");
@@ -5748,8 +5787,8 @@
           } else {
             set(childOf, 0);
           }
-          set(includeTerms, args.include || [], true);
-          set(excludeTerms, args.exclude || [], true);
+          set(includeTerms, (args.include || []).map(String), true);
+          set(excludeTerms, (args.exclude || []).map(String), true);
         } else {
           set(queryType, "post");
           set(postType, args.post_type || "post", true);
@@ -5759,17 +5798,17 @@
           } else {
             set(childOf, 0);
           }
-          set(includePosts, args.post__in || [], true);
-          set(excludePosts, args.post__not_in || [], true);
+          set(includePosts, (args.post__in || []).map(String), true);
+          set(excludePosts, (args.post__not_in || []).map(String), true);
           if (args.tax_query && Array.isArray(args.tax_query)) {
             const includeQuery = args.tax_query.find((q) => q.operator === "IN");
             const excludeQuery = args.tax_query.find((q) => q.operator === "NOT IN");
             if (includeQuery) {
-              set(includeTaxonomies, includeQuery.terms || [], true);
+              set(includeTaxonomies, (includeQuery.terms || []).map(String), true);
               if (includeQuery.taxonomy) set(taxonomy, includeQuery.taxonomy, true);
             }
             if (excludeQuery) {
-              set(excludeTaxonomies, excludeQuery.terms || [], true);
+              set(excludeTaxonomies, (excludeQuery.terms || []).map(String), true);
             }
           }
           if (args.meta_query) {
@@ -5869,7 +5908,7 @@
       }
     });
     user_effect(() => {
-      if (get(queryType) === "taxonomy" && get(taxonomy)) {
+      if (get(taxonomy)) {
         fetchTerms();
       }
     });
@@ -6137,12 +6176,12 @@
         showLabelOnEmpty: get(showLabelOnEmpty),
         emptyLabel: get(emptyLabel),
         showDefaultMenuItem: get(showDefaultMenuItem),
-        includePosts: get(includePosts).map((id) => typeof id === "number" ? id : parseInt(id, 10)).filter((id) => !isNaN(id)),
-        excludePosts: get(excludePosts).map((id) => typeof id === "number" ? id : parseInt(id, 10)).filter((id) => !isNaN(id)),
-        includeTerms: get(includeTerms).map((id) => typeof id === "number" ? id : parseInt(id, 10)).filter((id) => !isNaN(id)),
-        excludeTerms: get(excludeTerms).map((id) => typeof id === "number" ? id : parseInt(id, 10)).filter((id) => !isNaN(id)),
-        includeTaxonomies: get(includeTaxonomies).map((id) => typeof id === "number" ? id : parseInt(id, 10)).filter((id) => !isNaN(id)),
-        excludeTaxonomies: get(excludeTaxonomies).map((id) => typeof id === "number" ? id : parseInt(id, 10)).filter((id) => !isNaN(id)),
+        includePosts: get(includePosts).map((id) => parseInt(id, 10)).filter((id) => !isNaN(id)),
+        excludePosts: get(excludePosts).map((id) => parseInt(id, 10)).filter((id) => !isNaN(id)),
+        includeTerms: get(includeTerms).map((id) => parseInt(id, 10)).filter((id) => !isNaN(id)),
+        excludeTerms: get(excludeTerms).map((id) => parseInt(id, 10)).filter((id) => !isNaN(id)),
+        includeTaxonomies: get(includeTaxonomies).map((id) => parseInt(id, 10)).filter((id) => !isNaN(id)),
+        excludeTaxonomies: get(excludeTaxonomies).map((id) => parseInt(id, 10)).filter((id) => !isNaN(id)),
         metaQueries: get(metaQueries),
         metaQueryRelation: get(metaQueryRelation),
         rawWPQuery: get(rawWPQuery) || void 0
@@ -6416,10 +6455,9 @@
                       }
                     });
                     var node_11 = sibling(node_10, 2);
-                    Input(node_11, {
+                    NumberInput(node_11, {
                       id: "post-count",
                       label: "Post Count",
-                      type: "number",
                       help: "Use -1 for unlimited",
                       get value() {
                         return get(postCount);
@@ -6429,10 +6467,9 @@
                       }
                     });
                     var node_12 = sibling(node_11, 2);
-                    Input(node_12, {
+                    NumberInput(node_12, {
                       id: "child-of",
                       label: "Child Of",
-                      type: "number",
                       help: "Show only children of this ID",
                       get value() {
                         return get(childOf);

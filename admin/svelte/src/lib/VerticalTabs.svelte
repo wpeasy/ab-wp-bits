@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { ColorVariant } from './types';
   import type { Snippet } from 'svelte';
+  import type { ColorVariant } from './types';
 
   type Tab = {
     id: string;
     label: string;
-    content?: Snippet;
     separator?: boolean;
+    content?: Snippet;
   };
 
   type Props = {
@@ -15,28 +15,21 @@
     activeTab?: string;
     class?: string;
     style?: string;
-    onTabChange?: (tabId: string) => void;
     actions?: Snippet;
     content?: Snippet;
+    onTabChange?: (tabId: string) => void;
   };
 
   let {
     tabs = [],
     variant,
-    activeTab = $bindable(''),
+    activeTab = $bindable(tabs[0]?.id || ''),
     class: className = '',
     style,
-    onTabChange,
     actions,
-    content
+    content,
+    onTabChange
   }: Props = $props();
-
-  // If no activeTab is set, default to first tab
-  $effect(() => {
-    if (!activeTab && tabs.length > 0) {
-      activeTab = tabs[0].id;
-    }
-  });
 
   function selectTab(tabId: string) {
     activeTab = tabId;
@@ -47,23 +40,21 @@
 </script>
 
 <div class="wpea-vtabs {variantClass} {className}" {style}>
-  <div class="wpea-vtabs__sidebar">
-    <div class="wpea-vtabs__list" role="tablist">
-      {#each tabs as tab}
-        <button
-          class="wpea-vtabs__tab"
-          class:wpea-vtabs__tab--separator={tab.separator}
-          role="tab"
-          aria-selected={activeTab === tab.id}
-          onclick={() => selectTab(tab.id)}
-        >
-          {tab.label}
-        </button>
-      {/each}
-    </div>
+  <div class="wpea-vtabs__list" role="tablist">
+    {#each tabs as tab}
+      <button
+        class="wpea-vtabs__tab"
+        class:wpea-vtabs__tab--separator={tab.separator}
+        role="tab"
+        aria-selected={activeTab === tab.id}
+        onclick={() => selectTab(tab.id)}
+      >
+        {tab.label}
+      </button>
+    {/each}
   </div>
 
-  <div class="wpea-vtabs__main">
+  <div class="wpea-vtabs__content">
     {#if actions}
       <div class="wpea-vtabs__header">
         <div class="wpea-vtabs__actions">
@@ -71,60 +62,40 @@
         </div>
       </div>
     {/if}
-    <div class="wpea-vtabs__content">
-      {#if content}
-        {@render content()}
-      {:else}
-        {#each tabs as tab}
-          {#if tab.content}
-            <div
-              class="wpea-vtabs__panel"
-              role="tabpanel"
-              aria-hidden={activeTab !== tab.id}
-            >
-              {@render tab.content()}
-            </div>
-          {/if}
-        {/each}
-      {/if}
-    </div>
+    {#if content}
+      {@render content()}
+    {:else}
+      {#each tabs as tab}
+        {#if tab.content}
+          <div
+            class="wpea-vtabs__panel"
+            role="tabpanel"
+            aria-hidden={activeTab !== tab.id}
+          >
+            {@render tab.content()}
+          </div>
+        {/if}
+      {/each}
+    {/if}
   </div>
 </div>
 
 <style>
-  .wpea-vtabs__sidebar {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .wpea-vtabs__main {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-width: 0;
+  .wpea-vtabs__tab--separator {
+    margin-bottom: var(--wpea-space--sm, 0.5rem);
+    border-bottom: 1px solid var(--wpea-surface--divider, rgba(128, 128, 128, 0.2));
+    padding-bottom: var(--wpea-space--sm, 0.5rem);
   }
 
   .wpea-vtabs__header {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: var(--wpea-space--xs) var(--wpea-space--sm);
-    border-bottom: 1px solid var(--wpea-surface--divider);
+    margin-bottom: var(--wpea-space--md, 0.75rem);
   }
 
   .wpea-vtabs__actions {
     display: flex;
-    align-items: center;
-    gap: var(--wpea-space--sm);
-  }
-
-  .wpea-vtabs__content {
-    flex: 1;
-  }
-
-  .wpea-vtabs__tab--separator {
-    margin-bottom: var(--wpea-space--sm);
-    padding-bottom: var(--wpea-space--sm);
-    border-bottom: 1px solid var(--wpea-surface--divider);
+    gap: var(--wpea-space--sm, 0.5rem);
   }
 </style>
