@@ -4,6 +4,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [svelte()],
+  base: './',
   build: {
     outDir: 'dist',
     emptyOutDir: false,
@@ -13,8 +14,7 @@ export default defineConfig({
       output: {
         entryFileNames: 'menu-queries.js',
         assetFileNames: '[name][extname]',
-        format: 'iife',
-        name: 'ABMenuQueries'
+        format: 'es'
       }
     }
   }

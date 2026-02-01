@@ -1,14 +1,9 @@
 <script lang="ts">
-  import type { ColorVariant } from './types';
-
-  type Tab = {
-    id: string;
-    label: string;
-    content: any;
-  };
+  import type { ColorVariant, TabItem } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
-    tabs: Tab[];
+    tabs: TabItem[];
     variant?: ColorVariant;
     activeTab?: string;
     class?: string;
@@ -42,7 +37,11 @@
         aria-selected={activeTab === tab.id}
         onclick={() => selectTab(tab.id)}
       >
-        {tab.label}
+        {#if isSnippet(tab.label)}
+          {@render tab.label()}
+        {:else}
+          {tab.label}
+        {/if}
       </button>
     {/each}
   </div>
@@ -53,7 +52,9 @@
       role="tabpanel"
       aria-hidden={activeTab !== tab.id}
     >
-      {@render tab.content()}
+      {#if tab.content}
+        {@render tab.content()}
+      {/if}
     </div>
   {/each}
 </div>

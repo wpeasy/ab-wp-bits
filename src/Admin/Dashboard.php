@@ -23,7 +23,6 @@ final class Dashboard {
     public static function init(): void {
         add_action('admin_menu', [__CLASS__, 'register_menu']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
-        add_filter('script_loader_tag', [__CLASS__, 'add_module_type'], 10, 3);
     }
 
     /**
@@ -78,36 +77,38 @@ final class Dashboard {
             AB_WP_BITS_VERSION
         );
 
-        // CSS is bundled in the JS file, no separate CSS needed
+        // Enqueue Svelte app component CSS (extracted by Vite ES module build)
+        wp_enqueue_style(
+            'ab-wp-bits-svelte-shared',
+            AB_WP_BITS_PLUGIN_URL . 'admin/svelte/dist/shared.css',
+            ['ab-wp-bits-wpea-framework'],
+            AB_WP_BITS_VERSION
+        );
 
-        // Enqueue Svelte app
-        wp_enqueue_script(
+        wp_enqueue_style(
+            'ab-wp-bits-svelte-main',
+            AB_WP_BITS_PLUGIN_URL . 'admin/svelte/dist/main.css',
+            ['ab-wp-bits-svelte-shared'],
+            AB_WP_BITS_VERSION
+        );
+
+        // Enqueue Svelte app as ES module
+        wp_enqueue_script_module(
             'ab-wp-bits-admin-app',
             AB_WP_BITS_PLUGIN_URL . 'admin/svelte/dist/main.js',
             [],
-            AB_WP_BITS_VERSION,
-            true
+            AB_WP_BITS_VERSION
         );
 
-        // Localize script with data (must be after enqueue)
-        wp_localize_script('ab-wp-bits-admin-app', 'abWpBitsData', [
-            'apiUrl' => rest_url('ab-wp-bits/v1'),
-            'nonce' => wp_create_nonce('wp_rest'),
-            'modules' => ModuleManager::get_modules_for_api(),
-        ]);
-    }
-
-    /**
-     * Add type="module" to our scripts (not needed for IIFE format)
-     *
-     * @param string $tag Script tag
-     * @param string $handle Script handle
-     * @param string $src Script source
-     * @return string Modified script tag
-     */
-    public static function add_module_type(string $tag, string $handle, string $src): string {
-        // IIFE format doesn't need type="module"
-        return $tag;
+        // Pass data to the module via inline script (modules are deferred, so this runs first)
+        add_action('admin_print_footer_scripts', static function(): void {
+            $data = [
+                'apiUrl' => rest_url('ab-wp-bits/v1'),
+                'nonce'  => wp_create_nonce('wp_rest'),
+                'modules' => ModuleManager::get_modules_for_api(),
+            ];
+            wp_print_inline_script_tag('window.abWpBitsData = ' . wp_json_encode($data) . ';');
+        }, 1);
     }
 
     /**

@@ -1,8 +1,10 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type { StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
-    content: string;
+    content: StringOrSnippet;
     position?: 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'right';
     size?: 'xs' | 's' | 'm';
     visible?: boolean;
@@ -35,6 +37,10 @@
     {@render children()}
   {/if}
   <div class={contentClass}>
-    {content}
+    {#if isSnippet(content)}
+      {@render content()}
+    {:else}
+      {content}
+    {/if}
   </div>
 </div>

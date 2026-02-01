@@ -22,6 +22,8 @@
     --wpea-space--lg: calc(var(--wpea-space--md) * var(--wpea-space-scale));      /* 18px */
     --wpea-space--xl: calc(var(--wpea-space--lg) * var(--wpea-space-scale));      /* 27px */
     --wpea-space--2xl: calc(var(--wpea-space--xl) * var(--wpea-space-scale));     /* 40px */
+    --wpea-space--3xl: calc(var(--wpea-space--2xl) * var(--wpea-space-scale));    /* 60px */
+    --wpea-space--4xl: calc(var(--wpea-space--3xl) * var(--wpea-space-scale));    /* 90px */
 
     /* Typography scale (--sm as baseline, 1.2x ratio) */
     --wpea-text--xs: calc(var(--wpea-fs-base) / var(--wpea-type-scale));          /* ~11px */
@@ -32,7 +34,12 @@
     --wpea-text--2xl: calc(var(--wpea-text--xl) * var(--wpea-type-scale));         /* ~28px */
     --wpea-text--3xl: calc(var(--wpea-text--2xl) * var(--wpea-type-scale));        /* ~33px */
     --wpea-text--4xl: calc(var(--wpea-text--3xl) * var(--wpea-type-scale));        /* ~40px */
-  
+
+    /* Border radius scale (6px base with 1.67x multiplier) */
+    --wpea-radius--sm: var(--wpea-radius-base);                                    /* 6px */
+    --wpea-radius--md: calc(var(--wpea-radius-base) * var(--wpea-radius-scale));   /* ~10px */
+    --wpea-radius--lg: calc(var(--wpea-radius--md) * var(--wpea-radius-scale));    /* ~17px */
+
     /* Grids */
     --wpea-grid--1: repeat(1, minmax(0, 1fr));
     --wpea-grid--2: repeat(2, minmax(0, 1fr));
@@ -62,11 +69,7 @@
       0 8px 16px color-mix(in oklab, var(--wpea-color--black), transparent 80%),
       0 8px 24px color-mix(in oklab, var(--wpea-color--primary), transparent 75%), 0 4px 12px color-mix(in oklab, var(--wpea-color--black), transparent 20%)
     );
-
-    /* Shadow aliases (for backward compatibility) */
-    --wpea-shadow--sm: var(--wpea-shadow--s);
-    --wpea-shadow--lg: var(--wpea-shadow--l);
-
+  
     /* Focus surface (derived from primary) */
     --wpea-surface--focus: light-dark(var(--wpea-color--primary-t-50), color-mix(in oklab, var(--wpea-color--primary), transparent 55%));
     --wpea-focus-shadow: 0 0 0 3px var(--wpea-surface--focus);
@@ -94,13 +97,144 @@
     background: var(--wpea-surface--bg);
     display: flex;
     flex-direction: column;
+    max-width: var(--wpea-app-max-width);
   }
 
   /* Full-screen container - use for full-page apps and modals */
   .wpea-full {
     min-height: 100vh;
   }
-  
+
+  /* =========================
+     EMBEDDED RESETS
+     Use .wpea-embed when framework is embedded inside
+     page builders (Bricks, Elementor, etc.) where global
+     resets cannot be loaded.
+     ========================= */
+
+  /* Embedded container - isolates styles from parent app */
+  .wpea-embed {
+    /* Reset inherited styles from parent */
+    all: revert;
+
+    /* Re-apply WPEA base styles */
+    font-family: var(--wpea-font-sans);
+    font-size: var(--wpea-fs-base);
+    line-height: 1.5;
+    color: var(--wpea-surface--text);
+    background: var(--wpea-surface--bg);
+    box-sizing: border-box;
+  }
+
+  /* Scoped resets within .wpea-embed */
+  .wpea-embed *,
+  .wpea-embed *::before,
+  .wpea-embed *::after {
+    box-sizing: border-box;
+  }
+
+  .wpea-embed h1, .wpea-embed h2, .wpea-embed h3,
+  .wpea-embed h4, .wpea-embed h5, .wpea-embed h6 {
+    margin: 0;
+    padding: 0;
+    font-family: var(--wpea-font-sans);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .wpea-embed p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+  }
+
+  /* Lists in .wpea-embed: styled by default (bullets/numbers) */
+  .wpea-embed ul,
+  .wpea-embed ol {
+    margin: 0;
+    padding: 0 0 0 var(--wpea-space--lg);
+    /* list-style inherited from browser (disc, decimal) */
+  }
+
+  .wpea-embed li {
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+  }
+
+  .wpea-embed dl, .wpea-embed dt, .wpea-embed dd,
+  .wpea-embed blockquote, .wpea-embed pre, .wpea-embed figure,
+  .wpea-embed figcaption, .wpea-embed address {
+    margin: 0;
+    padding: 0;
+  }
+
+  .wpea-embed dt { font-weight: 600; }
+  .wpea-embed address { font-style: normal; }
+
+  .wpea-embed hr {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .wpea-embed table {
+    margin: 0;
+    padding: 0;
+    border-collapse: collapse;
+  }
+
+  .wpea-embed pre, .wpea-embed code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.9em;
+  }
+
+  .wpea-embed code {
+    padding: 0.2em 0.4em;
+    background: var(--wpea-surface--muted);
+    border-radius: var(--wpea-radius--sm);
+  }
+
+  .wpea-embed pre code {
+    padding: 0;
+    background: none;
+  }
+
+  .wpea-embed strong, .wpea-embed b { font-weight: 700; }
+  .wpea-embed em, .wpea-embed i { font-style: italic; }
+
+  .wpea-embed a {
+    color: var(--wpea-color--primary);
+    text-decoration: none;
+    transition: color var(--wpea-anim-duration--fast);
+  }
+
+  .wpea-embed a:hover {
+    color: var(--wpea-color--primary-d-2);
+    text-decoration: underline;
+  }
+
+  .wpea-embed input,
+  .wpea-embed select,
+  .wpea-embed textarea,
+  .wpea-embed button {
+    font-family: var(--wpea-font-sans);
+    margin: 0;
+  }
+
+  /* =========================
+     LIST RESET UTILITY
+     Use when lists are for layout, not content
+     ========================= */
+  .wpea-list-reset,
+  .wpea-list-reset ul,
+  .wpea-list-reset ol,
+  ul.wpea-list-reset,
+  ol.wpea-list-reset {
+    padding-left: 0;
+    list-style: none;
+  }
+
   /* =========================
      UTILITIES
      ========================= */
@@ -135,22 +269,125 @@
   /* Visibility helpers using container width */
   .wpea-cq .wpea-hide-md-down { display: none !important; }
   @container (min-width: 48rem) { .wpea-hide-md-down { display: initial !important; } }
-  
+
+  /* =========================
+     COMPACT MODE (class-based)
+     Add .wpea-compact to body or container to enable
+     ========================= */
+  .wpea-compact {
+    /* Reduce spacing scale */
+    --wpea-space--xs: calc(var(--wpea-space-base) / 2 * var(--wpea-space-compact));
+    --wpea-space--sm: calc(var(--wpea-space-base) * var(--wpea-space-compact));
+    --wpea-space--md: calc(var(--wpea-space-base) * var(--wpea-space-scale) * var(--wpea-space-compact));
+    --wpea-space--lg: calc(var(--wpea-space--md) * var(--wpea-space-scale));
+    --wpea-space--xl: calc(var(--wpea-space--lg) * var(--wpea-space-scale));
+    --wpea-space--2xl: calc(var(--wpea-space--xl) * var(--wpea-space-scale));
+    --wpea-space--3xl: calc(var(--wpea-space--2xl) * var(--wpea-space-scale));
+    --wpea-space--4xl: calc(var(--wpea-space--3xl) * var(--wpea-space-scale));
+
+    /* Reduce typography scale */
+    --wpea-text--xs: calc(var(--wpea-fs-base) * var(--wpea-text-compact) / var(--wpea-type-scale));
+    --wpea-text--sm: calc(var(--wpea-fs-base) * var(--wpea-text-compact));
+    --wpea-text--md: calc(var(--wpea-text--sm) * var(--wpea-type-scale));
+    --wpea-text--lg: calc(var(--wpea-text--md) * var(--wpea-type-scale));
+    --wpea-text--xl: calc(var(--wpea-text--lg) * var(--wpea-type-scale));
+    --wpea-text--2xl: calc(var(--wpea-text--xl) * var(--wpea-type-scale));
+    --wpea-text--3xl: calc(var(--wpea-text--2xl) * var(--wpea-type-scale));
+    --wpea-text--4xl: calc(var(--wpea-text--3xl) * var(--wpea-type-scale));
+  }
+
+  /* Compact mode component adjustments */
+  .wpea-compact .wpea-stack { gap: calc(var(--wpea-space--md) * var(--wpea-space-compact)); }
+  .wpea-compact .wpea-stack--sm { gap: calc(var(--wpea-space--sm) * var(--wpea-space-compact)); }
+  .wpea-compact .wpea-stack--lg { gap: calc(var(--wpea-space--lg) * 0.8); }
+  .wpea-compact .wpea-cluster { gap: calc(var(--wpea-space--sm) * 0.6); }
+  .wpea-compact .wpea-cluster--md { gap: calc(var(--wpea-space--md) * 0.7); }
+  .wpea-compact .wpea-cluster--lg { gap: calc(var(--wpea-space--lg) * 0.7); }
+
+  .wpea-compact .wpea-panel,
+  .wpea-compact .wpea-card {
+    padding-block: calc(var(--wpea-space--md) * 0.7);
+    padding-inline: calc(var(--wpea-space--md) * 0.8);
+    gap: calc(var(--wpea-space--md) * 0.7);
+  }
+  .wpea-compact .wpea-panel__header,
+  .wpea-compact .wpea-card__header {
+    padding-block-end: calc(var(--wpea-space--sm) * 0.7);
+    gap: calc(var(--wpea-space--sm) * 0.7);
+  }
+  .wpea-compact .wpea-card__title { font-size: var(--wpea-text--md); }
+  .wpea-compact .wpea-card__actions { gap: calc(var(--wpea-space--sm) * 0.6); }
+
+  .wpea-compact .wpea-heading--sm { font-size: var(--wpea-text--md); }
+  .wpea-compact .wpea-heading--md { font-size: var(--wpea-text--lg); }
+  .wpea-compact .wpea-heading--lg { font-size: var(--wpea-text--xl); }
+
+  .wpea-compact .wpea-field { gap: .25rem; }
+  .wpea-compact .wpea-input,
+  .wpea-compact .wpea-select,
+  .wpea-compact .wpea-textarea {
+    padding-block: calc(var(--wpea-space--sm) * 0.4);
+    padding-inline: calc(var(--wpea-space--sm) * 0.7);
+  }
+
+  .wpea-compact .wpea-btn {
+    padding-block: calc(var(--wpea-space--sm) * 0.4);
+    padding-inline: calc(var(--wpea-space--md) * 0.75);
+    gap: .4em;
+  }
+
+  .wpea-compact .wpea-tabs { gap: calc(var(--wpea-space--md) * 0.7); }
+  .wpea-compact .wpea-tabs__list { gap: calc(var(--wpea-space--xs) * 0.6); }
+  .wpea-compact .wpea-tabs__tab {
+    padding: calc(var(--wpea-space--sm) * 0.6) calc(var(--wpea-space--md) * 0.7);
+    font-size: var(--wpea-text--sm);
+  }
+
+  .wpea-compact .wpea-vtabs { gap: calc(var(--wpea-space--lg) * 0.7); }
+  .wpea-compact .wpea-vtabs__list {
+    gap: calc(var(--wpea-space--xs) * 0.6);
+    min-width: 140px;
+  }
+  .wpea-compact .wpea-vtabs__tab {
+    padding: calc(var(--wpea-space--sm) * 0.6) calc(var(--wpea-space--md) * 0.7);
+    font-size: var(--wpea-text--sm);
+  }
+
+  .wpea-compact .wpea-accordion { gap: calc(var(--wpea-space--sm) * 0.6); }
+  .wpea-compact .wpea-accordion__header {
+    padding: calc(var(--wpea-space--md) * 0.7);
+    font-size: var(--wpea-text--sm);
+  }
+  .wpea-compact .wpea-accordion__body { padding: calc(var(--wpea-space--md) * 0.7); }
+
+  .wpea-compact .wpea-table th,
+  .wpea-compact .wpea-table td {
+    padding-block: .4rem;
+    padding-inline: .6rem;
+  }
+
+  .wpea-compact .wpea-alert {
+    padding-block: calc(var(--wpea-space--sm) * 0.7);
+    padding-inline: calc(var(--wpea-space--sm) * 0.8);
+  }
+
   /* Density (container-style query) */
   @container style(--wpea-density: compact) {
     /* Apply to all elements inside the container */
     * {
-      /* Reduce spacing scale (70% of normal) */
-      --wpea-space--xs: calc(var(--wpea-space-base) / 2 * 0.7);
-      --wpea-space--sm: calc(var(--wpea-space-base) * 0.7);
-      --wpea-space--md: calc(var(--wpea-space-base) * var(--wpea-space-scale) * 0.7);
+      /* Reduce spacing scale (uses --wpea-space-compact multiplier) */
+      --wpea-space--xs: calc(var(--wpea-space-base) / 2 * var(--wpea-space-compact));
+      --wpea-space--sm: calc(var(--wpea-space-base) * var(--wpea-space-compact));
+      --wpea-space--md: calc(var(--wpea-space-base) * var(--wpea-space-scale) * var(--wpea-space-compact));
       --wpea-space--lg: calc(var(--wpea-space--md) * var(--wpea-space-scale));
       --wpea-space--xl: calc(var(--wpea-space--lg) * var(--wpea-space-scale));
       --wpea-space--2xl: calc(var(--wpea-space--xl) * var(--wpea-space-scale));
+      --wpea-space--3xl: calc(var(--wpea-space--2xl) * var(--wpea-space-scale));
+      --wpea-space--4xl: calc(var(--wpea-space--3xl) * var(--wpea-space-scale));
 
-      /* Reduce typography scale (90% of baseline) */
-      --wpea-text--xs: calc(var(--wpea-fs-base) * 0.9 / var(--wpea-type-scale));
-      --wpea-text--sm: calc(var(--wpea-fs-base) * 0.9);
+      /* Reduce typography scale (uses --wpea-text-compact multiplier) */
+      --wpea-text--xs: calc(var(--wpea-fs-base) * var(--wpea-text-compact) / var(--wpea-type-scale));
+      --wpea-text--sm: calc(var(--wpea-fs-base) * var(--wpea-text-compact));
       --wpea-text--md: calc(var(--wpea-text--sm) * var(--wpea-type-scale));
       --wpea-text--lg: calc(var(--wpea-text--md) * var(--wpea-type-scale));
       --wpea-text--xl: calc(var(--wpea-text--lg) * var(--wpea-type-scale));
@@ -160,8 +397,8 @@
     }
 
     /* Layout components - tighter spacing */
-    .wpea-stack { gap: calc(var(--wpea-space--md) * 0.7); }
-    .wpea-stack--sm { gap: calc(var(--wpea-space--sm) * 0.7); }
+    .wpea-stack { gap: calc(var(--wpea-space--md) * var(--wpea-space-compact)); }
+    .wpea-stack--sm { gap: calc(var(--wpea-space--sm) * var(--wpea-space-compact)); }
     .wpea-stack--lg { gap: calc(var(--wpea-space--lg) * 0.8); }
     .wpea-cluster { gap: calc(var(--wpea-space--sm) * 0.6); }
     .wpea-cluster--md { gap: calc(var(--wpea-space--md) * 0.7); }
@@ -565,83 +802,83 @@
 
   /* Switch size variants */
   .wpea-switch--xs {
-    width: var(--wpea-switch-width-xs);
-    height: var(--wpea-switch-height-xs);
+    width: var(--wpea-switch-width--xs);
+    height: var(--wpea-switch-height--xs);
   }
 
   .wpea-switch--xs .wpea-switch__slider {
-    border-radius: calc(var(--wpea-switch-height-xs) / 2);
+    border-radius: calc(var(--wpea-switch-height--xs) / 2);
   }
 
   .wpea-switch--xs .wpea-switch__slider::before {
-    width: var(--wpea-switch-knob-size-xs);
-    height: var(--wpea-switch-knob-size-xs);
-    top: var(--wpea-switch-knob-offset-xs);
-    left: var(--wpea-switch-knob-offset-xs);
+    width: var(--wpea-switch-knob-size--xs);
+    height: var(--wpea-switch-knob-size--xs);
+    top: var(--wpea-switch-knob-offset--xs);
+    left: var(--wpea-switch-knob-offset--xs);
   }
 
   .wpea-switch--xs input:checked + .wpea-switch__slider::before {
-    transform: translateX(var(--wpea-switch-translate-xs));
+    transform: translateX(var(--wpea-switch-translate--xs));
   }
 
   .wpea-switch--s {
-    width: var(--wpea-switch-width-s);
-    height: var(--wpea-switch-height-s);
+    width: var(--wpea-switch-width--s);
+    height: var(--wpea-switch-height--s);
   }
 
   .wpea-switch--s .wpea-switch__slider {
-    border-radius: calc(var(--wpea-switch-height-s) / 2);
+    border-radius: calc(var(--wpea-switch-height--s) / 2);
   }
 
   .wpea-switch--s .wpea-switch__slider::before {
-    width: var(--wpea-switch-knob-size-s);
-    height: var(--wpea-switch-knob-size-s);
-    top: var(--wpea-switch-knob-offset-s);
-    left: var(--wpea-switch-knob-offset-s);
+    width: var(--wpea-switch-knob-size--s);
+    height: var(--wpea-switch-knob-size--s);
+    top: var(--wpea-switch-knob-offset--s);
+    left: var(--wpea-switch-knob-offset--s);
   }
 
   .wpea-switch--s input:checked + .wpea-switch__slider::before {
-    transform: translateX(var(--wpea-switch-translate-s));
+    transform: translateX(var(--wpea-switch-translate--s));
   }
 
   .wpea-switch--m {
-    width: var(--wpea-switch-width-m);
-    height: var(--wpea-switch-height-m);
+    width: var(--wpea-switch-width--m);
+    height: var(--wpea-switch-height--m);
   }
 
   .wpea-switch--m .wpea-switch__slider {
-    border-radius: calc(var(--wpea-switch-height-m) / 2);
+    border-radius: calc(var(--wpea-switch-height--m) / 2);
   }
 
   .wpea-switch--m .wpea-switch__slider::before {
-    width: var(--wpea-switch-knob-size-m);
-    height: var(--wpea-switch-knob-size-m);
-    top: var(--wpea-switch-knob-offset-m);
-    left: var(--wpea-switch-knob-offset-m);
+    width: var(--wpea-switch-knob-size--m);
+    height: var(--wpea-switch-knob-size--m);
+    top: var(--wpea-switch-knob-offset--m);
+    left: var(--wpea-switch-knob-offset--m);
   }
 
   .wpea-switch--m input:checked + .wpea-switch__slider::before {
-    transform: translateX(var(--wpea-switch-translate-m));
+    transform: translateX(var(--wpea-switch-translate--m));
   }
 
   .wpea-switch--l {
-    width: var(--wpea-switch-width-l);
-    height: var(--wpea-switch-height-l);
+    width: var(--wpea-switch-width--l);
+    height: var(--wpea-switch-height--l);
   }
 
   .wpea-switch--l .wpea-switch__slider {
-    border-radius: calc(var(--wpea-switch-height-l) / 2);
+    border-radius: calc(var(--wpea-switch-height--l) / 2);
   }
 
   .wpea-switch--l .wpea-switch__slider::before {
-    width: var(--wpea-switch-knob-size-l);
-    height: var(--wpea-switch-knob-size-l);
-    top: var(--wpea-switch-knob-offset-l);
-    left: var(--wpea-switch-knob-offset-l);
+    width: var(--wpea-switch-knob-size--l);
+    height: var(--wpea-switch-knob-size--l);
+    top: var(--wpea-switch-knob-offset--l);
+    left: var(--wpea-switch-knob-offset--l);
   }
 
   .wpea-switch--l input:checked + .wpea-switch__slider::before {
-    transform: translateX(var(--wpea-switch-translate-l));
+    transform: translateX(var(--wpea-switch-translate--l));
   }
 
   /* Switch color variants */
@@ -1318,8 +1555,9 @@
     --_bg-hover: var(--wpea-color--neutral-d-2);
     --_fg: var(--wpea-color--white);
     --_shadow: var(--wpea-shadow--s);
-  
+
     display:inline-flex; align-items:center; justify-content:center; gap:.6em;
+    width: fit-content;
     font-size: var(--wpea-text--md);
     padding-block: calc(var(--wpea-space--sm) * .6);
     padding-inline: var(--wpea-space--md);
@@ -1354,8 +1592,10 @@
   }
   .wpea-table th, .wpea-table td { padding-block: .75rem; padding-inline: 1rem; border-block-start: 1px solid var(--wpea-surface--divider); }
   .wpea-table thead th { background: var(--wpea-surface--muted); text-align:left; font-weight:600; }
-  .wpea-table--striped tbody tr:nth-child(odd) { background: light-dark(var(--wpea-color--neutral-l-9), var(--wpea-color--neutral-d-6)); }
+  .wpea-table--striped tbody tr:nth-child(odd) { background: light-dark(var(--wpea-color--neutral-l-9), var(--wpea-color--neutral-l-6)); }
   .wpea-table--striped tbody tr:nth-child(even) { background: transparent; }
+  .wpea-table--hover tbody tr { transition: background-color var(--wpea-anim-duration--fast); }
+  .wpea-table--hover tbody tr:hover { background: light-dark(var(--wpea-color--primary-l-9), var(--wpea-color--primary-l-7)); }
 
   /* Alerts */
   .wpea-alert { border: 1px solid; padding-block: var(--wpea-space--md); padding-inline: var(--wpea-space--md); border-radius: var(--wpea-radius--md); }
@@ -1867,8 +2107,9 @@
   visibility: visible;
 }
 
-/* Arrow/caret */
-.wpea .wpea-popover__content::before {
+/* Arrow/caret - ::after for border, ::before for fill */
+.wpea .wpea-popover__content::before,
+.wpea .wpea-popover__content::after {
   content: '';
   position: absolute;
   width: 0;
@@ -1883,12 +2124,21 @@
   transform: translateX(-50%);
 }
 
+.wpea .wpea-popover__content--top::after {
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 7px 7px 0 7px;
+  border-color: var(--wpea-popover--border) transparent transparent transparent;
+}
+
 .wpea .wpea-popover__content--top::before {
-  bottom: -6px;
+  bottom: -5px;
   left: 50%;
   transform: translateX(-50%);
   border-width: 6px 6px 0 6px;
   border-color: var(--wpea-popover--bg) transparent transparent transparent;
+  z-index: 1;
 }
 
 .wpea .wpea-popover__content--top-start {
@@ -1896,11 +2146,19 @@
   left: 0;
 }
 
-.wpea .wpea-popover__content--top-start::before {
-  bottom: -6px;
+.wpea .wpea-popover__content--top-start::after {
+  bottom: -7px;
   left: 12px;
+  border-width: 7px 7px 0 7px;
+  border-color: var(--wpea-popover--border) transparent transparent transparent;
+}
+
+.wpea .wpea-popover__content--top-start::before {
+  bottom: -5px;
+  left: 13px;
   border-width: 6px 6px 0 6px;
   border-color: var(--wpea-popover--bg) transparent transparent transparent;
+  z-index: 1;
 }
 
 .wpea .wpea-popover__content--top-end {
@@ -1908,11 +2166,19 @@
   right: 0;
 }
 
-.wpea .wpea-popover__content--top-end::before {
-  bottom: -6px;
+.wpea .wpea-popover__content--top-end::after {
+  bottom: -7px;
   right: 12px;
+  border-width: 7px 7px 0 7px;
+  border-color: var(--wpea-popover--border) transparent transparent transparent;
+}
+
+.wpea .wpea-popover__content--top-end::before {
+  bottom: -5px;
+  right: 13px;
   border-width: 6px 6px 0 6px;
   border-color: var(--wpea-popover--bg) transparent transparent transparent;
+  z-index: 1;
 }
 
 /* Positioning - Bottom */
@@ -1922,12 +2188,21 @@
   transform: translateX(-50%);
 }
 
+.wpea .wpea-popover__content--bottom::after {
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 7px 7px 7px;
+  border-color: transparent transparent var(--wpea-popover--border) transparent;
+}
+
 .wpea .wpea-popover__content--bottom::before {
-  top: -6px;
+  top: -5px;
   left: 50%;
   transform: translateX(-50%);
   border-width: 0 6px 6px 6px;
   border-color: transparent transparent var(--wpea-popover--bg) transparent;
+  z-index: 1;
 }
 
 .wpea .wpea-popover__content--bottom-start {
@@ -1935,11 +2210,19 @@
   left: 0;
 }
 
-.wpea .wpea-popover__content--bottom-start::before {
-  top: -6px;
+.wpea .wpea-popover__content--bottom-start::after {
+  top: -7px;
   left: 12px;
+  border-width: 0 7px 7px 7px;
+  border-color: transparent transparent var(--wpea-popover--border) transparent;
+}
+
+.wpea .wpea-popover__content--bottom-start::before {
+  top: -5px;
+  left: 13px;
   border-width: 0 6px 6px 6px;
   border-color: transparent transparent var(--wpea-popover--bg) transparent;
+  z-index: 1;
 }
 
 .wpea .wpea-popover__content--bottom-end {
@@ -1947,11 +2230,19 @@
   right: 0;
 }
 
-.wpea .wpea-popover__content--bottom-end::before {
-  top: -6px;
+.wpea .wpea-popover__content--bottom-end::after {
+  top: -7px;
   right: 12px;
+  border-width: 0 7px 7px 7px;
+  border-color: transparent transparent var(--wpea-popover--border) transparent;
+}
+
+.wpea .wpea-popover__content--bottom-end::before {
+  top: -5px;
+  right: 13px;
   border-width: 0 6px 6px 6px;
   border-color: transparent transparent var(--wpea-popover--bg) transparent;
+  z-index: 1;
 }
 
 /* Positioning - Left */
@@ -1961,12 +2252,21 @@
   transform: translateY(-50%);
 }
 
+.wpea .wpea-popover__content--left::after {
+  right: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 7px 0 7px 7px;
+  border-color: transparent transparent transparent var(--wpea-popover--border);
+}
+
 .wpea .wpea-popover__content--left::before {
-  right: -6px;
+  right: -5px;
   top: 50%;
   transform: translateY(-50%);
   border-width: 6px 0 6px 6px;
   border-color: transparent transparent transparent var(--wpea-popover--bg);
+  z-index: 1;
 }
 
 /* Positioning - Right */
@@ -1976,12 +2276,21 @@
   transform: translateY(-50%);
 }
 
+.wpea .wpea-popover__content--right::after {
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 7px 7px 7px 0;
+  border-color: transparent var(--wpea-popover--border) transparent transparent;
+}
+
 .wpea .wpea-popover__content--right::before {
-  left: -6px;
+  left: -5px;
   top: 50%;
   transform: translateY(-50%);
   border-width: 6px 6px 6px 0;
   border-color: transparent var(--wpea-popover--bg) transparent transparent;
+  z-index: 1;
 }
 
 /* Size variants */
@@ -2254,6 +2563,9 @@
 .wpea-vtabs__content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wpea-space--lg);
 }
 
 .wpea-vtabs__panel {

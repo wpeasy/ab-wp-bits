@@ -1,11 +1,6 @@
 <script lang="ts">
-  import type { ColorVariant } from './types';
-
-  type AccordionItem = {
-    id: string;
-    title: string;
-    content: any;
-  };
+  import type { ColorVariant, AccordionItem } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     items: AccordionItem[];
@@ -55,7 +50,13 @@
         aria-expanded={isOpen}
         onclick={() => toggleItem(item.id)}
       >
-        <span>{item.title}</span>
+        <span>
+          {#if isSnippet(item.title)}
+            {@render item.title()}
+          {:else}
+            {item.title}
+          {/if}
+        </span>
         <span class="wpea-accordion__icon">▼</span>
       </button>
       <div

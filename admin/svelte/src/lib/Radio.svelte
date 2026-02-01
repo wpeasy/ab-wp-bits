@@ -1,21 +1,16 @@
 <script lang="ts">
-  import type { ColorVariant } from './types';
-
-  type Option = {
-    value: string;
-    label: string;
-    disabled?: boolean;
-  };
+  import type { ColorVariant, StringOrSnippet, RadioOption } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     value?: string;
     name: string;
-    options: Option[];
+    options: RadioOption[];
     id?: string;
     disabled?: boolean;
     color?: ColorVariant;
-    label?: string;
-    help?: string;
+    label?: StringOrSnippet;
+    help?: StringOrSnippet;
     inline?: boolean;
     class?: string;
     style?: string;
@@ -48,7 +43,13 @@
 
 <div class="wpea-field {className}" {style}>
   {#if label}
-    <span class="wpea-label">{label}</span>
+    <span class="wpea-label">
+      {#if isSnippet(label)}
+        {@render label()}
+      {:else}
+        {label}
+      {/if}
+    </span>
   {/if}
   <div class="wpea-radio-group {inline ? 'wpea-radio-group--inline' : ''}">
     {#each options as option, i}
@@ -65,11 +66,23 @@
           />
           <span class="wpea-radio__indicator"></span>
         </label>
-        <label for="{id || name}-{i}">{option.label}</label>
+        <label for="{id || name}-{i}">
+          {#if isSnippet(option.label)}
+            {@render option.label()}
+          {:else}
+            {option.label}
+          {/if}
+        </label>
       </div>
     {/each}
   </div>
   {#if help}
-    <span class="wpea-help">{help}</span>
+    <span class="wpea-help">
+      {#if isSnippet(help)}
+        {@render help()}
+      {:else}
+        {help}
+      {/if}
+    </span>
   {/if}
 </div>

@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type { StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     onClick?: () => void;
@@ -8,8 +10,8 @@
     disabled?: boolean;
     defaultIcon?: Snippet;
     confirmIcon?: Snippet;
-    defaultLabel?: string;
-    confirmLabel?: string;
+    defaultLabel?: StringOrSnippet;
+    confirmLabel?: StringOrSnippet;
     iconOnly?: boolean;
     ariaLabel?: string;
     class?: string;
@@ -30,6 +32,11 @@
     class: className = '',
     style
   }: Props = $props();
+
+  // Helper to get string for aria-label (falls back to 'Action' if Snippet)
+  function getAriaText(label: StringOrSnippet | undefined): string {
+    return typeof label === 'string' ? label : 'Action';
+  }
 
   let isConfirm = $state(false);
   let timeoutId: number | null = null;
@@ -90,7 +97,7 @@
   );
 
   const buttonAriaLabel = $derived(
-    iconOnly ? (ariaLabel || defaultLabel) : undefined
+    iconOnly ? (ariaLabel || getAriaText(defaultLabel)) : undefined
   );
 </script>
 
@@ -107,11 +114,23 @@
     {#if confirmIcon}
       {@render confirmIcon()}
     {/if}
-    <span class="btn-text">{confirmLabel}</span>
+    <span class="btn-text">
+      {#if isSnippet(confirmLabel)}
+        {@render confirmLabel()}
+      {:else}
+        {confirmLabel}
+      {/if}
+    </span>
   {:else}
     {#if defaultIcon}
       {@render defaultIcon()}
     {/if}
-    <span class="btn-text">{defaultLabel}</span>
+    <span class="btn-text">
+      {#if isSnippet(defaultLabel)}
+        {@render defaultLabel()}
+      {:else}
+        {defaultLabel}
+      {/if}
+    </span>
   {/if}
 </button>

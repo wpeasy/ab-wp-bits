@@ -1,22 +1,17 @@
 <script lang="ts">
-  import type { ColorVariant } from './types';
-
-  type Option = {
-    value: string;
-    label: string;
-    disabled?: boolean;
-  };
+  import type { ColorVariant, StringOrSnippet, SelectOptionWithDisabled } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     value?: string[];
     id?: string;
     name?: string;
-    options: Option[];
+    options: SelectOptionWithDisabled[];
     placeholder?: string;
     disabled?: boolean;
     color?: ColorVariant;
-    label?: string;
-    help?: string;
+    label?: StringOrSnippet;
+    help?: StringOrSnippet;
     searchable?: boolean;
     clearable?: boolean;
     maxItems?: number;
@@ -52,17 +47,22 @@
   // Generate unique ID for aria-controls
   const listboxId = `wpea-multiselect-listbox-${Math.random().toString(36).slice(2, 9)}`;
 
+  // Helper to get string label for searching (falls back to value if Snippet)
+  function getSearchableLabel(opt: SelectOptionWithDisabled): string {
+    return typeof opt.label === 'string' ? opt.label : opt.value;
+  }
+
   let filteredOptions = $derived(
     searchQuery
       ? options.filter(opt =>
-          opt.label.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          getSearchableLabel(opt).toLowerCase().includes(searchQuery.toLowerCase()) &&
           !opt.disabled
         )
       : options.filter(opt => !opt.disabled)
   );
 
   let selectedOptions = $derived(
-    value.map(v => options.find(o => o.value === v)).filter(Boolean) as Option[]
+    value.map(v => options.find(o => o.value === v)).filter(Boolean) as SelectOptionWithDisabled[]
   );
 
   let canAddMore = $derived(!maxItems || value.length < maxItems);
@@ -77,7 +77,7 @@
     }
   }
 
-  function selectOption(option: Option) {
+  function selectOption(option: SelectOptionWithDisabled) {
     if (!canAddMore && !value.includes(option.value)) return;
 
     if (value.includes(option.value)) {
@@ -150,7 +150,13 @@
 
 <div class="wpea-field {className}" {style}>
   {#if label}
-    <label class="wpea-label" for={id}>{label}</label>
+    <label class="wpea-label" for={id}>
+      {#if isSnippet(label)}
+        {@render label()}
+      {:else}
+        {label}
+      {/if}
+    </label>
   {/if}
   <div
     class="wpea-multiselect {colorClass}"
@@ -172,13 +178,19 @@
       <div class="wpea-multiselect__value-container">
         {#each selectedOptions as option}
           <span class="wpea-multiselect__tag">
-            <span class="wpea-multiselect__tag-label">{option.label}</span>
+            <span class="wpea-multiselect__tag-label">
+              {#if isSnippet(option.label)}
+                {@render option.label()}
+              {:else}
+                {option.label}
+              {/if}
+            </span>
             <button
               type="button"
               class="wpea-multiselect__tag-remove"
               onclick={(e) => removeOption(option.value, e)}
               tabindex="-1"
-              aria-label="Remove {option.label}"
+              aria-label="Remove {getSearchableLabel(option)}"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -240,7 +252,11 @@
               onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectOption(option); }}
               onmouseenter={() => highlightedIndex = i}
             >
-              {option.label}
+              {#if isSnippet(option.label)}
+                {@render option.label()}
+              {:else}
+                {option.label}
+              {/if}
               {#if value.includes(option.value)}
                 <svg class="wpea-multiselect__option-check" width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -255,6 +271,12 @@
     {/if}
   </div>
   {#if help}
-    <span class="wpea-help">{help}</span>
+    <span class="wpea-help">
+      {#if isSnippet(help)}
+        {@render help()}
+      {:else}
+        {help}
+      {/if}
+    </span>
   {/if}
 </div>

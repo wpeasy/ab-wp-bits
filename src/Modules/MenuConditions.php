@@ -157,18 +157,21 @@ final class MenuConditions {
             return;
         }
 
-        wp_enqueue_script(
+        wp_enqueue_script_module(
             'ab-wp-bits-menu-conditions',
             AB_WP_BITS_PLUGIN_URL . 'admin/svelte/dist/menu-conditions.js',
             [],
-            AB_WP_BITS_VERSION,
-            true
+            AB_WP_BITS_VERSION
         );
 
-        wp_localize_script('ab-wp-bits-menu-conditions', 'abMenuConditionsData', [
-            'apiUrl' => rest_url('ab-wp-bits/v1'),
-            'nonce' => wp_create_nonce('wp_rest'),
-        ]);
+        // Pass data to the module via inline script (modules are deferred, so this runs first)
+        add_action('admin_print_footer_scripts', static function(): void {
+            $data = [
+                'apiUrl' => rest_url('ab-wp-bits/v1'),
+                'nonce'  => wp_create_nonce('wp_rest'),
+            ];
+            wp_print_inline_script_tag('window.abMenuConditionsData = ' . wp_json_encode($data) . ';');
+        }, 1);
     }
 
     /**
@@ -201,19 +204,22 @@ final class MenuConditions {
             true
         );
 
-        // Enqueue Conditions app
-        wp_enqueue_script(
+        // Enqueue Conditions app as ES module (runs after regular scripts, so no explicit dependency needed)
+        wp_enqueue_script_module(
             'ab-wp-bits-menu-conditions',
             AB_WP_BITS_PLUGIN_URL . 'admin/svelte/dist/menu-conditions.js',
-            ['ab-wp-bits-menu-conditions-customizer'],
-            AB_WP_BITS_VERSION,
-            true
+            [],
+            AB_WP_BITS_VERSION
         );
 
-        wp_localize_script('ab-wp-bits-menu-conditions', 'abMenuConditionsData', [
-            'apiUrl' => rest_url('ab-wp-bits/v1'),
-            'nonce' => wp_create_nonce('wp_rest'),
-        ]);
+        // Pass data to the module via inline script
+        add_action('customize_controls_print_footer_scripts', static function(): void {
+            $data = [
+                'apiUrl' => rest_url('ab-wp-bits/v1'),
+                'nonce'  => wp_create_nonce('wp_rest'),
+            ];
+            wp_print_inline_script_tag('window.abMenuConditionsData = ' . wp_json_encode($data) . ';');
+        }, 1);
     }
 
     /**

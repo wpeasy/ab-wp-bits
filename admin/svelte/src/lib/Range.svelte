@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { ColorVariant } from './types';
+  import type { ColorVariant, StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     value?: number;
@@ -12,8 +13,8 @@
     step?: number;
     disabled?: boolean;
     color?: ColorVariant;
-    label?: string;
-    help?: string;
+    label?: StringOrSnippet;
+    help?: StringOrSnippet;
     showValue?: boolean;
     range?: boolean;
     class?: string;
@@ -58,7 +59,6 @@
   function handleMinInput(event: Event) {
     const target = event.target as HTMLInputElement;
     let newVal = parseFloat(target.value);
-    // Ensure min doesn't exceed max - clamp at one step before max
     const maxAllowed = valueMax - step;
     if (newVal > maxAllowed) {
       newVal = maxAllowed;
@@ -71,7 +71,6 @@
   function handleMaxInput(event: Event) {
     const target = event.target as HTMLInputElement;
     let newVal = parseFloat(target.value);
-    // Ensure max doesn't go below min - clamp at one step after min
     const minAllowed = valueMin + step;
     if (newVal < minAllowed) {
       newVal = minAllowed;
@@ -117,7 +116,13 @@
   {#if label || showValue}
     <div class="wpea-range__header">
       {#if label}
-        <label class="wpea-label" for={id}>{label}</label>
+        <label class="wpea-label" for={id}>
+          {#if isSnippet(label)}
+            {@render label()}
+          {:else}
+            {label}
+          {/if}
+        </label>
       {/if}
       {#if showValue}
         {#if range}
@@ -181,6 +186,12 @@
   {/if}
 
   {#if help}
-    <span class="wpea-help">{help}</span>
+    <span class="wpea-help">
+      {#if isSnippet(help)}
+        {@render help()}
+      {:else}
+        {help}
+      {/if}
+    </span>
   {/if}
 </div>

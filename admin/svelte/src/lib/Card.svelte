@@ -1,11 +1,13 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type { StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     muted?: boolean;
     hover?: boolean;
-    title?: string;
-    subtitle?: string;
+    title?: StringOrSnippet;
+    subtitle?: StringOrSnippet;
     class?: string;
     style?: string;
     header?: Snippet;
@@ -38,10 +40,22 @@
           {@render header()}
         {:else}
           {#if title}
-            <div class="wpea-card__title">{title}</div>
+            <h3 class="wpea-card__title">
+              {#if isSnippet(title)}
+                {@render title()}
+              {:else}
+                {title}
+              {/if}
+            </h3>
           {/if}
           {#if subtitle}
-            <div class="wpea-card__sub">{subtitle}</div>
+            <div class="wpea-card__sub">
+              {#if isSnippet(subtitle)}
+                {@render subtitle()}
+              {:else}
+                {subtitle}
+              {/if}
+            </div>
           {/if}
         {/if}
       </div>

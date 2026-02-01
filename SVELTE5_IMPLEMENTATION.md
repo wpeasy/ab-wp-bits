@@ -275,36 +275,40 @@ When migrating from Svelte 4 to Svelte 5:
 
 ### Enqueuing Svelte Scripts in WordPress
 
-**IMPORTANT:** Always use this exact pattern for WordPress integration:
+**IMPORTANT:** This plugin requires WordPress 6.5+ and uses ES modules via `wp_enqueue_script_module()`.
 
 ```php
-// 1. Enqueue the script FIRST
-wp_enqueue_script(
+// 1. Enqueue the script as an ES module
+wp_enqueue_script_module(
     'my-svelte-app',
     PLUGIN_URL . 'admin/svelte/dist/main.js',
     [],
-    PLUGIN_VERSION,
-    true  // Load in footer
+    PLUGIN_VERSION
 );
 
-// 2. Localize script with data AFTER enqueuing
-wp_localize_script('my-svelte-app', 'myAppData', [
-    'apiUrl' => rest_url('my-plugin/v1'),
-    'nonce' => wp_create_nonce('wp_rest'),
-    'settings' => get_option('my_settings', []),
-]);
+// 2. Pass data via inline script (wp_localize_script does NOT work with modules)
+// Modules are deferred, so inline scripts always execute first.
+add_action('admin_print_footer_scripts', static function(): void {
+    $data = [
+        'apiUrl'  => rest_url('my-plugin/v1'),
+        'nonce'   => wp_create_nonce('wp_rest'),
+        'settings' => get_option('my_settings', []),
+    ];
+    wp_print_inline_script_tag('window.myAppData = ' . wp_json_encode($data) . ';');
+}, 1);
 ```
 
 **Key Points:**
-- Use `wp_enqueue_script()` FIRST to register the script
-- Use `wp_localize_script()` AFTER to attach data
+- Use `wp_enqueue_script_module()` — NOT `wp_enqueue_script()` — for Svelte apps
+- `wp_localize_script()` and `wp_add_inline_script()` do NOT work with script modules
+- Pass data via `wp_print_inline_script_tag()` in a footer scripts hook
+- ES modules are always deferred, so inline `<script>` tags in the footer execute first
 - Data becomes available as `window.myAppData` in JavaScript
-- Never use `wp_add_inline_script()` with empty source - it doesn't output
-- Don't overcomplicate with separate data scripts
+- For Customizer pages, use `customize_controls_print_footer_scripts` instead of `admin_print_footer_scripts`
 
 ### Build Configuration for WordPress
 
-Use **IIFE format** (not ES modules) to avoid issues with WordPress query string versioning:
+Use **ES module format** for code splitting and modern module loading (requires WordPress 6.5+):
 
 ```typescript
 // vite.config.ts
@@ -321,19 +325,18 @@ export default defineConfig({
       output: {
         entryFileNames: 'main.js',
         assetFileNames: '[name][extname]',
-        format: 'iife',  // NOT 'es' - WordPress adds ?ver= which breaks ES module imports
-        name: 'MyApp'
+        format: 'es'
       }
     }
   }
 });
 ```
 
-**Why IIFE over ES Modules:**
-- WordPress adds `?ver=X.X.X` to script URLs
-- ES module relative imports fail with query strings
-- IIFE bundles everything into one file (or uses globals for chunks)
-- CSS is automatically bundled into the JavaScript
+**Why ES Modules:**
+- `wp_enqueue_script_module()` (WordPress 6.5+) handles `type="module"` and import maps
+- Enables automatic code splitting — lazy-loaded chunks for tabs/modals
+- WordPress import maps resolve chunk paths correctly (no `?ver=` issues)
+- Each module has its own entry point so disabled modules don't load unnecessary code
 
 ### Multiple Svelte Apps
 
@@ -347,8 +350,7 @@ export default defineConfig({
     input: 'src/main.ts',
     output: {
       entryFileNames: 'main.js',
-      format: 'iife',
-      name: 'MainApp'
+      format: 'es'
     }
   }
 });
@@ -362,8 +364,7 @@ export default defineConfig({
       input: 'src/secondary-main.ts',
       output: {
         entryFileNames: 'secondary.js',
-        format: 'iife',
-        name: 'SecondaryApp'
+        format: 'es'
       }
     }
   }
@@ -397,36 +398,32 @@ fetch(`${apiUrl}/endpoint`, {
 
 ## Common Pitfalls
 
-### ❌ DON'T: Use ES modules with WordPress
-```typescript
-// vite.config.ts - WRONG
-output: {
-  format: 'es',  // WordPress ?ver= breaks relative imports
-  chunkFileNames: 'chunks/[name].js'  // Chunks won't load
-}
-```
-
-### ✅ DO: Use IIFE format
-```typescript
-// vite.config.ts - CORRECT
-output: {
-  format: 'iife',
-  name: 'MyApp'
-}
-```
-
-### ❌ DON'T: Try to use wp_add_inline_script with empty source
+### ❌ DON'T: Use wp_enqueue_script for ES modules
 ```php
-// WRONG - doesn't output anything
-wp_enqueue_script('my-data', '', [], '1.0', false);
-wp_add_inline_script('my-data', 'window.data = {...}');
-```
-
-### ✅ DO: Use wp_localize_script
-```php
-// CORRECT
+// WRONG - wp_enqueue_script doesn't add type="module"
 wp_enqueue_script('my-app', 'path/to/app.js', [], '1.0', true);
+```
+
+### ✅ DO: Use wp_enqueue_script_module
+```php
+// CORRECT - WordPress 6.5+ handles module loading and import maps
+wp_enqueue_script_module('my-app', 'path/to/app.js', [], '1.0');
+```
+
+### ❌ DON'T: Use wp_localize_script with modules
+```php
+// WRONG - wp_localize_script does NOT work with wp_enqueue_script_module
+wp_enqueue_script_module('my-app', 'path/to/app.js', [], '1.0');
 wp_localize_script('my-app', 'myAppData', ['key' => 'value']);
+```
+
+### ✅ DO: Use inline script tags for module data
+```php
+// CORRECT - output data before modules execute
+wp_enqueue_script_module('my-app', 'path/to/app.js', [], '1.0');
+add_action('admin_print_footer_scripts', static function(): void {
+    wp_print_inline_script_tag('window.myAppData = ' . wp_json_encode(['key' => 'value']) . ';');
+}, 1);
 ```
 
 ### ❌ DON'T: Use runes in TypeScript files

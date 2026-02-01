@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { Size } from './types';
+  import type { Size, StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     value?: number;
@@ -13,8 +14,8 @@
     max?: number;
     step?: number;
     size?: Size;
-    label?: string;
-    help?: string;
+    label?: StringOrSnippet;
+    help?: StringOrSnippet;
     class?: string;
     style?: string;
     oninput?: (value: number) => void;
@@ -55,9 +56,23 @@
     onchange?.(value);
   }
 
+  // Round to avoid floating point precision issues
+  function roundToPrecision(num: number, precision: number): number {
+    const factor = Math.pow(10, precision);
+    return Math.round(num * factor) / factor;
+  }
+
+  // Get decimal places from step value
+  function getDecimalPlaces(num: number): number {
+    const str = num.toString();
+    const decimal = str.indexOf('.');
+    return decimal === -1 ? 0 : str.length - decimal - 1;
+  }
+
   function increment() {
     if (disabled || readonly) return;
-    let newValue = value + step;
+    const precision = getDecimalPlaces(step);
+    let newValue = roundToPrecision(value + step, precision);
     if (max !== undefined && newValue > max) newValue = max;
     value = newValue;
     oninput?.(value);
@@ -66,7 +81,8 @@
 
   function decrement() {
     if (disabled || readonly) return;
-    let newValue = value - step;
+    const precision = getDecimalPlaces(step);
+    let newValue = roundToPrecision(value - step, precision);
     if (min !== undefined && newValue < min) newValue = min;
     value = newValue;
     oninput?.(value);
@@ -89,7 +105,13 @@
 {#if label || help}
   <div class="wpea-field">
     {#if label}
-      <label class="wpea-label" for={id}>{label}</label>
+      <label class="wpea-label" for={id}>
+        {#if isSnippet(label)}
+          {@render label()}
+        {:else}
+          {label}
+        {/if}
+      </label>
     {/if}
     <div class="wpea-number-wrapper">
       <input
@@ -139,7 +161,13 @@
       </div>
     </div>
     {#if help}
-      <span class="wpea-help">{help}</span>
+      <span class="wpea-help">
+        {#if isSnippet(help)}
+          {@render help()}
+        {:else}
+          {help}
+        {/if}
+      </span>
     {/if}
   </div>
 {:else}

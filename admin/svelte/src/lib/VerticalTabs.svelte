@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import type { ColorVariant } from './types';
+  import type { ColorVariant, StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Tab = {
     id: string;
-    label: string;
+    label: StringOrSnippet;
     separator?: boolean;
     content?: Snippet;
   };
@@ -49,7 +50,11 @@
         aria-selected={activeTab === tab.id}
         onclick={() => selectTab(tab.id)}
       >
-        {tab.label}
+        {#if isSnippet(tab.label)}
+          {@render tab.label()}
+        {:else}
+          {tab.label}
+        {/if}
       </button>
     {/each}
   </div>

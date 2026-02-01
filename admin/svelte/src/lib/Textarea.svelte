@@ -1,4 +1,7 @@
 <script lang="ts">
+  import type { StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
+
   type Props = {
     value?: string;
     id?: string;
@@ -8,8 +11,8 @@
     readonly?: boolean;
     required?: boolean;
     rows?: number;
-    label?: string;
-    help?: string;
+    label?: StringOrSnippet;
+    help?: StringOrSnippet;
     class?: string;
     style?: string;
     oninput?: (value: string) => void;
@@ -49,7 +52,13 @@
 {#if label || help}
   <div class="wpea-field">
     {#if label}
-      <label class="wpea-label" for={id}>{label}</label>
+      <label class="wpea-label" for={id}>
+        {#if isSnippet(label)}
+          {@render label()}
+        {:else}
+          {label}
+        {/if}
+      </label>
     {/if}
     <textarea
       class="wpea-textarea {className}"
@@ -66,7 +75,13 @@
       onchange={handleChange}
     ></textarea>
     {#if help}
-      <span class="wpea-help">{help}</span>
+      <span class="wpea-help">
+        {#if isSnippet(help)}
+          {@render help()}
+        {:else}
+          {help}
+        {/if}
+      </span>
     {/if}
   </div>
 {:else}

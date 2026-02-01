@@ -1,16 +1,13 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type { TableColumn } from './types';
+  import { isSnippet } from './utils/renderContent';
 
-  type Column<T = any> = {
-    key: string;
-    label: string;
-    render?: (row: T) => any;
-  };
-
-  type Props<T = any> = {
-    columns: Column<T>[];
+  type Props<T = Record<string, unknown>> = {
+    columns: TableColumn<T>[];
     data: T[];
     striped?: boolean;
+    hover?: boolean;
     class?: string;
     style?: string;
     thead?: Snippet;
@@ -21,21 +18,35 @@
     columns = [],
     data = [],
     striped = false,
+    hover = false,
     class: className = '',
     style,
     thead,
     tbody
   }: Props = $props();
+
+  let tableClasses = $derived([
+    'wpea-table',
+    striped ? 'wpea-table--striped' : '',
+    hover ? 'wpea-table--hover' : '',
+    className
+  ].filter(Boolean).join(' '));
 </script>
 
-<table class="wpea-table {striped ? 'wpea-table--striped' : ''} {className}" {style}>
+<table class={tableClasses} {style}>
   <thead>
     {#if thead}
       {@render thead()}
     {:else}
       <tr>
         {#each columns as column}
-          <th>{column.label}</th>
+          <th>
+            {#if isSnippet(column.label)}
+              {@render column.label()}
+            {:else}
+              {column.label}
+            {/if}
+          </th>
         {/each}
       </tr>
     {/if}

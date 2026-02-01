@@ -64,9 +64,6 @@ final class MenuQueries {
         // This method is called when module is enabled to run any initialization
         // For now, nothing needs to happen here as hooks check module status themselves
 
-        // Add module type to scripts
-        add_filter('script_loader_tag', [__CLASS__, 'add_module_type'], 10, 3);
-
         // Register REST API endpoints
         add_action('rest_api_init', [__CLASS__, 'register_rest_routes']);
 
@@ -209,39 +206,42 @@ final class MenuQueries {
 
         // CSS is bundled in the JS file, no separate CSS needed
 
-        // Enqueue Query Builder app
-        wp_enqueue_script(
+        // Enqueue Query Builder app as ES module
+        wp_enqueue_script_module(
             'ab-menu-queries-app',
             AB_WP_BITS_PLUGIN_URL . 'admin/svelte/dist/menu-queries.js',
             [],
-            AB_WP_BITS_VERSION,
-            true
+            AB_WP_BITS_VERSION
         );
 
-        // Localize script with data (must be after enqueue)
-        wp_localize_script('ab-menu-queries-app', 'abMenuQueriesData', [
-            'apiUrl' => rest_url('ab-wp-bits/v1'),
-            'nonce' => wp_create_nonce('wp_rest'),
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'ajaxNonce' => wp_create_nonce('add-query-menu-item'),
-            'cacheTTL' => self::get_cache_ttl(),
-        ]);
-
-        // Remove hide-if-js class to make meta box visible by default
+        // Pass data and inline scripts for nav-menus.php only
+        // (Customizer data is handled by enqueue_customizer_scripts)
         if ($hook === 'nav-menus.php') {
-            wp_add_inline_script('ab-menu-queries-app', '
-                document.addEventListener("DOMContentLoaded", function() {
-                    const metaBox = document.getElementById("add-query-items");
-                    if (metaBox) {
-                        metaBox.classList.remove("hide-if-js");
-                    }
-                });
-            ');
+            $cache_ttl = self::get_cache_ttl();
+            add_action('admin_print_footer_scripts', static function() use ($cache_ttl): void {
+                // Pass data to the module via inline script (modules are deferred, so this runs first)
+                $data = [
+                    'apiUrl'    => rest_url('ab-wp-bits/v1'),
+                    'nonce'     => wp_create_nonce('wp_rest'),
+                    'ajaxUrl'   => admin_url('admin-ajax.php'),
+                    'ajaxNonce' => wp_create_nonce('add-query-menu-item'),
+                    'cacheTTL'  => $cache_ttl,
+                ];
+                wp_print_inline_script_tag('window.abMenuQueriesData = ' . wp_json_encode($data) . ';');
+
+                // Remove hide-if-js class to make meta box visible by default
+                wp_print_inline_script_tag(
+                    'document.addEventListener("DOMContentLoaded", function() {' .
+                    '  var metaBox = document.getElementById("add-query-items");' .
+                    '  if (metaBox) { metaBox.classList.remove("hide-if-js"); }' .
+                    '});'
+                );
+            }, 1);
         }
 
         // Add modal container for Customizer
         if ($hook === 'customize.php') {
-            add_action('admin_footer', function() {
+            add_action('admin_footer', static function(): void {
                 echo '<div id="menu-queries-app"></div>';
             });
         }
@@ -272,36 +272,26 @@ final class MenuQueries {
             AB_WP_BITS_VERSION
         );
 
-        // Enqueue Query Builder app
-        wp_enqueue_script(
+        // Enqueue Query Builder app as ES module
+        wp_enqueue_script_module(
             'ab-menu-queries-app',
             AB_WP_BITS_PLUGIN_URL . 'admin/svelte/dist/menu-queries.js',
             [],
-            AB_WP_BITS_VERSION,
-            true
+            AB_WP_BITS_VERSION
         );
 
-        // Localize script with data
-        wp_localize_script('ab-menu-queries-app', 'abMenuQueriesData', [
-            'apiUrl' => rest_url('ab-wp-bits/v1'),
-            'nonce' => wp_create_nonce('wp_rest'),
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'ajaxNonce' => wp_create_nonce('add-query-menu-item'),
-            'cacheTTL' => self::get_cache_ttl(),
-        ]);
-    }
-
-    /**
-     * Add type="module" to our scripts (not needed for IIFE format)
-     *
-     * @param string $tag Script tag
-     * @param string $handle Script handle
-     * @param string $src Script source
-     * @return string Modified script tag
-     */
-    public static function add_module_type(string $tag, string $handle, string $src): string {
-        // IIFE format doesn't need type="module"
-        return $tag;
+        // Pass data to the module via inline script
+        $cache_ttl = self::get_cache_ttl();
+        add_action('customize_controls_print_footer_scripts', static function() use ($cache_ttl): void {
+            $data = [
+                'apiUrl'    => rest_url('ab-wp-bits/v1'),
+                'nonce'     => wp_create_nonce('wp_rest'),
+                'ajaxUrl'   => admin_url('admin-ajax.php'),
+                'ajaxNonce' => wp_create_nonce('add-query-menu-item'),
+                'cacheTTL'  => $cache_ttl,
+            ];
+            wp_print_inline_script_tag('window.abMenuQueriesData = ' . wp_json_encode($data) . ';');
+        }, 1);
     }
 
     /**

@@ -1,0 +1,64 @@
+
+  /* Compact mode - reduce spacing and typography */
+  .ab-wp-bits-admin--compact {
+    --wpea-space--xs: 0.2rem;
+    --wpea-space--sm: 0.35rem;
+    --wpea-space--md: 0.6rem;
+    --wpea-space--lg: 0.9rem;
+    --wpea-space--xl: 1.2rem;
+    --wpea-text--xs: 0.7rem;
+    --wpea-text--sm: 0.775rem;
+    --wpea-text--md: 0.85rem;
+    --wpea-text--lg: 0.95rem;
+    --wpea-text--xl: 1.1rem;
+    font-size: var(--wpea-text--md);
+    line-height: 1.4;
+  }
+
+  /* Ensure card border is visible in dark mode */
+  .wpea-card {
+    border: 1px solid var(--wpea-surface--border, rgba(255, 255, 255, 0.16));
+  }
+
+  /* Ensure input inherits color-scheme for proper dark mode support */
+  .wpea-multiselect__input {
+    color-scheme: inherit;
+    background: transparent !important;
+    color: inherit !important;
+  }
+
+  .wpea-grid-2.svelte-qhqlmy {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--wpea-space--md);
+  }
+
+  /* Override fullscreen modal to be 90% viewport with max width */
+  .wpea-modal--fullscreen .wpea-modal__container {
+    width: 90vw !important;
+    height: 90vh !important;
+    max-width: 800px !important;
+    max-height: 90vh !important;
+    border-radius: var(--wpea-radius--lg) !important;
+  }
+
+  .wpea-grid-2.svelte-15s92sb {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--wpea-space--md);
+    align-items: start;
+  }
+
+  .wpea-grid-3.svelte-15s92sb {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--wpea-space--md);
+    align-items: start;
+  }
+
+  @container (max-width: 768px) {
+    .wpea-grid-2.svelte-15s92sb,
+    .wpea-grid-3.svelte-15s92sb {
+      grid-template-columns: 1fr;
+    }
+  }

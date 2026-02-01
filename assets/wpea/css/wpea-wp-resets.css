@@ -2,6 +2,11 @@
    WORDPRESS ADMIN RESETS
    Override WP Admin default margins/typography
    Wrapped in .wpea for scoped application
+
+   NOTE: For embedded contexts (page builders like Bricks,
+   Elementor, etc.), use .wpea-embed instead. It provides
+   self-contained resets without needing this file.
+   See wpea-framework.css for .wpea-embed definition.
    ========================= */
 
 body:has(.wpea){
@@ -34,16 +39,27 @@ body:has(.wpea){
   line-height: 1.6;
 }
 
+/* Lists: styled by default (bullets/numbers preserved) */
 .wpea ul, .wpea ol {
   margin: 0;
-  padding: 0;
-  list-style: none;
+  padding: 0 0 0 var(--wpea-space--lg);
+  /* list-style inherited from browser (disc, decimal) */
 }
 
 .wpea li {
   margin: 0;
   padding: 0;
   line-height: 1.6;
+}
+
+/* List reset utility - use for layout lists (navs, menus, etc.) */
+.wpea .wpea-list-reset,
+.wpea .wpea-list-reset ul,
+.wpea .wpea-list-reset ol,
+.wpea ul.wpea-list-reset,
+.wpea ol.wpea-list-reset {
+  padding-left: 0;
+  list-style: none;
 }
 
 .wpea dl {
@@ -267,6 +283,9 @@ body:has(.wpea){
 .wpea textarea {
   margin: 0;
   font-family: var(--wpea-font-sans);
+  background: var(--wpea-surface--panel);
+  color: var(--wpea-surface--text);
+  border-color: var(--wpea-surface--border);
 }
 
 .wpea button {

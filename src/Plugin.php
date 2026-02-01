@@ -86,5 +86,6 @@ final class Plugin {
         // Initialize modules
         Modules\MenuQueries::init();
         Modules\MenuConditions::init();
+        Modules\BricksSplitMenu::init();
     }
 }

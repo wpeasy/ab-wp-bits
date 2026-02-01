@@ -1,0 +1,148 @@
+/**
+ * Split Menu — Base styles.
+ *
+ * Minimal CSS for state toggling. Users style everything in Bricks.
+ *
+ * @package AB\AB_WP_Bits
+ * @since   0.0.9-beta
+ */
+
+@layer ab-split-menu {
+    /* Split Menu Wrapper fills available width */
+    .brxe-ab-split-menu {
+        width: 100%;
+    }
+
+    /* Split Menu Nav <nav> uses CSS grid with auto-fit columns */
+    .brxe-ab-split-menu-nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    /* Menu links: full-width flex row with icon pushed to the end */
+    .ab-split-menu__link {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    /* Transitions */
+    .ab-split-menu-level,
+    .ab-split-menu__item {
+        transition: all 0.4s ease;
+    }
+
+    /* Menu Level Wrapper slide-in effect */
+    .brxe-ab-split-menu-level-wrapper:not([data-level="1"]) {
+        position: relative;
+        transform: translateY(8px);
+        transition: all 0.4s ease;
+    }
+
+    .brxe-ab-split-menu-level-wrapper:not([data-level="1"]).active {
+        transform: translateY(0);
+    }
+
+    /* Active item highlight */
+    .ab-split-menu__item--active {
+        background: #00000014;
+        border-radius: 4px;
+    }
+
+    /* Reset list styles */
+    .ab-split-menu__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Level 2+ ULs hidden by default (grouped by parent item) */
+    .ab-split-menu__list[data-parent-id] {
+        display: none;
+    }
+
+    .ab-split-menu__list[data-parent-id].active {
+        display: block;
+    }
+
+    /* Submenu icon inline with link text */
+    .ab-split-menu__submenu-icon {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 0.25em;
+    }
+
+    .ab-split-menu__submenu-icon svg {
+        width: 1em;
+        height: 1em;
+        fill: currentColor;
+    }
+
+    /* Hide Menu Level when it has grouped lists but none are active.
+       visibility:hidden keeps the grid cell occupied but hides content
+       from both view and screen readers.
+       Scoped to :not([data-show-all-levels]) so the high-specificity :has()
+       rule never fires when show-all-levels is active. */
+    .brxe-ab-split-menu:not([data-show-all-levels])
+    .brxe-ab-split-menu-level:has(.ab-split-menu__list[data-parent-id]):not(:has(.ab-split-menu__list[data-parent-id].active)) {
+        visibility: hidden;
+    }
+
+    /* Show all levels: make all level divs and UL groups visible for styling */
+    .brxe-ab-split-menu[data-show-all-levels] .ab-split-menu__list[data-parent-id] {
+        display: block;
+    }
+
+    /* In Bricks editor: exclude nestable placeholders from layout */
+    .bricks-is-builder .brxe-ab-split-menu > .brx-nestable-children-placeholder,
+    .bricks-is-builder .brxe-ab-split-menu-nav > .brx-nestable-children-placeholder,
+    .bricks-is-builder .brxe-ab-split-menu-level-wrapper > .brx-nestable-children-placeholder {
+        display: none;
+    }
+
+    /* --- Selected Item Label ------------------------------------------------ */
+
+    .brxe-ab-split-menu-selected-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+    }
+
+    .brxe-ab-split-menu-selected-label[data-icon-position="right"] {
+        flex-direction: row-reverse;
+    }
+
+    .ab-split-menu-selected-label__icon {
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .ab-split-menu-selected-label__icon svg {
+        width: 1em;
+        height: 1em;
+        fill: currentColor;
+    }
+
+    /* Text transition: exit */
+    .ab-split-menu-selected-label__text {
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .ab-split-menu-selected-label__text--out {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    /* Text transition: enter */
+    .ab-split-menu-selected-label__text--in {
+        animation: ab-split-menu-label-in 0.25s ease forwards;
+    }
+
+    @keyframes ab-split-menu-label-in {
+        from { opacity: 0; transform: translateY(4px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+}

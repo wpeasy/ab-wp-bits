@@ -2,6 +2,36 @@
 
 All notable changes to Alan Blair's WP Bits will be documented in this file.
 
+## [0.0.9-beta] - 2026-02-01
+
+### Added
+- **Bricks Split Menu Module**: New 5-element nestable architecture for splitting WordPress menus into separate level-based structures
+  - **Split Menu Wrapper**: Root element with all settings (menu selection, trigger mode, submenu icon, default state)
+  - **Split Menu Nav**: Nestable `<nav>` wrapper for layout flexibility
+  - **Menu Level Wrapper**: Nestable wrapper per menu depth level with slide-in transitions
+  - **Menu Level**: Renders `<ul>/<li>/<a>` items with full ARIA menu roles
+  - **Selected Item Label**: Displays active item text with configurable HTML tag (h1-h6, div, span, p), optional icon, and animated transitions
+- **Keyboard Accessibility (A11y)**:
+  - Hover mode: focus-visible activates items the same as mouse hover
+  - Click mode: Enter/Space activates submenus on parent items
+  - Arrow Right/Left navigates between menu levels (into child, back to parent)
+  - Arrow Up/Down navigates siblings within a level with wrapping
+  - Focus-out deactivation mirrors mouse-leave behaviour
+- **Show All Levels**: Toggle to make all menu levels visible for styling in the builder
+- **CSS Visibility**: Menu Levels with no active children are hidden with `visibility: hidden` to preserve grid layout
+- **WPEA Library**: Restructured upstream reference into `Components/` and `Icons/` subdirectories with shared trait pattern
+- **Documentation**: Added BRICKS_NOTES.md, CODE_STANDARDS.md, and module definition files
+
+### Changed
+- **WPEA Svelte Components**: Migrated all components from flat upstream copies to app-specific working library in `admin/svelte/src/lib/`
+- **Svelte Build**: Updated Vite configs and TypeScript configuration for improved module builds
+- **Dashboard**: Updated module registration to include Bricks Split Menu
+
+### Fixed
+- **Show All Levels**: Fixed specificity conflict where CSS `:has()` rule overrode the toggle — scoped hiding rule to `:not([data-show-all-levels])`
+- **Builder Preview**: Removed unconditional builder overrides that prevented Show All Levels toggle from working correctly
+- **AJAX Re-renders**: Added persistent static context so child elements survive Bricks builder AJAX re-renders without showing placeholders
+
 ## [0.0.8-beta] - 2025-12-10
 
 ### Fixed

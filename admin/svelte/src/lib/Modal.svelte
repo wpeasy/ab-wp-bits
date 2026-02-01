@@ -2,11 +2,13 @@
   import type { Snippet } from 'svelte';
   import { fade } from 'svelte/transition';
   import { modalSlideUp } from './transitions';
+  import type { StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     open?: boolean;
     size?: 'standard' | 'large' | 'fullscreen';
-    title?: string;
+    title?: StringOrSnippet;
     onClose?: () => void;
     header?: Snippet;
     children?: Snippet;
@@ -119,7 +121,13 @@
         {#if header}
           {@render header()}
         {:else}
-          <h3 class="wpea-modal__title">{title}</h3>
+          <h3 class="wpea-modal__title">
+            {#if isSnippet(title)}
+              {@render title()}
+            {:else}
+              {title}
+            {/if}
+          </h3>
         {/if}
         <button class="wpea-modal__close" onclick={handleClose} aria-label="Close">&times;</button>
       </div>

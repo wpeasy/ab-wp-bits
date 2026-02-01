@@ -38,6 +38,71 @@
 
 - `.wpea` - Base styling for top-level layout wrapper and modals mounted in document.body (font, colors, flex column layout)
 - `.wpea-full` - Add to `.wpea` for full-screen apps/modals (adds `min-height: 100vh`)
+- `.wpea-embed` - Isolated wrapper for page builders (Bricks, Elementor, etc.) - includes all resets inline
+
+### Embedded Usage (Page Builders)
+
+When using the framework inside page builders or other applications where you cannot load global reset CSS, use `.wpea-embed` instead of `.wpea`:
+
+```html
+<!-- Inside Bricks Builder, Elementor, etc. -->
+<div class="wpea-embed">
+  <!-- Your WPEA components here -->
+  <div class="wpea-card">
+    <h3>Settings</h3>
+    <p>Content here</p>
+  </div>
+</div>
+```
+
+**Key differences from `.wpea`:**
+- Uses `all: revert` to reset inherited styles from parent app
+- Includes all typography, form, and element resets inline
+- Does not require `wpea-wp-resets.css`
+- Self-contained - no global CSS side effects
+
+### List Styling
+
+**Default behavior:** Lists (`<ul>`, `<ol>`) retain their bullets/numbers by default.
+
+**For layout lists** (navigation, menus, tag lists), use `.wpea-list-reset`:
+
+```html
+<!-- Content list - has bullets -->
+<ul>
+  <li>Feature one</li>
+  <li>Feature two</li>
+</ul>
+
+<!-- Layout list - no bullets -->
+<ul class="wpea-list-reset">
+  <li><a href="#">Home</a></li>
+  <li><a href="#">About</a></li>
+</ul>
+```
+
+The `.wpea-list-reset` class:
+- Removes `list-style`
+- Removes left padding
+- Works on the element itself and nested `<ul>`/`<ol>`
+
+### Layout Pattern: Content Containers with Gap
+
+**IMPORTANT:** When creating content areas that contain multiple cards, sections, or info boxes, the parent container MUST use flex column with gap:
+
+```css
+.my-content-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wpea-space--lg);
+}
+```
+
+The framework provides this pattern in:
+- `.wpea-vtabs__content` - Vertical tabs content area
+- `.wpea-tabs__panel` - Horizontal tabs panel
+
+If creating custom containers for cards/sections, always include flex column with gap to ensure proper spacing.
 
 ## Light/Dark Mode Usage
 
@@ -451,3 +516,115 @@ const config = {
 export default config;
 ```
 - note that these components are intended for a UI. All Svelte  state should be Global, with teh exception of local state for Component status
+- ensure all code you create for this app are based on Svelte 5 patterns.
+- before creating new Svelte functionality, always check our library first to see if a suitable component already exists.
+
+## StringOrSnippet Pattern
+
+Components support flexible content through the `StringOrSnippet` type - props can accept either a plain string or a Svelte 5 Snippet for rich content.
+
+### Available Types (from `src/lib/types.ts`)
+
+```typescript
+import type { Snippet } from 'svelte';
+
+// Union type for flexible content
+export type StringOrSnippet = string | Snippet;
+
+// Option types for form controls
+export type SelectOption = { value: string; label: StringOrSnippet };
+export type SelectOptionWithDisabled = SelectOption & { disabled?: boolean };
+export type RadioOption = SelectOptionWithDisabled;
+export type ToggleOption = { value: string; label: StringOrSnippet; icon?: Snippet };
+
+// Navigation types
+export type TabItem = { id: string; label: StringOrSnippet; content: Snippet };
+export type AccordionItem = { id: string; title: StringOrSnippet; content: Snippet };
+```
+
+### Usage Examples
+
+**Simple string (backwards compatible):**
+```svelte
+<Input label="Email Address" help="We'll never share your email" />
+<Card title="Settings" subtitle="Configure your preferences" />
+```
+
+**Snippet for rich content:**
+```svelte
+<Input>
+  {#snippet label()}
+    <span>Email <span class="required">*</span></span>
+  {/snippet}
+</Input>
+
+<Card>
+  {#snippet title()}
+    <span class="icon">⚙️</span> Settings
+  {/snippet}
+</Card>
+```
+
+**Options with Snippets:**
+```svelte
+<script>
+  const options = [
+    { value: 'home', label: 'Home' },
+    { value: 'settings', label: settingsSnippet }
+  ];
+</script>
+
+{#snippet settingsSnippet()}
+  <span class="icon">⚙️</span> Settings
+{/snippet}
+
+<Radio name="nav" {options} />
+```
+
+### Components Supporting StringOrSnippet
+
+**Form Components:**
+- `Input`, `NumberInput`, `Textarea`: `label`, `help`
+- `Switch`: `label`
+- `Range`: `label`, `help`
+- `Select`, `MultiSelect`, `AdvancedSelect`: `label`, `help`, `options[].label`
+- `Radio`: `label`, `help`, `options[].label`
+- `Toggle3State`: `options[].label`
+
+**Container Components:**
+- `Card`: `title`, `subtitle`
+- `Modal`: `title`
+- `Popover`: `content`
+
+**Navigation Components:**
+- `Tabs`, `VerticalTabs`: `tabs[].label`
+- `Accordion`: `items[].title`
+
+**Data Display:**
+- `Table`: `columns[].label`
+- `Toast`: `toasts[].title`, `toasts[].message`
+
+**Action Components:**
+- `DoubleOptInButton`: `defaultLabel`, `confirmLabel`
+
+### Helper Utility
+
+Use `isSnippet()` to check content type:
+
+```typescript
+import { isSnippet } from './utils/renderContent';
+
+// In template:
+{#if isSnippet(label)}
+  {@render label()}
+{:else}
+  {label}
+{/if}
+```
+
+### Notes
+
+- **Backwards compatible**: Existing string usage works unchanged
+- **Native `<select>` limitation**: Option labels in `Select.svelte` fall back to `value` when Snippets are used (native `<option>` cannot contain HTML). Use `AdvancedSelect` for rich option labels.
+- **Search filtering**: In searchable components (MultiSelect, AdvancedSelect), search only works on string labels. Snippet labels are not searchable.
+- **Accessibility**: Aria labels automatically fall back to string values or the option's `value` when Snippets are used.

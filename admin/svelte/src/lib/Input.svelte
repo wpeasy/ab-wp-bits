@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { Size } from './types';
+  import type { Size, StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     value?: string;
@@ -11,8 +12,8 @@
     readonly?: boolean;
     required?: boolean;
     size?: Size;
-    label?: string;
-    help?: string;
+    label?: StringOrSnippet;
+    help?: StringOrSnippet;
     class?: string;
     style?: string;
     oninput?: (value: string) => void;
@@ -55,7 +56,13 @@
 {#if label || help}
   <div class="wpea-field">
     {#if label}
-      <label class="wpea-label" for={id}>{label}</label>
+      <label class="wpea-label" for={id}>
+        {#if isSnippet(label)}
+          {@render label()}
+        {:else}
+          {label}
+        {/if}
+      </label>
     {/if}
     <input
       class="wpea-input {sizeClass} {className}"
@@ -72,7 +79,13 @@
       onchange={handleChange}
     />
     {#if help}
-      <span class="wpea-help">{help}</span>
+      <span class="wpea-help">
+        {#if isSnippet(help)}
+          {@render help()}
+        {:else}
+          {help}
+        {/if}
+      </span>
     {/if}
   </div>
 {:else}

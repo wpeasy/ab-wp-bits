@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { ColorVariant } from './types';
+  import type { ColorVariant, ToastItem as ToastItemType } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type ToastPosition =
     | 'top-left'
@@ -10,13 +11,8 @@
     | 'bottom-right'
     | 'center';
 
-  export type ToastItem = {
-    id: string;
-    title?: string;
-    message: string;
-    variant?: ColorVariant;
-    duration?: number;
-  };
+  // Re-export for backwards compatibility
+  export type ToastItem = ToastItemType;
 
   type Props = {
     toasts?: ToastItem[];
@@ -67,9 +63,21 @@
     <div class="wpea-toast {variantClass}" class:wpea-toast--closing={isClosing}>
       <div class="wpea-toast__content">
         {#if toast.title}
-          <div class="wpea-toast__title">{toast.title}</div>
+          <div class="wpea-toast__title">
+            {#if isSnippet(toast.title)}
+              {@render toast.title()}
+            {:else}
+              {toast.title}
+            {/if}
+          </div>
         {/if}
-        <div class="wpea-toast__message">{toast.message}</div>
+        <div class="wpea-toast__message">
+          {#if isSnippet(toast.message)}
+            {@render toast.message()}
+          {:else}
+            {toast.message}
+          {/if}
+        </div>
       </div>
       <button
         class="wpea-toast__close"

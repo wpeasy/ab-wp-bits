@@ -9,7 +9,7 @@
   const { apiUrl, nonce } = window.abWpBitsData;
 
   // State
-  let cacheTTL = $state(3600); // Default 1 hour
+  let cacheTTL = $state('3600'); // Default 1 hour (string for Input component)
   let isLoading = $state(false);
   let isClearingCache = $state(false);
   let toasts = $state<ToastItem[]>([]);
@@ -26,7 +26,7 @@
       });
       const data = await response.json();
       if (data.success && data.settings) {
-        cacheTTL = data.settings.cache_ttl || 3600;
+        cacheTTL = String(data.settings.cache_ttl || 3600);
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -43,7 +43,7 @@
           'X-WP-Nonce': nonce
         },
         body: JSON.stringify({
-          cache_ttl: cacheTTL
+          cache_ttl: Number(cacheTTL)
         })
       });
 

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { Size, ColorVariant } from './types';
+  import type { Size, ColorVariant, StringOrSnippet } from './types';
+  import { isSnippet } from './utils/renderContent';
 
   type Props = {
     checked?: boolean;
@@ -7,8 +8,8 @@
     disabled?: boolean;
     size?: Size;
     color?: ColorVariant;
-    label?: string;
-    help?: string;
+    label?: StringOrSnippet;
+    help?: StringOrSnippet;
     class?: string;
     style?: string;
     onchange?: (checked: boolean) => void;
@@ -49,9 +50,21 @@
     <span class="wpea-switch__slider"></span>
   </label>
   {#if label}
-    <label for={id}>{label}</label>
+    <label for={id}>
+      {#if isSnippet(label)}
+        {@render label()}
+      {:else}
+        {label}
+      {/if}
+    </label>
   {/if}
   {#if help}
-    <span class="wpea-help">{help}</span>
+    <span class="wpea-help">
+      {#if isSnippet(help)}
+        {@render help()}
+      {:else}
+        {help}
+      {/if}
+    </span>
   {/if}
 </div>

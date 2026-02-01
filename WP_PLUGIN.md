@@ -4,9 +4,9 @@
 **Plugin URI**: https://github.com/wpeasy/ab-wp-bits
 **Description**: A collection of modular enhancements for WordPress with tab-based admin dashboard
 **Version**: 0.0.1-beta
-**Requires at least**: 6.0
-**Tested up to**: {latest wordpress}
-**Requires PHP**: 7.4
+**Requires at least**: 6.5
+**Tested up to**: 6.9
+**Requires PHP**: 8.0
 **Author**: Alan Blair
 **Author URI**: https://alanblair.co
 **License**: GPL v2 or later
@@ -15,5 +15,5 @@
 **Domain Path**: /languages
 **Network**: true
 **Update URI**: https://github.com/wpeasy/ab-wp-bits
-- with WordPress Classes, Functions and Hookd, never assume, always check the documentation
+- with WordPress Classes, Functions and Hooks, never assume, always check the documentation
 - When updating the plugin version, set the Tested up to, to teh latest WP version.
