@@ -141,7 +141,7 @@ final class GitHubUpdater {
      * @param object                 $args   Plugin API arguments.
      * @return false|object|\WP_Error Plugin info object or passthrough.
      */
-    public static function plugin_info(false|object|\WP_Error $result, string $action, object $args): false|object|\WP_Error {
+    public static function plugin_info(mixed $result, string $action, object $args): mixed {
         if ($action !== 'plugin_information' || ($args->slug ?? '') !== self::PLUGIN_SLUG) {
             return $result;
         }
