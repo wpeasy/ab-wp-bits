@@ -2,6 +2,21 @@
 
 All notable changes to Alan Blair's WP Bits will be documented in this file.
 
+## [1.0.0] - 2026-02-02
+
+### Official Release
+
+First stable release of Alan Blair's WP Bits.
+
+### Added
+- **GitHub Auto-Updates**: Automatic plugin updates from the public GitHub repository via WordPress native update system
+  - Checks GitHub releases API for newer versions (12-hour cache)
+  - Integrates with Plugins page "View details" popup with changelog
+  - Fixes GitHub ZIP directory naming for seamless upgrades
+  - No authentication required (public repo)
+
+---
+
 ## [0.0.9-beta] - 2026-02-01
 
 ### Added

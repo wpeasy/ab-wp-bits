@@ -3,7 +3,7 @@
 **Plugin Name**: Alan Blair's WP Bits
 **Plugin URI**: https://github.com/wpeasy/ab-wp-bits
 **Description**: A collection of modular enhancements for WordPress with tab-based admin dashboard
-**Version**: 0.0.1-beta
+**Version**: 1.0.0
 **Requires at least**: 6.5
 **Tested up to**: 6.9
 **Requires PHP**: 8.0

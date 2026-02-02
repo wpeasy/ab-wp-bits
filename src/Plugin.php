@@ -23,6 +23,9 @@ final class Plugin {
         register_activation_hook(AB_WP_BITS_PLUGIN_FILE, [__CLASS__, 'activate']);
         register_deactivation_hook(AB_WP_BITS_PLUGIN_FILE, [__CLASS__, 'deactivate']);
 
+        // GitHub update checker (registered early, outside init hook)
+        Services\GitHubUpdater::init();
+
         // Initialize core components
         add_action('plugins_loaded', [__CLASS__, 'load_textdomain']);
         add_action('init', [__CLASS__, 'initialize_components'], 0);
