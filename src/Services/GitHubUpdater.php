@@ -77,6 +77,7 @@ final class GitHubUpdater {
     public static function init(): void {
         add_filter('pre_set_site_transient_update_plugins', [self::class, 'check_for_updates']);
         add_filter('plugins_api', [self::class, 'plugin_info'], 10, 3);
+        add_filter('upgrader_pre_install', [self::class, 'pre_install_check'], 10, 2);
         add_filter('upgrader_source_selection', [self::class, 'fix_directory_name'], 10, 4);
         add_action('upgrader_process_complete', [self::class, 'after_update'], 10, 2);
     }
@@ -131,6 +132,70 @@ final class GitHubUpdater {
         }
 
         return $transient;
+    }
+
+    /**
+     * Verify the plugin directory is writable before WordPress removes the old version.
+     *
+     * Runs before the old plugin is deleted. If the directory or its files are
+     * locked (e.g., by an IDE), returning WP_Error aborts the update cleanly
+     * without touching existing files.
+     *
+     * @param bool|\WP_Error $response Install response (true or WP_Error).
+     * @param array          $hook_extra Extra arguments including plugin basename.
+     * @return bool|\WP_Error Pass-through or WP_Error to abort.
+     */
+    public static function pre_install_check(mixed $response, array $hook_extra): mixed {
+        // Only check for our plugin
+        if (!isset($hook_extra['plugin']) || $hook_extra['plugin'] !== self::PLUGIN_BASENAME) {
+            return $response;
+        }
+
+        // If a previous filter already returned an error, pass it through
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $plugin_dir = WP_PLUGIN_DIR . '/' . self::PLUGIN_SLUG;
+
+        if (!is_dir($plugin_dir)) {
+            return $response;
+        }
+
+        // Test 1: Check directory is writable
+        if (!is_writable($plugin_dir)) {
+            return new \WP_Error(
+                'ab_wp_bits_dir_not_writable',
+                __('Update aborted: The plugin directory is not writable. Please check file permissions or close any applications that may have files open in the plugin folder.', 'ab-wp-bits')
+            );
+        }
+
+        // Test 2: Try to create and delete a temp file (catches file-system locks)
+        $test_file = $plugin_dir . '/.update-test-' . wp_generate_password(8, false);
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+        $written = @file_put_contents($test_file, 'test');
+        if ($written === false) {
+            return new \WP_Error(
+                'ab_wp_bits_write_failed',
+                __('Update aborted: Cannot write to the plugin directory. Please close any applications (IDE, editor) that may be locking files in the plugin folder, then try again.', 'ab-wp-bits')
+            );
+        }
+        @unlink($test_file);
+
+        // Test 3: Verify key files can be opened for writing (catches per-file locks on Windows)
+        $main_file = $plugin_dir . '/' . self::PLUGIN_SLUG . '.php';
+        if (file_exists($main_file)) {
+            $handle = @fopen($main_file, 'a');
+            if ($handle === false) {
+                return new \WP_Error(
+                    'ab_wp_bits_file_locked',
+                    __('Update aborted: The main plugin file appears to be locked by another process. Please close any applications (IDE, editor) that have plugin files open, then try again.', 'ab-wp-bits')
+                );
+            }
+            @fclose($handle);
+        }
+
+        return $response;
     }
 
     /**
