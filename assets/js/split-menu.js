@@ -32,9 +32,10 @@
     menu._abSplitMenuAbort = controller;
 
     var trigger              = menu.getAttribute('data-trigger') || 'hover';
-    var defaultState         = menu.getAttribute('data-default-state') || 'none';
     var parentClickable      = menu.getAttribute('data-parent-clickable') === 'true';
     var deactivateOnMouseout = menu.getAttribute('data-deactivate-on-mouseout') === 'true';
+    var defaultLabel         = menu.getAttribute('data-default-label') || '';
+    var topLevelLabelOnly    = menu.getAttribute('data-top-level-label-only') === 'true';
 
     // --- Selected Label helpers -----------------------------------------------
 
@@ -59,25 +60,34 @@
     }
 
     /**
-     * Get the default label text (first Level 1 item's title).
+     * Get the default label text from the data-default-label attribute.
      *
      * @return {string}
      */
     function getDefaultLabelText() {
-      var firstLevel = findLevel(1);
-      if (!firstLevel) {
-        return '';
-      }
-      var firstItem = firstLevel.querySelector('.ab-split-menu__item');
-      return firstItem ? getItemText(firstItem) : '';
+      return defaultLabel;
     }
 
     /**
      * Update all selected-label elements within this menu with transition.
+     * Also updates the data-current-label attribute on the root element.
      *
      * @param {string} text The new label text.
+     * @param {boolean} [isActive=true] Whether an item is currently active.
      */
-    function updateSelectedLabel(text) {
+    function updateSelectedLabel(text, isActive) {
+      // Default isActive to true unless explicitly false
+      if (typeof isActive === 'undefined') {
+        isActive = true;
+      }
+
+      // Update data-current-label on root element
+      if (isActive && text) {
+        menu.setAttribute('data-current-label', text);
+      } else {
+        menu.removeAttribute('data-current-label');
+      }
+
       var labels = menu.querySelectorAll('.brxe-ab-split-menu-selected-label');
       for (var i = 0; i < labels.length; i++) {
         var textEl = labels[i].querySelector('.ab-split-menu-selected-label__text');
@@ -205,8 +215,10 @@
       // Add state class to wrapper
       menu.classList.add('level' + targetLevel + '-active');
 
-      // Update selected label with this item's text
-      updateSelectedLabel(getItemText(item));
+      // Update selected label with this item's text (only for level 1 if topLevelLabelOnly)
+      if (!topLevelLabelOnly || fromLevel === 1) {
+        updateSelectedLabel(getItemText(item));
+      }
     }
 
     /**
@@ -274,7 +286,10 @@
       } else {
         deactivateFromLevel(levelNum + 1);
         clearSiblingActive(item);
-        updateSelectedLabel(getItemText(item));
+        // Update label only for level 1 if topLevelLabelOnly is enabled
+        if (!topLevelLabelOnly || levelNum === 1) {
+          updateSelectedLabel(getItemText(item));
+        }
       }
     }
 
@@ -321,7 +336,10 @@
           if (levelNum !== null) {
             deactivateFromLevel(levelNum + 1);
             clearSiblingActive(item);
-            updateSelectedLabel(getItemText(item));
+            // Update label only for level 1 if topLevelLabelOnly is enabled
+            if (!topLevelLabelOnly || levelNum === 1) {
+              updateSelectedLabel(getItemText(item));
+            }
           }
         }
         return;
@@ -490,7 +508,7 @@
     if (deactivateOnMouseout) {
       menu.addEventListener('mouseleave', function () {
         deactivateFromLevel(2);
-        updateSelectedLabel(getDefaultLabelText());
+        updateSelectedLabel(getDefaultLabelText(), false);
       }, { signal: signal });
 
       // Mirror mouseleave for keyboard: deactivate when focus leaves the menu
@@ -499,21 +517,9 @@
         // this menu (or null, e.g. tabbing out of the page), deactivate.
         if (!e.relatedTarget || !menu.contains(e.relatedTarget)) {
           deactivateFromLevel(2);
-          updateSelectedLabel(getDefaultLabelText());
+          updateSelectedLabel(getDefaultLabelText(), false);
         }
       }, { signal: signal });
-    }
-
-    // --- Default state ------------------------------------------------------
-
-    if (defaultState === 'first') {
-      var firstLevel = findLevel(1);
-      if (firstLevel) {
-        var firstItem = firstLevel.querySelector('.ab-split-menu__item--has-children');
-        if (firstItem) {
-          activateSubmenu(firstItem, 1);
-        }
-      }
     }
   }
 

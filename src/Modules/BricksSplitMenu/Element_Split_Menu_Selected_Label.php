@@ -155,15 +155,10 @@ class Element_Split_Menu_Selected_Label extends \Bricks\Element {
             return;
         }
 
-        $tree = $context['tree'];
+        $parent_settings = $context['settings'] ?? [];
 
-        // Determine default text: first Level 1 item's title
-        $default_text = '';
-        $level1_items = Element_Split_Menu::get_items_at_level($tree, 1);
-        if (!empty($level1_items)) {
-            $first_item   = reset($level1_items);
-            $default_text = $first_item['title'] ?? '';
-        }
+        // Determine default text from parent's defaultLabel setting
+        $default_text = $parent_settings['defaultLabel'] ?? '';
 
         // Icon settings
         $icon          = $settings['icon'] ?? [];

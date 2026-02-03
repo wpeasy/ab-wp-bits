@@ -3,7 +3,7 @@
  * Split Menu Parent Element
  *
  * Nestable Bricks element that wraps child menu-level elements.
- * Provides the menu selector, trigger mode, default state, and
+ * Provides the menu selector, trigger mode, and
  * passes parsed menu data to children via a static render stack.
  *
  * @package AB\AB_WP_Bits\Modules\BricksSplitMenu
@@ -134,28 +134,24 @@ class Element_Split_Menu extends \Bricks\Element {
             'group'       => 'settings',
         ];
 
-        // Trigger mode
-        $this->controls['trigger'] = [
-            'label'   => esc_html__('Trigger', 'ab-wp-bits'),
-            'type'    => 'select',
-            'options' => [
-                'hover' => esc_html__('Hover', 'ab-wp-bits'),
-                'click' => esc_html__('Click', 'ab-wp-bits'),
-            ],
-            'default' => 'hover',
-            'group'   => 'settings',
+        // Default label text for Selected Item Label element
+        $this->controls['defaultLabel'] = [
+            'label'       => esc_html__('Default Label', 'ab-wp-bits'),
+            'type'        => 'text',
+            'placeholder' => esc_html__('Select an item...', 'ab-wp-bits'),
+            'description' => esc_html__('Text shown in Selected Item Label when no menu item is active.', 'ab-wp-bits'),
+            'group'       => 'settings',
         ];
 
-        // Default state
-        $this->controls['defaultState'] = [
-            'label'   => esc_html__('Default State', 'ab-wp-bits'),
-            'type'    => 'select',
-            'options' => [
-                'none'  => esc_html__('None', 'ab-wp-bits'),
-                'first' => esc_html__('First Item Active', 'ab-wp-bits'),
-            ],
-            'default' => 'none',
-            'group'   => 'settings',
+        // Top level label only
+        $this->controls['topLevelLabelOnly'] = [
+            'label'       => esc_html__('Top Level Label Only', 'ab-wp-bits'),
+            'type'        => 'checkbox',
+            'inline'      => true,
+            'small'       => true,
+            'default'     => false,
+            'description' => esc_html__('Only update label for Level 1 items. Deeper levels keep the parent label.', 'ab-wp-bits'),
+            'group'       => 'settings',
         ];
 
         // Parent items clickable
@@ -189,6 +185,18 @@ class Element_Split_Menu extends \Bricks\Element {
             'group'       => 'settings',
         ];
 
+        // Trigger mode
+        $this->controls['trigger'] = [
+            'label'   => esc_html__('Trigger', 'ab-wp-bits'),
+            'type'    => 'select',
+            'options' => [
+                'hover' => esc_html__('Hover', 'ab-wp-bits'),
+                'click' => esc_html__('Click', 'ab-wp-bits'),
+            ],
+            'default' => 'hover',
+            'group'   => 'settings',
+        ];
+
         // Has-submenu icon (font icon or SVG)
         $this->controls['submenuIcon'] = [
             'label' => esc_html__('Submenu Icon', 'ab-wp-bits'),
@@ -219,10 +227,11 @@ class Element_Split_Menu extends \Bricks\Element {
                 . '4. Add elements outside <strong>Split Menu Nav</strong> for content around the nav<br><br>'
                 . '<strong>Controls:</strong><br>'
                 . '&bull; <strong>Trigger</strong> — Hover or Click to open submenus<br>'
-                . '&bull; <strong>Default State</strong> — None, or activate the first item on page load<br>'
                 . '&bull; <strong>Parent Items Clickable</strong> — Allow parent item links to navigate (otherwise they only open submenus)<br>'
                 . '&bull; <strong>Deactivate All on Mouseout</strong> — Close all submenus when the cursor leaves the menu<br>'
-                . '&bull; <strong>Submenu Icon</strong> — Icon appended to items that have children<br><br>'
+                . '&bull; <strong>Submenu Icon</strong> — Icon appended to items that have children<br>'
+                . '&bull; <strong>Top Level Label Only</strong> — Only update label for Level 1 items<br>'
+                . '&bull; <strong>Default Label</strong> — Text shown in Selected Item Label when no menu item is active<br><br>'
                 . '<strong>JS State Classes:</strong><br>'
                 . '&bull; <code>.ab-split-menu__item--active</code> — on the hovered/clicked parent item<br>'
                 . '&bull; <code>.active</code> — on the level div and the visible UL group<br>'
@@ -376,7 +385,6 @@ class Element_Split_Menu extends \Bricks\Element {
         $settings = $this->settings;
         $menu_id  = !empty($settings['menu']) ? (int) $settings['menu'] : 0;
         $trigger  = $settings['trigger'] ?? 'hover';
-        $default  = $settings['defaultState'] ?? 'none';
 
         // Build menu tree
         $tree = [];
@@ -403,7 +411,6 @@ class Element_Split_Menu extends \Bricks\Element {
 
         // Data attributes for the frontend JS
         $this->set_attribute('_root', 'data-trigger', esc_attr($trigger));
-        $this->set_attribute('_root', 'data-default-state', esc_attr($default));
 
         if (!empty($settings['parentClickable'])) {
             $this->set_attribute('_root', 'data-parent-clickable', 'true');
@@ -415,6 +422,16 @@ class Element_Split_Menu extends \Bricks\Element {
 
         if (!empty($settings['showAllLevels'])) {
             $this->set_attribute('_root', 'data-show-all-levels', 'true');
+        }
+
+        // Default label for the Selected Item Label element
+        $default_label = $settings['defaultLabel'] ?? '';
+        if ($default_label !== '') {
+            $this->set_attribute('_root', 'data-default-label', esc_attr($default_label));
+        }
+
+        if (!empty($settings['topLevelLabelOnly'])) {
+            $this->set_attribute('_root', 'data-top-level-label-only', 'true');
         }
 
         $output  = "<div {$this->render_attributes('_root')}>";

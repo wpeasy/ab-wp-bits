@@ -2,6 +2,21 @@
 
 All notable changes to Alan Blair's WP Bits will be documented in this file.
 
+## [1.0.1] - 2026-02-03
+
+### Added
+- **Split Menu - Default Label**: New text control to set default text for Selected Item Label when no menu item is active
+- **Split Menu - Top Level Label Only**: New switch to only update the label for Level 1 items; deeper levels keep the parent label
+- **Split Menu - data-current-label**: Root element now has `data-current-label` attribute reflecting active item text (removed when no item active)
+
+### Changed
+- **Split Menu Controls**: Reorganized control order for better UX (Default Label first, Trigger after Show All Levels)
+
+### Removed
+- **Split Menu - Default State**: Removed unused control that auto-activated first item on page load
+
+---
+
 ## [1.0.0] - 2026-02-02
 
 ### Official Release
@@ -21,7 +36,7 @@ First stable release of Alan Blair's WP Bits.
 
 ### Added
 - **Bricks Split Menu Module**: New 5-element nestable architecture for splitting WordPress menus into separate level-based structures
-  - **Split Menu Wrapper**: Root element with all settings (menu selection, trigger mode, submenu icon, default state)
+  - **Split Menu Wrapper**: Root element with all settings (menu selection, trigger mode, submenu icon)
   - **Split Menu Nav**: Nestable `<nav>` wrapper for layout flexibility
   - **Menu Level Wrapper**: Nestable wrapper per menu depth level with slide-in transitions
   - **Menu Level**: Renders `<ul>/<li>/<a>` items with full ARIA menu roles

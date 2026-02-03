@@ -14,7 +14,6 @@ The container element where the WordPress Menu is selected. All child elements i
 ### Controls
 - **Menu**: WordPress Menu selector (dropdown of registered menus)
 - **Trigger**: Hover or Click (how submenu activation is triggered)
-- **Default State**: None or First Item Active (whether the first top-level item's submenu is shown on page load)
 - **Has Submenu SVG**: SVG code input — an icon appended after the link text of any menu item that has children (e.g., a chevron/arrow indicator). If empty, no indicator is rendered.
 
 ### Behaviour
@@ -74,10 +73,6 @@ A lightweight vanilla JS script manages the active state across levels:
    - The item loses `ab-split-menu__item--active`
    - The parent loses the corresponding `levelN-active` class
    - All deeper levels are also deactivated (cascading close)
-
-3. **Default State** options:
-   - **None**: All sub-levels start hidden
-   - **First Item Active**: The first top-level item's submenu chain is shown on page load
 
 ## CSS Classes Summary
 
